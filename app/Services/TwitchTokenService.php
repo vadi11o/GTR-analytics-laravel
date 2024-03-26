@@ -33,7 +33,7 @@ class TwitchTokenService
             throw new \Exception("Error al solicitar el token.");
         }
 
-        $tokenModel = Token::find(1); // Asume que el ID del token que quieres actualizar es 1
+        $tokenModel = Token::find(1);
         if ($tokenModel) {
             $tokenModel->access_token = $newToken;
             $tokenModel->save();

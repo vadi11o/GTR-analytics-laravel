@@ -30,13 +30,13 @@ class UserTaController extends Controller
 
             if ($userData) {
                 UserTa::create($userData);
-                return response()->json($userData);
+                return response()->json($userData)->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
             } else {
                 return response()->json(['error' => 'No se encontraron datos de usuario para el ID proporcionado.'], 404);
             }
         }
 
-        return response()->json($user);
+        return response()->json($user)->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
     private function fetchUserDataFromTwitch($token, $userId)

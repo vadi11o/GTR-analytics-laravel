@@ -21,7 +21,7 @@ class TopGamesService
             throw new \Exception("No se pudo obtener el token de Twitch.");
         }
 
-        $url = 'https://api.twitch.tv/helix/games/top?first=3'; // Ajusta el parámetro 'first' según necesites
+        $url = 'https://api.twitch.tv/helix/games/top?first=3';
         $response = Http::withHeaders([
             'Authorization' => "Bearer {$accessToken}",
             'Client-Id' => env('TWITCH_CLIENT_ID'),
@@ -33,12 +33,12 @@ class TopGamesService
             throw new \Exception("No se encontraron datos válidos en la respuesta de la API de Twitch.");
         }
 
-        // Vaciar la tabla topGames antes de insertar los nuevos datos
+
         TopGame::truncate();
 
         foreach ($games as $game) {
             TopGame::create([
-                'game_id' => $game['id'], // Asegúrate de que tu modelo TopGame y la migración correspondiente estén configurados para aceptar este campo
+                'game_id' => $game['id'],
                 'game_name' => $game['name'],
             ]);
         }

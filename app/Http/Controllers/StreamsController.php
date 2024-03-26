@@ -34,7 +34,10 @@ class StreamsController extends Controller
 
         $activeStreams = $this->verifyActiveStreams(json_decode($response['body'], true));
 
-        return response()->json($activeStreams);
+        return response()->json($activeStreams)
+            ->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+
     }
 
     protected function curlPetition($url, $token, $client_id)

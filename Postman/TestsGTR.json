@@ -1,0 +1,446 @@
+{
+	"info": {
+		"_postman_id": "922b70da-cda0-455a-b945-a9391c297bda",
+		"name": "TestsGTR",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25866603"
+	},
+	"item": [
+		{
+			"name": "Streams",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Código de respuesta es 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"La respuesta es un array\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(Array.isArray(jsonData)).to.be.true;\r",
+							"});\r",
+							"\r",
+							"\r",
+							"\r",
+							"pm.test(\"El 'username' y el 'title' son strings\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(typeof jsonData[0].user_name).to.equal(\"string\");\r",
+							"    pm.expect(typeof jsonData[0].title).to.equal(\"string\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://equipogtrapi.000webhostapp.com/analytics/streams",
+					"protocol": "https",
+					"host": [
+						"equipogtrapi",
+						"000webhostapp",
+						"com"
+					],
+					"path": [
+						"analytics",
+						"streams"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "StreamsLocal",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Código de respuesta es 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"La respuesta es un array\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(Array.isArray(jsonData)).to.be.true;\r",
+							"});\r",
+							"\r",
+							"\r",
+							"\r",
+							"pm.test(\"El 'username' y el 'title' son strings\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(typeof jsonData[0].user_name).to.equal(\"string\");\r",
+							"    pm.expect(typeof jsonData[0].title).to.equal(\"string\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://equipogtrapi.000webhostapp.com/analytics/streams",
+					"protocol": "https",
+					"host": [
+						"equipogtrapi",
+						"000webhostapp",
+						"com"
+					],
+					"path": [
+						"analytics",
+						"streams"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Users",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Verificar que el código de respuesta sea 200\r",
+							"pm.test(\"Código de respuesta es 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// Verificar que la respuesta tenga todas las propiedades esperadas\r",
+							"pm.test(\"La respuesta tiene todas las propiedades esperadas\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property('id');\r",
+							"    pm.expect(jsonData).to.have.property('twitch_id');\r",
+							"    pm.expect(jsonData).to.have.property('login');\r",
+							"    pm.expect(jsonData).to.have.property('display_name');\r",
+							"    pm.expect(jsonData).to.have.property('type');\r",
+							"    pm.expect(jsonData).to.have.property('broadcaster_type');\r",
+							"    pm.expect(jsonData).to.have.property('description');\r",
+							"    pm.expect(jsonData).to.have.property('profile_image_url');\r",
+							"    pm.expect(jsonData).to.have.property('offline_image_url');\r",
+							"    pm.expect(jsonData).to.have.property('view_count');\r",
+							"    pm.expect(jsonData).to.have.property('created_at');\r",
+							"});\r",
+							"\r",
+							"// Verificar tipos de datos de algunas propiedades específicas\r",
+							"pm.test(\"Verificación de tipos de datos de propiedades específicas\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(typeof jsonData.id).to.be.oneOf(['number', 'string']); // Si 'id' puede ser número o string\r",
+							"    pm.expect(typeof jsonData.twitch_id).to.be.oneOf(['number', 'string']); // Si 'twitch_id' puede ser número o string\r",
+							"    pm.expect(typeof jsonData.login).to.equal(\"string\");\r",
+							"    pm.expect(typeof jsonData.display_name).to.equal(\"string\");\r",
+							"    pm.expect(typeof jsonData.description).to.equal(\"string\");\r",
+							"    pm.expect(typeof jsonData.profile_image_url).to.equal(\"string\");\r",
+							"    pm.expect(typeof jsonData.view_count).to.be.a(\"string\");\r",
+							"    pm.expect(typeof jsonData.created_at).to.equal(\"string\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://equipogtrapi.000webhostapp.com/analytics/users?id=1234",
+					"protocol": "https",
+					"host": [
+						"equipogtrapi",
+						"000webhostapp",
+						"com"
+					],
+					"path": [
+						"analytics",
+						"users"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "1234"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UsersLocal",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Verificar que el código de respuesta sea 200\r",
+							"pm.test(\"Código de respuesta es 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// Verificar que la respuesta tenga todas las propiedades esperadas\r",
+							"pm.test(\"La respuesta tiene todas las propiedades esperadas\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property('id');\r",
+							"    pm.expect(jsonData).to.have.property('twitch_id');\r",
+							"    pm.expect(jsonData).to.have.property('login');\r",
+							"    pm.expect(jsonData).to.have.property('display_name');\r",
+							"    pm.expect(jsonData).to.have.property('type');\r",
+							"    pm.expect(jsonData).to.have.property('broadcaster_type');\r",
+							"    pm.expect(jsonData).to.have.property('description');\r",
+							"    pm.expect(jsonData).to.have.property('profile_image_url');\r",
+							"    pm.expect(jsonData).to.have.property('offline_image_url');\r",
+							"    pm.expect(jsonData).to.have.property('view_count');\r",
+							"    pm.expect(jsonData).to.have.property('created_at');\r",
+							"});\r",
+							"\r",
+							"// Verificar tipos de datos de algunas propiedades específicas\r",
+							"pm.test(\"Verificación de tipos de datos de propiedades específicas\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(typeof jsonData.id).to.be.oneOf(['number', 'string']); // Si 'id' puede ser número o string\r",
+							"    pm.expect(typeof jsonData.twitch_id).to.be.oneOf(['number', 'string']); // Si 'twitch_id' puede ser número o string\r",
+							"    pm.expect(typeof jsonData.login).to.equal(\"string\");\r",
+							"    pm.expect(typeof jsonData.display_name).to.equal(\"string\");\r",
+							"    pm.expect(typeof jsonData.description).to.equal(\"string\");\r",
+							"    pm.expect(typeof jsonData.profile_image_url).to.equal(\"string\");\r",
+							"    pm.expect(typeof jsonData.view_count).to.be.a(\"string\");\r",
+							"    pm.expect(typeof jsonData.created_at).to.equal(\"string\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://equipogtrapi.000webhostapp.com/analytics/users?id=1234",
+					"protocol": "https",
+					"host": [
+						"equipogtrapi",
+						"000webhostapp",
+						"com"
+					],
+					"path": [
+						"analytics",
+						"users"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "1234"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Topsofthetops",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Verificar que la respuesta sea un array\r",
+							"pm.test(\"La respuesta es un array\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.be.an('array');\r",
+							"});\r",
+							"\r",
+							"// Verificar que exactamente dos ítems aparecen en la respuesta\r",
+							"pm.test(\"La respuesta contiene exactamente dos ítems\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.length).to.equal(3);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"// Verificar que cada objeto en el array tenga todas las propiedades esperadas\r",
+							"pm.test(\"Cada objeto tiene las propiedades esperadas con los tipos de datos correctos\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    jsonData.forEach((item) => {\r",
+							"        pm.expect(item).to.have.all.keys('game_id', 'game_name', 'user_name', 'total_videos', 'total_views', 'most_viewed_title', 'most_viewed_views', 'most_viewed_duration', 'most_viewed_created_at', 'ultima_actualizacion');\r",
+							"        pm.expect(item.game_id).to.be.a('string');\r",
+							"        pm.expect(item.game_name).to.be.a('string');\r",
+							"        pm.expect(item.user_name).to.be.a('string');\r",
+							"        pm.expect(item.total_videos).to.be.a('number');\r",
+							"        pm.expect(item.total_views).to.be.a('number');\r",
+							"        pm.expect(item.most_viewed_title).to.be.a('string');\r",
+							"        pm.expect(item.most_viewed_views).to.be.a('number');\r",
+							"        pm.expect(item.most_viewed_duration).to.be.a('string');\r",
+							"        pm.expect(item.most_viewed_created_at).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$/); // Formato ISO 8601 para la fecha\r",
+							"        pm.expect(item.ultima_actualizacion).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/); // Formato de fecha y hora\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://equipogtrapi.000webhostapp.com/analytics/topsofthetops",
+					"protocol": "https",
+					"host": [
+						"equipogtrapi",
+						"000webhostapp",
+						"com"
+					],
+					"path": [
+						"analytics",
+						"topsofthetops"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TopsofthetopsLocal",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Verificar que la respuesta sea un array\r",
+							"pm.test(\"La respuesta es un array\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.be.an('array');\r",
+							"});\r",
+							"\r",
+							"// Verificar que exactamente dos ítems aparecen en la respuesta\r",
+							"pm.test(\"La respuesta contiene exactamente dos ítems\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.length).to.equal(3);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"// Verificar que cada objeto en el array tenga todas las propiedades esperadas\r",
+							"pm.test(\"Cada objeto tiene las propiedades esperadas con los tipos de datos correctos\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    jsonData.forEach((item) => {\r",
+							"        pm.expect(item).to.have.all.keys('game_id', 'game_name', 'user_name', 'total_videos', 'total_views', 'most_viewed_title', 'most_viewed_views', 'most_viewed_duration', 'most_viewed_created_at', 'ultima_actualizacion');\r",
+							"        pm.expect(item.game_id).to.be.a('string');\r",
+							"        pm.expect(item.game_name).to.be.a('string');\r",
+							"        pm.expect(item.user_name).to.be.a('string');\r",
+							"        pm.expect(item.total_videos).to.be.a('number');\r",
+							"        pm.expect(item.total_views).to.be.a('number');\r",
+							"        pm.expect(item.most_viewed_title).to.be.a('string');\r",
+							"        pm.expect(item.most_viewed_views).to.be.a('number');\r",
+							"        pm.expect(item.most_viewed_duration).to.be.a('string');\r",
+							"        pm.expect(item.most_viewed_created_at).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$/); // Formato ISO 8601 para la fecha\r",
+							"        pm.expect(item.ultima_actualizacion).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/); // Formato de fecha y hora\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://equipogtrapi.000webhostapp.com/analytics/topsofthetops",
+					"protocol": "https",
+					"host": [
+						"equipogtrapi",
+						"000webhostapp",
+						"com"
+					],
+					"path": [
+						"analytics",
+						"topsofthetops"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TopsofthetopsSince",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Verificar que la respuesta sea un array\r",
+							"pm.test(\"La respuesta es un array\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.be.an('array');\r",
+							"});\r",
+							"\r",
+							"// Verificar que exactamente dos ítems aparecen en la respuesta\r",
+							"pm.test(\"La respuesta contiene exactamente dos ítems\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.length).to.equal(3);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"// Verificar que cada objeto en el array tenga todas las propiedades esperadas\r",
+							"pm.test(\"Cada objeto tiene las propiedades esperadas con los tipos de datos correctos\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    jsonData.forEach((item) => {\r",
+							"        pm.expect(item).to.have.all.keys('game_id', 'game_name', 'user_name', 'total_videos', 'total_views', 'most_viewed_title', 'most_viewed_views', 'most_viewed_duration', 'most_viewed_created_at', 'ultima_actualizacion');\r",
+							"        pm.expect(item.game_id).to.be.a('string');\r",
+							"        pm.expect(item.game_name).to.be.a('string');\r",
+							"        pm.expect(item.user_name).to.be.a('string');\r",
+							"        pm.expect(item.total_videos).to.be.a('number');\r",
+							"        pm.expect(item.total_views).to.be.a('number');\r",
+							"        pm.expect(item.most_viewed_title).to.be.a('string');\r",
+							"        pm.expect(item.most_viewed_views).to.be.a('number');\r",
+							"        pm.expect(item.most_viewed_duration).to.be.a('string');\r",
+							"        pm.expect(item.most_viewed_created_at).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$/); // Formato ISO 8601 para la fecha\r",
+							"        pm.expect(item.ultima_actualizacion).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/); // Formato de fecha y hora\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://equipogtrapi.000webhostapp.com/analytics/topsofthetops?since=2",
+					"protocol": "https",
+					"host": [
+						"equipogtrapi",
+						"000webhostapp",
+						"com"
+					],
+					"path": [
+						"analytics",
+						"topsofthetops"
+					],
+					"query": [
+						{
+							"key": "since",
+							"value": "2"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

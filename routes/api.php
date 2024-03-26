@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StreamsController;
 use App\Http\Controllers\UserTaController;
+use App\Http\Controllers\TopsofthetopsController;
 
 
 Route::get('/user', function (Request $request) {
@@ -14,3 +15,4 @@ Route::get('/streams', [StreamsController::class, 'index']);
 
 Route::get('/users', [UserTaController::class, 'show']);
 
+Route::get('/topsofthetops', [TopsofthetopsController::class, 'index']);

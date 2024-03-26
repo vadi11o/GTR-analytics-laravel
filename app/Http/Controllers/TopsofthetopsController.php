@@ -26,6 +26,6 @@ class TopsofthetopsController extends Controller
 
         return response()->json([
             'data' => $topOfTheTopsData
-        ])->setEncodingOptions(JSON_PRETTY_PRINT);
+        ])->setEncodingOptions(JSON_PRETTY_PRINT| JSON_UNESCAPED_UNICODE);
     }
 }

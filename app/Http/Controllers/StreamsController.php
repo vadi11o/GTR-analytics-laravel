@@ -59,7 +59,6 @@ class StreamsController extends Controller
                 $streams[] = [
                     'title' => $stream['title'],
                     'user_name' => $stream['user_name'],
-                    // Añade más campos según necesites
                 ];
             }
         } else {

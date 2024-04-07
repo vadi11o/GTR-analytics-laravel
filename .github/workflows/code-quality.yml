@@ -4,15 +4,16 @@ on:
   pull_request:
     branches:
       - master
-    path:
+    paths:
       - app/**
 
 jobs:
   code_quality_and_tests:
     runs-on: ubuntu-latest
 
-    run:
-      working-directory: app
+    defaults:
+      run:
+        working-directory: app
 
     steps:
       - name: Checkout code

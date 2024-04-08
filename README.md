@@ -35,7 +35,7 @@ Utiliza Laravel Sail, una interfaz de línea de comandos para gestionar tu entor
 Finalmente, ejecuta las migraciones de la base de datos para preparar tu esquema:
 
 ```
-./vendor/bin/sail php artisan migration
+./vendor/bin/sail php artisan migrate
 ```
 
 ## Endpoints Disponibles

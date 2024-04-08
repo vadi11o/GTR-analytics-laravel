@@ -1,8 +1,8 @@
 {
 	"info": {
-		"_postman_id": "e3844e5f-c11e-4edb-9658-4c013a327141",
+		"_postman_id": "f5185790-00d7-4f86-82eb-37924016f899",
 		"name": "TestGTRLocal",
-		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "32684656"
 	},
 	"item": [
@@ -39,7 +39,17 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"url": "http://localhost/api/streams"
+				"url": {
+					"raw": "http://localhost/analytics/streams",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"analytics",
+						"streams"
+					]
+				}
 			},
 			"response": []
 		},
@@ -104,13 +114,13 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost/api/users?id=1234",
+					"raw": "http://localhost/analytics/users?id=1234",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"path": [
-						"api",
+						"analytics",
 						"users"
 					],
 					"query": [
@@ -176,7 +186,17 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"url": "http://localhost/api/topsofthetops"
+				"url": {
+					"raw": "http://localhost/analytics/topsofthetops",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"analytics",
+						"topsofthetops"
+					]
+				}
 			},
 			"response": []
 		},
@@ -234,13 +254,13 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost/api/topsofthetops?since=2",
+					"raw": "http://localhost/analytics/topsofthetops?since=2",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"path": [
-						"api",
+						"analytics",
 						"topsofthetops"
 					],
 					"query": [

@@ -11,19 +11,20 @@ jobs:
   code_quality_and_tests:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: app
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
 
       - name: Install dependencies
-        run: composer install --no-interaction --no-suggest --prefer-dist
+        run: composer install
 
-      - name: Run PHP_CodeSniffer
-        run: vendor/bin/phpcs --standard=PSR12 .
-
-      - name: Run PHPMD
-        run: vendor/bin/phpmd . text cleancode,codesize,naming
+      - name: Run GRUMPHP
+        run: |
+          ./vendor/bin/grumphp run

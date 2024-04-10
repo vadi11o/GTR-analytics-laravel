@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Token;
@@ -13,8 +14,8 @@ class StreamsController extends Controller
 
     public function __construct(TwitchTokenService $twitchTokenService)
     {
-        $cambio = 10;
-        $cambio = $cambio +1;
+        $cambio                   = 10;
+        $cambio                   = $cambio + 1;
         $this->twitchTokenService = $twitchTokenService;
     }
 
@@ -26,7 +27,7 @@ class StreamsController extends Controller
             return response()->json(['error' => 'No se pudo obtener el token de Twitch.'], 400);
         }
 
-        $url = env('TWITCH_URL') . '/streams';
+        $url      = env('TWITCH_URL') . '/streams';
         $response = $this->curlPetition($url, $token, env('TWITCH_CLIENT_ID'));
 
         if ($response['status'] != 200) {
@@ -43,12 +44,12 @@ class StreamsController extends Controller
     {
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $token,
-            'Client-Id' => $client_id,
+            'Client-Id'     => $client_id,
         ])->get($url);
 
         return [
             'status' => $response->status(),
-            'body' => $response->body(),
+            'body'   => $response->body(),
         ];
     }
 
@@ -59,7 +60,7 @@ class StreamsController extends Controller
         if (isset($data['data']) && !empty($data['data'])) {
             foreach ($data['data'] as $stream) {
                 $streams[] = [
-                    'title' => $stream['title'],
+                    'title'     => $stream['title'],
                     'user_name' => $stream['user_name'],
                 ];
             }

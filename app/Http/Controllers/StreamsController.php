@@ -13,12 +13,13 @@ class StreamsController extends Controller
 
     public function __construct(TwitchTokenService $twitchTokenService)
     {
+        $cambio = 10;
+        $cambio = $cambio +1;
         $this->twitchTokenService = $twitchTokenService;
     }
 
     public function index()
     {
-        // Aquí asumo que adaptas Token::obtainFromDatabase() para que use el servicio.
         $token = $this->twitchTokenService->getTokenFromTwitch();
 
         if (!$token) {
@@ -36,8 +37,6 @@ class StreamsController extends Controller
 
         return response()->json($activeStreams)
             ->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-
-
     }
 
     protected function curlPetition($url, $token, $client_id)
@@ -64,10 +63,7 @@ class StreamsController extends Controller
                     'user_name' => $stream['user_name'],
                 ];
             }
-        } else {
-            return ['message' => 'No hay streams activos en este momento.'];
         }
-
         return $streams;
     }
 }

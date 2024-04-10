@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\UserTa;
+use App\Models\User;
 use App\Services\TwitchTokenService;
 use Illuminate\Support\Facades\Http;
 
-class UserTaController extends Controller
+class UserController extends Controller
 {
     public function show(Request $request)
     {
@@ -16,7 +16,7 @@ class UserTaController extends Controller
             return response()->json(['error' => 'El parámetro "id" no se proporcionó en la URL.'], 400);
         }
 
-        $user = UserTa::where('twitch_id', $userId)->first();
+        $user = User::where('twitch_id', $userId)->first();
 
         if (!$user) {
             $tokenService = new TwitchTokenService();
@@ -29,7 +29,7 @@ class UserTaController extends Controller
             $userData = $this->fetchUserDataFromTwitch($token, $userId);
 
             if ($userData) {
-                UserTa::create($userData);
+                User::create($userData);
                 return response()->json($userData)->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
             } else {
                 return response()->json(['error' => 'No se encontraron datos de usuario para el ID proporcionado.'], 404);

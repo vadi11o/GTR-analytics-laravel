@@ -35,7 +35,7 @@ Utiliza Laravel Sail, una interfaz de línea de comandos para gestionar tu entor
 Finalmente, ejecuta las migraciones de la base de datos para preparar tu esquema:
 
 ```
-./vendor/bin/sail php artisan migration
+./vendor/bin/sail php artisan migrate
 ```
 
 ## Endpoints Disponibles
@@ -44,16 +44,16 @@ Una vez que el proyecto esté corriendo, podrás acceder a los siguientes endpoi
 
 - **Streams**
 
-`http://localhost/api/streams`
+`http://localhost/analytics/streams`
 
 - **Usuarios**
 
 Accede a la información de un usuario específico usando su ID (reemplaza `1234` con el ID deseado):
 
-`http://localhost/api/users?id=1234`
+`http://localhost/analytics/users?id=1234`
 
 - **Top de los Tops**
 
-`http://localhost/api/topsofthetops`
+`http://localhost/analytics/topsofthetops`
 
 Estos endpoints te permitirán interactuar con el proyecto y probar sus funcionalidades. ¡Disfruta explorando lo que has construido!

@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Http\Clients\ApiClient;
 use App\Http\Controllers\StreamsController;
 use Tests\TestCase;
 use App\Services\StreamsService;
@@ -19,59 +20,6 @@ class StreamsTest extends TestCase
         Mockery::close();
         parent::tearDown();
     }
-
-    public function testExecuteReturnsResponseBodyWhenCalledWithValidToken()
-    {
-        $twitchTokenServiceMock = Mockery::mock(TwitchTokenService::class);
-        $twitchTokenServiceMock->shouldReceive('getTokenFromTwitch')->once()->andReturn('valid_token');
-
-        $responseMock = Mockery::mock('Illuminate\Http\Client\Response');
-        $responseMock->shouldReceive('status')->once()->andReturn(200);
-        $responseMock->shouldReceive('body')->once()->andReturn('expected_response_body');
-
-        Http::shouldReceive('withHeaders')
-            ->once()
-            ->with([
-                'Authorization' => 'Bearer valid_token',
-                'Client-Id' => env('TWITCH_CLIENT_ID'),
-            ])
-            ->andReturnSelf()
-            ->shouldReceive('get')
-            ->once()
-            ->with(env('TWITCH_URL') . '/streams')
-            ->andReturn($responseMock);
-
-        $service = new GetStreamsService($twitchTokenServiceMock);
-        $result = $service->execute();
-
-        $this->assertEquals('expected_response_body', $result);
-    }
-
-    public function testCurlPetitionShouldReturnCorrectHttpStatusAndBodyWhenCalledWithValidCredentials()
-    {
-        $responseMock = Mockery::mock('Illuminate\Http\Client\Response');
-        $responseMock->shouldReceive('status')->andReturn(200);
-        $responseMock->shouldReceive('body')->andReturn('{"data": "some data"}');
-
-        Http::shouldReceive('withHeaders')
-            ->with([
-                'Authorization' => 'Bearer dummy_token',
-                'Client-Id' => 'dummy_client_id',
-            ])
-            ->andReturnSelf()
-            ->shouldReceive('get')
-            ->with('https://api.twitch.tv/helix/streams')
-            ->andReturn($responseMock);
-
-        $twitchTokenServiceMock = Mockery::mock('App\Services\TwitchTokenService');
-        $twitchTokenServiceMock->shouldReceive('getTokenFromTwitch')->andReturn('dummy_token');
-
-        $service = new GetStreamsService($twitchTokenServiceMock);
-        $result = $service->curlPetition('https://api.twitch.tv/helix/streams', 'dummy_token', 'dummy_client_id');
-
-        $this->assertEquals(['status' => 200, 'body' => '{"data": "some data"}'], $result);
-    }
-
     public function testExecuteReturnsStreamsWithData()
     {
         $mockData = json_encode([
@@ -82,10 +30,10 @@ class StreamsTest extends TestCase
         ]);
 
         $getStreamsServiceMock = Mockery::mock(GetStreamsService::class);
-        $getStreamsServiceMock->shouldReceive('execute')->once()->andReturn($mockData);
+        $getStreamsServiceMock->shouldReceive('getStreamsResponseFromApiClient')->once()->andReturn($mockData);
 
         $service = new StreamsService($getStreamsServiceMock);
-        $result = $service->execute();
+        $result = $service->processStreamsResponse();
 
         $this->assertInstanceOf(JsonResponse::class, $result);
 
@@ -106,12 +54,46 @@ class StreamsTest extends TestCase
         ]);
 
         $streamsServiceMock = Mockery::mock(StreamsService::class);
-        $streamsServiceMock->shouldReceive('execute')->once()->andReturn(new JsonResponse(json_decode($mockData, true)));
+        $streamsServiceMock->shouldReceive('processStreamsResponse')->once()->andReturn(new JsonResponse(json_decode($mockData, true)));
 
         $controller = new StreamsController($streamsServiceMock);
         $response = $controller->index();
 
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(json_decode($mockData, true), $response->getData(true));
+    }
+
+    public function testGetsTokenFromTwitchReturnsAccessToken()
+    {
+        Http::fake([
+            'id.twitch.tv/oauth2/token' => Http::response([
+                'access_token' => '12345',
+                'expires_in' => 3600,
+                'token_type' => 'bearer'
+            ], 200)
+        ]);
+
+        $service = new TwitchTokenService();
+
+        $token = $service->getTokenFromTwitch();
+
+        $this->assertEquals('12345', $token);
+    }
+
+    public function testSendCurlPetitionToTwitchReturnsCorrectData()
+    {
+        $twitchStreamsUrl = 'https://api.twitch.tv/helix/streams';
+        $twitchToken = 'fake-token';
+        $twitchClientId = 'fake-client-id';
+
+        Http::fake([
+            $twitchStreamsUrl => Http::response(['data' => 'stream data'], 200, ['Headers' => 'Value'])
+        ]);
+
+        $client = new ApiClient();
+        $response = $client->sendCurlPetitionToTwitch($twitchStreamsUrl, $twitchToken, $twitchClientId);
+
+        $this->assertEquals(200, $response['status']);
+        $this->assertJson($response['body'], json_encode(['data' => 'stream data']));
     }
 }

@@ -11,23 +11,21 @@ class StreamsService
         $this->getStreamsService = $getStreamsService;
     }
 
-    public function execute(){
-        $activeStreams = json_decode($this->getStreamsService->execute(), true);
+    public function processStreamsResponse(){
+        $activeStreamsWithoutTreatment = json_decode($this->getStreamsService->getStreamsResponseFromApiClient(), true);
 
-        $streams = [];
+        $treatedStreams = [];
 
-        if (!empty($activeStreams['data'])) {
-            foreach ($activeStreams['data'] as $stream) {
-                $streams[] = [
+        if (!empty($activeStreamsWithoutTreatment['data'])) {
+            foreach ($activeStreamsWithoutTreatment['data'] as $stream) {
+                $treatedStreams[] = [
                     'title' => $stream['title'],
                     'user_name' => $stream['user_name'],
                 ];
             }
-        } else {
-            return ['message' => 'No hay streams activos en este momento.'];
         }
 
-        return response()->json($streams)
+        return response()->json($treatedStreams)
             ->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 }

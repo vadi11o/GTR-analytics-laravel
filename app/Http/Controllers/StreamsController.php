@@ -15,11 +15,8 @@ class StreamsController extends Controller
 
     public function index():jsonResponse
     {
-        $streams = $this->StreamsService->execute();
+        $activeStreams = $this->StreamsService->processStreamsResponse();
 
-        return $streams;
-
+        return $activeStreams;
     }
-
-
 }

@@ -2,35 +2,24 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
+use App\Http\Clients\ApiClient;
 
 class GetStreamsService
 {
     protected $twitchTokenService;
+    protected $apiClient;
     public function __construct(TwitchTokenService $twitchTokenService)
     {
         $this->twitchTokenService = $twitchTokenService;
+        $this->apiClient = new ApiClient();
     }
-    public function execute()
+    public function getStreamsResponseFromApiClient()
     {
-        $token = $this->twitchTokenService->getTokenFromTwitch();
+        $twitchStreamsUrl = env('TWITCH_URL') . '/streams';
+        $tokenFromTwitch = $this->twitchTokenService->getTokenFromTwitch();
 
-        $url = env('TWITCH_URL') . '/streams';
-        $response = $this->curlPetition($url, $token, env('TWITCH_CLIENT_ID'));
+        $streamsResponse = $this->apiClient->sendCurlPetitionToTwitch($twitchStreamsUrl, $tokenFromTwitch, env('TWITCH_CLIENT_ID'));
 
-        return ($response['body']);
-    }
-
-    public function curlPetition($url, $token, $client_id)
-    {
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $token,
-            'Client-Id' => $client_id,
-        ])->get($url);
-
-        return [
-            'status' => $response->status(),
-            'body' => $response->body(),
-        ];
+        return ($streamsResponse['body']);
     }
 }

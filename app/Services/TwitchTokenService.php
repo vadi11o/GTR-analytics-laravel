@@ -2,7 +2,6 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
-use App\Models\Token;
 
 
 class TwitchTokenService
@@ -25,21 +24,5 @@ class TwitchTokenService
         ]);
 
         return $response->json()['access_token'] ?? null;
-    }
-
-    public function updateTokenDataBase($newToken)
-    {
-        if (!$newToken) {
-            throw new \Exception("Error al solicitar el token.");
-        }
-
-        $tokenModel = Token::find(1);
-        if ($tokenModel) {
-            $tokenModel->access_token = $newToken;
-            $tokenModel->save();
-            echo "Token actualizado con éxito.";
-        } else {
-            echo "Token no encontrado.";
-        }
     }
 }

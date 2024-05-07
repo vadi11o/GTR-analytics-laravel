@@ -1,73 +1,22 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Models\Token;
-use App\Services\TwitchTokenService; // Asegúrate de importar tu servicio
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Http;
+use App\Services\StreamsService;
+use Illuminate\Http\JsonResponse;
 
 class StreamsController extends Controller
 {
-    protected $twitchTokenService;
+    private $StreamsService;
 
-    public function __construct(TwitchTokenService $twitchTokenService)
+    public function __construct(StreamsService $StreamsService)
     {
-        $this->twitchTokenService = $twitchTokenService;
+        $this->StreamsService = $StreamsService;
     }
 
-    public function index()
+    public function index():jsonResponse
     {
-        // Aquí asumo que adaptas Token::obtainFromDatabase() para que use el servicio.
-        $token = $this->twitchTokenService->getTokenFromTwitch();
+        $activeStreams = $this->StreamsService->processStreamsResponse();
 
-        if (!$token) {
-            return response()->json(['error' => 'No se pudo obtener el token de Twitch.'], 400);
-        }
-
-        $url = env('TWITCH_URL') . '/streams';
-        $response = $this->curlPetition($url, $token, env('TWITCH_CLIENT_ID'));
-
-        if ($response['status'] != 200) {
-            return response()->json(['error' => 'Error al comunicarse con Twitch'], $response['status']);
-        }
-
-        $activeStreams = $this->verifyActiveStreams(json_decode($response['body'], true));
-
-        return response()->json($activeStreams)
-            ->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-
-
-    }
-
-    protected function curlPetition($url, $token, $client_id)
-    {
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $token,
-            'Client-Id' => $client_id,
-        ])->get($url);
-
-        return [
-            'status' => $response->status(),
-            'body' => $response->body(),
-        ];
-    }
-
-    protected function verifyActiveStreams($data)
-    {
-        $streams = [];
-
-        if (isset($data['data']) && !empty($data['data'])) {
-            foreach ($data['data'] as $stream) {
-                $streams[] = [
-                    'title' => $stream['title'],
-                    'user_name' => $stream['user_name'],
-                ];
-            }
-        } else {
-            return ['message' => 'No hay streams activos en este momento.'];
-        }
-
-        return $streams;
+        return $activeStreams;
     }
 }

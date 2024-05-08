@@ -30,10 +30,10 @@ class StreamsTest extends TestCase
         ]);
 
         $getStreamsServiceMock = Mockery::mock(GetStreamsService::class);
-        $getStreamsServiceMock->shouldReceive('getStreamsResponseFromApiClient')->once()->andReturn($mockData);
+        $getStreamsServiceMock->shouldReceive('execute')->once()->andReturn($mockData);
 
         $service = new StreamsService($getStreamsServiceMock);
-        $result = $service->processStreamsResponse();
+        $result = $service->execute();
 
         $this->assertInstanceOf(JsonResponse::class, $result);
 
@@ -54,7 +54,7 @@ class StreamsTest extends TestCase
         ]);
 
         $streamsServiceMock = Mockery::mock(StreamsService::class);
-        $streamsServiceMock->shouldReceive('processStreamsResponse')->once()->andReturn(new JsonResponse(json_decode($mockData, true)));
+        $streamsServiceMock->shouldReceive('execute')->once()->andReturn(new JsonResponse(json_decode($mockData, true)));
 
         $controller = new StreamsController($streamsServiceMock);
         $response = $controller->index();
@@ -91,7 +91,7 @@ class StreamsTest extends TestCase
         ]);
 
         $client = new ApiClient();
-        $response = $client->sendCurlPetitionToTwitch($twitchStreamsUrl, $twitchToken, $twitchClientId);
+        $response = $client->sendCurlPetitionToTwitchForStreams($twitchStreamsUrl, $twitchToken, $twitchClientId);
 
         $this->assertEquals(200, $response['status']);
         $this->assertJson($response['body'], json_encode(['data' => 'stream data']));

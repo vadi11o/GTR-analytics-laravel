@@ -11,8 +11,8 @@ class StreamsService
         $this->getStreamsService = $getStreamsService;
     }
 
-    public function processStreamsResponse(){
-        $activeStreamsWithoutTreatment = json_decode($this->getStreamsService->getStreamsResponseFromApiClient(), true);
+    public function execute(){
+        $activeStreamsWithoutTreatment = json_decode($this->getStreamsService->execute(), true);
 
         $treatedStreams = [];
 

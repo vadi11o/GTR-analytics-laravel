@@ -13,12 +13,12 @@ class GetStreamsService
         $this->twitchTokenService = $twitchTokenService;
         $this->apiClient = new ApiClient();
     }
-    public function getStreamsResponseFromApiClient()
+    public function execute()
     {
         $twitchStreamsUrl = env('TWITCH_URL') . '/streams';
         $tokenFromTwitch = $this->twitchTokenService->getTokenFromTwitch();
 
-        $streamsResponse = $this->apiClient->sendCurlPetitionToTwitch($twitchStreamsUrl, $tokenFromTwitch, env('TWITCH_CLIENT_ID'));
+        $streamsResponse = $this->apiClient->sendCurlPetitionToTwitchForStreams($twitchStreamsUrl, $tokenFromTwitch, env('TWITCH_CLIENT_ID'));
 
         return ($streamsResponse['body']);
     }

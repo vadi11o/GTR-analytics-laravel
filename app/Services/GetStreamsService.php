@@ -2,24 +2,42 @@
 
 namespace App\Services;
 
-use App\Http\Clients\ApiClient;
+use App\Infrastructure\Clients\ApiClient;
 
 class GetStreamsService
 {
-    protected $twitchTokenService;
     protected $apiClient;
-    public function __construct(TwitchTokenService $twitchTokenService)
+    protected $twitchStreamsUrl;
+
+    public function __construct(ApiClient $apiClient = null, $twitchStreamsUrl = null)
     {
-        $this->twitchTokenService = $twitchTokenService;
-        $this->apiClient = new ApiClient();
+        $this->apiClient = $apiClient ?? new ApiClient();
+        $this->twitchStreamsUrl = $twitchStreamsUrl ?? env('TWITCH_URL') . '/streams';
     }
-    public function getStreamsResponseFromApiClient()
+
+    public function execute()
     {
-        $twitchStreamsUrl = env('TWITCH_URL') . '/streams';
-        $tokenFromTwitch = $this->twitchTokenService->getTokenFromTwitch();
+        $tokenFromTwitch = $this->apiClient->getTokenFromTwitch();
+        $streamsResponse = $this->apiClient->sendCurlPetitionToTwitch($this->twitchStreamsUrl, $tokenFromTwitch);
 
-        $streamsResponse = $this->apiClient->sendCurlPetitionToTwitch($twitchStreamsUrl, $tokenFromTwitch, env('TWITCH_CLIENT_ID'));
+        return $this->treatData($streamsResponse['body']);
+    }
 
-        return ($streamsResponse['body']);
+    protected function treatData($rawData)
+    {
+        $data = json_decode($rawData, true);
+        $treatedStreams = [];
+
+        if (!empty($data['data'])) {
+            foreach ($data['data'] as $stream) {
+                $treatedStreams[] = [
+                    'title' => $stream['title'],
+                    'user_name' => $stream['user_name'],
+                ];
+            }
+        }
+
+        return response()->json($treatedStreams)
+            ->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 }

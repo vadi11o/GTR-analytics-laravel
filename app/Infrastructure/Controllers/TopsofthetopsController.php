@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Infrastructure\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\TopsofthetopsService;

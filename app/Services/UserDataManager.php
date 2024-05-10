@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Http\Clients\DBClient;
-class UserService
+use App\Infrastructure\Clients\DBClient;
+class UserDataManager
 {
     protected DBClient $dBClient;
     protected GetUserService $getUserService;
@@ -18,10 +18,8 @@ class UserService
     {
         $userFromDB = $this->dBClient->getUserByIdFromDB($userId);
         if (!$userFromDB) {
-            return response()->json($this->getUserService->execute($userId))->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+            return $this->getUserService->execute($userId);
         }
-
         return response()->json($userFromDB)->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
-
 }

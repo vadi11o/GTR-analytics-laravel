@@ -5,7 +5,7 @@ namespace Tests\Unit;
 use App\Http\Clients\ApiClient;
 use App\Http\Controllers\StreamsController;
 use Tests\TestCase;
-use App\Services\StreamsService;
+use App\Services\StreamsDataManager;
 use App\Services\GetStreamsService;
 use App\Services\TwitchTokenService;
 use Mockery;
@@ -32,7 +32,7 @@ class StreamsTest extends TestCase
         $getStreamsServiceMock = Mockery::mock(GetStreamsService::class);
         $getStreamsServiceMock->shouldReceive('execute')->once()->andReturn($mockData);
 
-        $service = new StreamsService($getStreamsServiceMock);
+        $service = new StreamsDataManager($getStreamsServiceMock);
         $result = $service->execute();
 
         $this->assertInstanceOf(JsonResponse::class, $result);
@@ -53,11 +53,11 @@ class StreamsTest extends TestCase
             ['title' => 'Stream 2', 'user_name' => 'User2'],
         ]);
 
-        $streamsServiceMock = Mockery::mock(StreamsService::class);
+        $streamsServiceMock = Mockery::mock(StreamsDataManager::class);
         $streamsServiceMock->shouldReceive('execute')->once()->andReturn(new JsonResponse(json_decode($mockData, true)));
 
         $controller = new StreamsController($streamsServiceMock);
-        $response = $controller->index();
+        $response = $controller->__invoke();
 
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(json_decode($mockData, true), $response->getData(true));

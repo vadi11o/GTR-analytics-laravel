@@ -2,9 +2,8 @@
 
 namespace Tests\Feature;
 
-// use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Http\Controllers\UserController;
-use App\Services\UserService;
+use App\Services\UserDataManager;
 use Illuminate\Http\Request;
 use Tests\TestCase;
 use Mockery;
@@ -28,7 +27,7 @@ class UserTest extends TestCase
         $request = Request::create('/users', 'GET', ['id' => $userId]);
         $expectedResponse = new JsonResponse(['user' => 'data'], 200);
 
-        $mockUserService = Mockery::mock(UserService::class);
+        $mockUserService = Mockery::mock(UserDataManager::class);
         $mockUserService->shouldReceive('execute')
             ->once()
             ->with($userId)
@@ -36,7 +35,7 @@ class UserTest extends TestCase
 
         $controller = new UserController($mockUserService);
 
-        $response = $controller->show($request);
+        $response = $controller->__invoke($request);
 
         $this->assertEquals($expectedResponse, $response);
     }

@@ -6,6 +6,10 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 
+/**
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
+
 class ApiClient
 {
     private mixed $clientId;
@@ -68,9 +72,10 @@ class ApiClient
                 'view_count'        => $userData['view_count'],
                 'created_at'        => Carbon::parse($userData['created_at'])->toDateTimeString()
             ];
-        } else {
-            return ['error' => 'Failed to fetch data from Twitch', 'status_code' => $response->status()];
         }
+
+        return ['error' => 'Failed to fetch data from Twitch', 'status_code' => $response->status()];
+
     }
     public function getClientId()
     {

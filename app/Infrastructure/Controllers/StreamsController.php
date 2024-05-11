@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Infrastructure\Controllers;
 
 use App\Services\StreamsDataManager;
@@ -7,7 +8,7 @@ use Illuminate\Http\JsonResponse;
 
 class StreamsController extends Controller
 {
-    private $streamsService;
+    private StreamsDataManager $streamsService;
 
     public function __construct(StreamsDataManager $streamsService)
     {
@@ -18,7 +19,7 @@ class StreamsController extends Controller
     {
         try {
             return $this->streamsService->execute();
-        } catch (Exception $e) {
+        } catch (Exception) {
             $response = [
                 'error' => 'No se pueden devolver streams en este momento, inténtalo más tarde'
             ];

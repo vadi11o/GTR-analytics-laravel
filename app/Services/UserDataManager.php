@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Infrastructure\Clients\DBClient;
+
 class UserDataManager
 {
     protected DBClient $dBClient;
@@ -11,7 +12,7 @@ class UserDataManager
     public function __construct(GetUserService $getUserService, DBClient $dBClient)
     {
         $this->getUserService = $getUserService;
-        $this->dBClient = $dBClient;
+        $this->dBClient       = $dBClient;
     }
 
     public function execute(String $userId)

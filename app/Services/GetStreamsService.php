@@ -3,19 +3,23 @@
 namespace App\Services;
 
 use App\Infrastructure\Clients\ApiClient;
+use Illuminate\Http\Client\ConnectionException;
 
 class GetStreamsService
 {
-    protected $apiClient;
-    protected $twitchStreamsUrl;
+    protected ApiClient $apiClient;
+    private mixed $twitchStreamsUrl;
 
     public function __construct(ApiClient $apiClient = null, $twitchStreamsUrl = null)
     {
-        $this->apiClient = $apiClient ?? new ApiClient();
+        $this->apiClient        = $apiClient        ?? new ApiClient();
         $this->twitchStreamsUrl = $twitchStreamsUrl ?? env('TWITCH_URL') . '/streams';
     }
 
-    public function execute()
+    /**
+     * @throws ConnectionException
+     */
+    public function execute(): \Illuminate\Http\JsonResponse
     {
         $tokenFromTwitch = $this->apiClient->getTokenFromTwitch();
         $streamsResponse = $this->apiClient->sendCurlPetitionToTwitch($this->twitchStreamsUrl, $tokenFromTwitch);
@@ -23,15 +27,15 @@ class GetStreamsService
         return $this->treatData($streamsResponse['body']);
     }
 
-    protected function treatData($rawData)
+    protected function treatData($rawData): \Illuminate\Http\JsonResponse
     {
-        $data = json_decode($rawData, true);
+        $data           = json_decode($rawData, true);
         $treatedStreams = [];
 
         if (!empty($data['data'])) {
             foreach ($data['data'] as $stream) {
                 $treatedStreams[] = [
-                    'title' => $stream['title'],
+                    'title'     => $stream['title'],
                     'user_name' => $stream['user_name'],
                 ];
             }
@@ -41,4 +45,3 @@ class GetStreamsService
             ->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 }
-

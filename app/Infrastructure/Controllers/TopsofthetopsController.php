@@ -7,6 +7,9 @@ use App\Services\TopsofthetopsService;
 use App\Models\TopGame;
 use App\Models\TopOfTheTop;
 
+/**
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
 class TopsofthetopsController extends Controller
 {
     protected $topsOfTheTopsService;
@@ -26,6 +29,6 @@ class TopsofthetopsController extends Controller
 
         return response()->json([
             'data' => $topOfTheTopsData
-        ])->setEncodingOptions(JSON_PRETTY_PRINT| JSON_UNESCAPED_UNICODE);
+        ])->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 }

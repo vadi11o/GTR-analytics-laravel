@@ -2,98 +2,219 @@
 
 namespace Tests\Unit;
 
-use App\Http\Clients\ApiClient;
-use App\Http\Controllers\StreamsController;
-use Tests\TestCase;
-use App\Services\StreamsDataManager;
+use App\Infrastructure\Clients\ApiClient;
 use App\Services\GetStreamsService;
-use App\Services\TwitchTokenService;
-use Mockery;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
+use Tests\TestCase;
+use Carbon\Carbon;
+use Exception;
 
-
+/**
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
 class StreamsTest extends TestCase
 {
-    public function tearDown(): void
+    protected ApiClient $apiClient;
+    private GetStreamsService $service;
+
+    /**
+     * @throws Exception|\PHPUnit\Framework\MockObject\Exception
+     */
+    protected function setUp(): void
     {
-        Mockery::close();
-        parent::tearDown();
+        parent::setUp();
+        $this->apiClient = $this->createMock(ApiClient::class);
+        $this->service   = new GetStreamsService($this->apiClient);
     }
-    public function testExecuteReturnsStreamsWithData()
+
+    /**
+     * @test
+     * @throws ConnectionException
+     */
+    public function testTokenPetitionToTwitch()
     {
-        $mockData = json_encode([
+        $this->apiClient->method('getTokenFromTwitch')
+            ->willReturn('test_access_token');
+
+        $token = $this->apiClient->getTokenFromTwitch();
+        $this->assertEquals('test_access_token', $token);
+    }
+
+    /**
+     * @test
+     * @throws ConnectionException
+     */
+    public function testTokenPetitionThrowsException()
+    {
+        $this->apiClient->method('getTokenFromTwitch')
+            ->will($this->throwException(new Exception('Failed to retrieve access token from Twitch: invalid_request')));
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Failed to retrieve access token from Twitch: invalid_request');
+
+        $this->apiClient->getTokenFromTwitch();
+    }
+
+    /** @test */
+    public function testCurlPetitionToTwitch()
+    {
+        $fakeResponse = [
+            'status' => 200,
+            'body'   => json_encode([
+                'data' => [
+                    [
+                        'id'        => '123456789',
+                        'user_name' => 'SandySanderman',
+                        'title'     => 'Cool Stream'
+                    ]
+                ]
+            ])
+        ];
+        $twitchStreamsUrl = 'https://api.twitch.tv/helix/streams';
+        $twitchToken      = 'some_fake_token';
+
+        $this->apiClient->method('sendCurlPetitionToTwitch')
+            ->with($twitchStreamsUrl, $twitchToken)
+            ->willReturn($fakeResponse);
+
+        $response = $this->apiClient->sendCurlPetitionToTwitch($twitchStreamsUrl, $twitchToken);
+
+        $this->assertEquals(200, $response['status']);
+        $this->assertEquals($fakeResponse['body'], $response['body']);
+    }
+
+    /** @test */
+    public function testCurlPetitionToTwitchFailsWithNotFoundError()
+    {
+        $twitchStreamsUrl = 'https://api.twitch.tv/helix/streams';
+        $twitchToken      = 'some_fake_token';
+        $errorMessage     = ['message' => 'Stream not found', 'status' => 404];
+
+        $this->apiClient->method('sendCurlPetitionToTwitch')
+            ->willReturn([
+                'status' => 404,
+                'body'   => json_encode($errorMessage)
+            ]);
+
+        $response     = $this->apiClient->sendCurlPetitionToTwitch($twitchStreamsUrl, $twitchToken);
+        $responseBody = json_decode($response['body'], true);
+
+        $this->assertEquals(404, $response['status']);
+        $this->assertEquals('Stream not found', $responseBody['message']);
+    }
+
+    /** @test
+     * @throws ConnectionException
+     */
+    public function testParsesJsonFromTwitchResponseSuccessfully()
+    {
+        $token  = 'fake_token';
+        $userId = '12345';
+        $url    = 'https://api.twitch.tv/helix/users?id=' . $userId;
+
+        $fakeResponse = [
             'data' => [
-                ['title' => 'Stream 1', 'user_name' => 'User1'],
-                ['title' => 'Stream 2', 'user_name' => 'User2'],
+                [
+                    'id'                => '12345',
+                    'login'             => 'testuser',
+                    'display_name'      => 'Test User',
+                    'type'              => '',
+                    'broadcaster_type'  => 'partner',
+                    'description'       => 'A great Twitch streamer',
+                    'profile_image_url' => 'https://example.com/image.jpg',
+                    'offline_image_url' => 'https://example.com/offline.jpg',
+                    'view_count'        => 100,
+                    'created_at'        => '2020-01-01T00:00:00Z'
+                ]
+            ]
+        ];
+
+        Http::fake([
+            $url => Http::response($fakeResponse, 200),
+        ]);
+
+        $this->apiClient->method('fetchUserDataFromTwitch')
+            ->willReturn($fakeResponse['data'][0]);
+
+        $response = $this->apiClient->fetchUserDataFromTwitch($token, $userId);
+
+        $this->assertEquals('12345', $response['id']);
+        $this->assertEquals('Test User', $response['display_name']);
+        $this->assertEquals(Carbon::parse('2020-01-01T00:00:00Z')->toDateTimeString(), Carbon::parse($response['created_at'])->toDateTimeString());
+
+        Http::fake([
+            'https://api.twitch.tv/helix/users?id=12345' => Http::response([
+                'data' => [
+                    [
+                        'id'                => '12345',
+                        'login'             => 'testuser',
+                        'display_name'      => 'Test User',
+                        'type'              => '',
+                        'broadcaster_type'  => 'partner',
+                        'description'       => 'A great Twitch streamer',
+                        'profile_image_url' => 'https://example.com/image.jpg',
+                        'offline_image_url' => 'https://example.com/offline.jpg',
+                        'view_count'        => 100,
+                        'created_at'        => '2020-01-01T00:00:00Z'
+                    ]
+                ]
+            ], 200)
+        ]);
+    }
+
+    /** @test
+     * @throws ConnectionException
+     */
+    public function testParsesJsonFromTwitchResponseUnsuccessfully()
+    {
+        $token  = 'fake_token';
+        $userId = 'wrong_id';
+        $url    = 'https://api.twitch.tv/helix/users?id=' . $userId;
+
+        Http::fake([
+            $url => Http::response(['message' => 'Not Found'], 404),
+        ]);
+
+        $this->apiClient->method('fetchUserDataFromTwitch')
+            ->willReturn(['error' => 'Failed to fetch data from Twitch', 'status_code' => 404]);  // Assume this is the format your method returns on error
+
+        $response = $this->apiClient->fetchUserDataFromTwitch($token, $userId);
+
+        $this->assertArrayHasKey('error', $response);
+        $this->assertEquals('Failed to fetch data from Twitch', $response['error']);
+        $this->assertEquals(404, $response['status_code']);
+    }
+
+    /** @test
+     * @throws ConnectionException
+     */
+    public function testTreatDataWithValidInput()
+    {
+        $rawData = json_encode([
+            'data' => [
+                ['title' => 'Cool Stream', 'user_name' => 'Streamer1'],
+                ['title' => 'Another Stream', 'user_name' => 'Streamer2']
             ]
         ]);
 
-        $getStreamsServiceMock = Mockery::mock(GetStreamsService::class);
-        $getStreamsServiceMock->shouldReceive('execute')->once()->andReturn($mockData);
+        $this->apiClient->expects($this->once())
+            ->method('getTokenFromTwitch')
+            ->willReturn('fake_token');
 
-        $service = new StreamsDataManager($getStreamsServiceMock);
-        $result = $service->execute();
+        $this->apiClient->expects($this->once())
+            ->method('sendCurlPetitionToTwitch')
+            ->with($this->anything(), 'fake_token')
+            ->willReturn(['body' => $rawData, 'status' => 200]);
 
-        $this->assertInstanceOf(JsonResponse::class, $result);
-
-        $responseData = json_decode($result->getContent(), true);
-        $expectedData = [
-            ['title' => 'Stream 1', 'user_name' => 'User1'],
-            ['title' => 'Stream 2', 'user_name' => 'User2'],
-        ];
-
-        $this->assertEquals($expectedData, $responseData);
-    }
-
-    public function testIndexReturnsJsonResponseWithData()
-    {
-        $mockData = json_encode([
-            ['title' => 'Stream 1', 'user_name' => 'User1'],
-            ['title' => 'Stream 2', 'user_name' => 'User2'],
-        ]);
-
-        $streamsServiceMock = Mockery::mock(StreamsDataManager::class);
-        $streamsServiceMock->shouldReceive('execute')->once()->andReturn(new JsonResponse(json_decode($mockData, true)));
-
-        $controller = new StreamsController($streamsServiceMock);
-        $response = $controller->__invoke();
+        $response = $this->service->execute();
 
         $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(json_decode($mockData, true), $response->getData(true));
+        $content = json_decode($response->getContent(), true);
+        $this->assertCount(2, $content);
+        $this->assertEquals('Cool Stream', $content[0]['title']);
+        $this->assertEquals('Streamer1', $content[0]['user_name']);
     }
 
-    public function testGetsTokenFromTwitchReturnsAccessToken()
-    {
-        Http::fake([
-            'id.twitch.tv/oauth2/token' => Http::response([
-                'access_token' => '12345',
-                'expires_in' => 3600,
-                'token_type' => 'bearer'
-            ], 200)
-        ]);
-
-        $service = new TwitchTokenService();
-
-        $token = $service->getTokenFromTwitch();
-
-        $this->assertEquals('12345', $token);
-    }
-
-    public function testSendCurlPetitionToTwitchReturnsCorrectData()
-    {
-        $twitchStreamsUrl = 'https://api.twitch.tv/helix/streams';
-        $twitchToken = 'fake-token';
-        $twitchClientId = 'fake-client-id';
-
-        Http::fake([
-            $twitchStreamsUrl => Http::response(['data' => 'stream data'], 200, ['Headers' => 'Value'])
-        ]);
-
-        $client = new ApiClient();
-        $response = $client->sendCurlPetitionToTwitchForStreams($twitchStreamsUrl, $twitchToken, $twitchClientId);
-
-        $this->assertEquals(200, $response['status']);
-        $this->assertJson($response['body'], json_encode(['data' => 'stream data']));
-    }
 }

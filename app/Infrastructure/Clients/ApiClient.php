@@ -5,6 +5,7 @@ namespace App\Infrastructure\Clients;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
@@ -36,6 +37,7 @@ class ApiClient
 
     /**
      * @throws ConnectionException
+     * @throws \Exception
      */
     public function getTokenFromTwitch()
     {
@@ -45,9 +47,21 @@ class ApiClient
             'grant_type'    => 'client_credentials',
         ]);
 
-        return $response->json()['access_token'];
+        if ($response->successful() && isset($response->json()['access_token'])) {
+            return $response->json()['access_token'];
+        }
+
+        Log::warning('Failed to retrieve access token from Twitch', [
+            'status'        => $response->status(),
+            'response_body' => $response->json(),
+        ]);
+
+        throw new \Exception('Failed to retrieve access token from Twitch: ' . $response->json()['error'] ?? 'Unknown error', $response->status());
     }
 
+    /**
+     * @throws ConnectionException
+     */
     public function fetchUserDataFromTwitch($token, $userId): array
     {
         $url = 'https://api.twitch.tv/helix/users?id=' . $userId;
@@ -77,6 +91,7 @@ class ApiClient
         return ['error' => 'Failed to fetch data from Twitch', 'status_code' => $response->status()];
 
     }
+
     public function getClientId()
     {
         return $this->clientId;

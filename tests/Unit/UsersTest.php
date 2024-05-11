@@ -8,7 +8,9 @@ use App\Services\GetUserService;
 use Illuminate\Http\JsonResponse;
 use Mockery;
 use Tests\TestCase;
-
+/**
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
 class UsersTest extends TestCase
 {
 

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Infrastructure\Clients\ApiClient;
+use Illuminate\Http\Client\ConnectionException;
 
 class GetStreamsService
 {
@@ -15,6 +16,9 @@ class GetStreamsService
         $this->twitchStreamsUrl = $twitchStreamsUrl ?? env('TWITCH_URL') . '/streams';
     }
 
+    /**
+     * @throws ConnectionException
+     */
     public function execute(): \Illuminate\Http\JsonResponse
     {
         $tokenFromTwitch = $this->apiClient->getTokenFromTwitch();

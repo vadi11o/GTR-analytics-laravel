@@ -6,6 +6,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
@@ -56,7 +57,7 @@ class ApiClient
             'response_body' => $response->json(),
         ]);
 
-        throw new \Exception('Failed to retrieve access token from Twitch: ' . $response->json()['error'] ?? 'Unknown error', $response->status());
+        throw new Exception('Failed to retrieve access token from Twitch: ' . $response->json()['error'] ?? 'Unknown error', $response->status());
     }
 
     /**

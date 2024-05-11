@@ -41,7 +41,7 @@ class StreamsTest extends TestCase
      * @test
      * @throws ConnectionException
      */
-    public function testTokenRetrievalThrowsExceptionWhenAccessTokenIsMissing()
+    public function testTokenPetitionThrowsException()
     {
         Http::fake([
             'id.twitch.tv/oauth2/token' => Http::response([
@@ -105,6 +105,33 @@ class StreamsTest extends TestCase
     }
 
     /** @test */
+    public function testCurlPetitionToTwitchFailsWithNotFoundError()
+    {
+        $twitchStreamsUrl = 'https://api.twitch.tv/helix/streams';
+        $twitchToken      = 'some_fake_token';
+        $errorMessage     = ['message' => 'Stream not found', 'status' => 404];
+
+        Http::fake([
+            $twitchStreamsUrl => Http::response($errorMessage, 404),
+        ]);
+
+        $service = new ApiClient();
+
+        $response = $service->sendCurlPetitionToTwitch($twitchStreamsUrl, $twitchToken);
+
+        $responseBody = json_decode($response['body'], true);
+
+        $this->assertEquals(404, $response['status']);
+        $this->assertEquals('Stream not found', $responseBody['message']);
+
+        Http::assertSent(function ($request) use ($twitchToken, $twitchStreamsUrl) {
+            return $request->url() == $twitchStreamsUrl && $request->method() === 'GET' && $request->hasHeader('Authorization', 'Bearer ' . $twitchToken) && $request->hasHeader('Client-Id');
+        });
+    }
+
+    /** @test
+     * @throws ConnectionException
+     */
     public function testParsesJsonFromTwitchResponseSuccessfully()
     {
         $token  = 'fake_token';
@@ -146,7 +173,9 @@ class StreamsTest extends TestCase
         });
     }
 
-    /** @test */
+    /** @test
+     * @throws ConnectionException
+     */
     public function testParsesJsonFromTwitchResponseUnsuccessfully()
     {
         $token  = 'fake_token';

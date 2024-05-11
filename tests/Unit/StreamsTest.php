@@ -7,9 +7,9 @@ use App\Services\GetStreamsService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
-use PHPUnit\Framework\MockObject\Exception;
 use Tests\TestCase;
 use Carbon\Carbon;
+use Exception;
 
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
@@ -20,7 +20,7 @@ class StreamsTest extends TestCase
     private GetStreamsService $service;
 
     /**
-     * @throws Exception
+     * @throws Exception|\PHPUnit\Framework\MockObject\Exception
      */
     protected function setUp(): void
     {
@@ -49,7 +49,7 @@ class StreamsTest extends TestCase
     public function testTokenPetitionThrowsException()
     {
         $this->apiClient->method('getTokenFromTwitch')
-            ->will($this->throwException(new \Exception('Failed to retrieve access token from Twitch: invalid_request')));
+            ->will($this->throwException(new Exception('Failed to retrieve access token from Twitch: invalid_request')));
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Failed to retrieve access token from Twitch: invalid_request');
@@ -136,7 +136,7 @@ class StreamsTest extends TestCase
         ]);
 
         $this->apiClient->method('fetchUserDataFromTwitch')
-            ->willReturn($fakeResponse['data'][0]);  // Simulate the data processing if needed
+            ->willReturn($fakeResponse['data'][0]);
 
         $response = $this->apiClient->fetchUserDataFromTwitch($token, $userId);
 
@@ -187,7 +187,7 @@ class StreamsTest extends TestCase
         $this->assertEquals(404, $response['status_code']);
     }
 
-    /**
+    /** @test
      * @throws ConnectionException
      */
     public function testTreatDataWithValidInput()

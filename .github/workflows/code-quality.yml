@@ -6,8 +6,6 @@ on:
       - master
     paths:
       - app/**
-  workflow_dispatch:
-  
 jobs:
   code_quality_and_tests:
     runs-on: ubuntu-latest

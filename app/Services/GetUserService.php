@@ -13,7 +13,7 @@ class GetUserService
 
     public function __construct(DBClient $dbClient, ApiClient $apiClient)
     {
-        $this->dbClient = $dbClient;
+        $this->dbClient  = $dbClient;
         $this->apiClient = $apiClient;
     }
 
@@ -36,8 +36,9 @@ class GetUserService
             $userData = ['id' => $userData['id']] + $userData;
 
             return response()->json($userData, 200, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-        } else {
-            return response()->json(['error' => 'No se encontraron datos de usuario para el ID proporcionado.'], 404);
         }
+
+        return response()->json(['error' => 'No se encontraron datos de usuario para el ID proporcionado.'], 404);
+
     }
 }

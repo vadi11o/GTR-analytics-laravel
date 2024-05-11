@@ -6,7 +6,11 @@ use App\Models\TopGame;
 use App\Models\TopOfTheTop;
 use App\Models\TopVideo;
 use Carbon\Carbon;
+use Exception;
 
+/**
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
 class TopsofthetopsService
 {
     protected $twitchTokenService;
@@ -16,15 +20,15 @@ class TopsofthetopsService
     public function __construct(TwitchTokenService $twitchTokenService, TopVideoService $topVideosService, TopGamesService $topGamesService)
     {
         $this->twitchTokenService = $twitchTokenService;
-        $this->topVideosService = $topVideosService;
-        $this->topGamesService = $topGamesService;
+        $this->topVideosService   = $topVideosService;
+        $this->topGamesService    = $topGamesService;
     }
 
     public function updateTopOfTheTops($since)
     {
         $accessToken = $this->twitchTokenService->getTokenFromTwitch();
         if (!$accessToken) {
-            throw new \Exception("No se pudo obtener el token de Twitch.");
+            throw new Exception('No se pudo obtener el token de Twitch.');
         }
 
         $this->topGamesService->updateTopGames();
@@ -48,7 +52,7 @@ class TopsofthetopsService
         }
 
         $lastUpdate = Carbon::parse($topOfTheTop->ultima_actualizacion);
-        $now = Carbon::now();
+        $now        = Carbon::now();
 
         return $now->diffInSeconds($lastUpdate) > $since;
     }
@@ -63,22 +67,22 @@ class TopsofthetopsService
             return;
         }
 
-        $totalViews = $videos->sum('views');
-        $totalVideos = $videos->count();
+        $totalViews      = $videos->sum('views');
+        $totalVideos     = $videos->count();
         $mostViewedVideo = $videos->first();
 
         $topOfTheTop = TopOfTheTop::updateOrCreate(
             ['game_id' => $game->game_id],
             [
-                'game_name' => $game->game_name,
-                'user_name' => $mostViewedVideo->user_name,
-                'total_videos' => $totalVideos,
-                'total_views' => $totalViews,
-                'most_viewed_title' => $mostViewedVideo->title,
-                'most_viewed_views' => $mostViewedVideo->views,
-                'most_viewed_duration' => $mostViewedVideo->duration,
+                'game_name'              => $game->game_name,
+                'user_name'              => $mostViewedVideo->user_name,
+                'total_videos'           => $totalVideos,
+                'total_views'            => $totalViews,
+                'most_viewed_title'      => $mostViewedVideo->title,
+                'most_viewed_views'      => $mostViewedVideo->views,
+                'most_viewed_duration'   => $mostViewedVideo->duration,
                 'most_viewed_created_at' => $mostViewedVideo->created_at,
-                'ultima_actualizacion' => Carbon::now()
+                'ultima_actualizacion'   => Carbon::now()
             ]
         );
     }

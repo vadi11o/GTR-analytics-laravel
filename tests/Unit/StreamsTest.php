@@ -2,98 +2,34 @@
 
 namespace Tests\Unit;
 
-use App\Http\Clients\ApiClient;
-use App\Http\Controllers\StreamsController;
-use Tests\TestCase;
-use App\Services\StreamsDataManager;
-use App\Services\GetStreamsService;
-use App\Services\TwitchTokenService;
-use Mockery;
-use Illuminate\Http\JsonResponse;
+use App\Infrastructure\Clients\ApiClient;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
-
+use Tests\TestCase;
 
 class StreamsTest extends TestCase
 {
-    public function tearDown(): void
-    {
-        Mockery::close();
-        parent::tearDown();
-    }
-    public function testExecuteReturnsStreamsWithData()
-    {
-        $mockData = json_encode([
-            'data' => [
-                ['title' => 'Stream 1', 'user_name' => 'User1'],
-                ['title' => 'Stream 2', 'user_name' => 'User2'],
-            ]
-        ]);
-
-        $getStreamsServiceMock = Mockery::mock(GetStreamsService::class);
-        $getStreamsServiceMock->shouldReceive('execute')->once()->andReturn($mockData);
-
-        $service = new StreamsDataManager($getStreamsServiceMock);
-        $result = $service->execute();
-
-        $this->assertInstanceOf(JsonResponse::class, $result);
-
-        $responseData = json_decode($result->getContent(), true);
-        $expectedData = [
-            ['title' => 'Stream 1', 'user_name' => 'User1'],
-            ['title' => 'Stream 2', 'user_name' => 'User2'],
-        ];
-
-        $this->assertEquals($expectedData, $responseData);
-    }
-
-    public function testIndexReturnsJsonResponseWithData()
-    {
-        $mockData = json_encode([
-            ['title' => 'Stream 1', 'user_name' => 'User1'],
-            ['title' => 'Stream 2', 'user_name' => 'User2'],
-        ]);
-
-        $streamsServiceMock = Mockery::mock(StreamsDataManager::class);
-        $streamsServiceMock->shouldReceive('execute')->once()->andReturn(new JsonResponse(json_decode($mockData, true)));
-
-        $controller = new StreamsController($streamsServiceMock);
-        $response = $controller->__invoke();
-
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(json_decode($mockData, true), $response->getData(true));
-    }
-
-    public function testGetsTokenFromTwitchReturnsAccessToken()
+    /**
+     * @test
+     * @throws ConnectionException
+     */
+    public function testCurlPetitionForTokenRetrieve()
     {
         Http::fake([
             'id.twitch.tv/oauth2/token' => Http::response([
-                'access_token' => '12345',
-                'expires_in' => 3600,
-                'token_type' => 'bearer'
-            ], 200)
+                'access_token' => 'test_access_token',
+                'expires_in'   => 3600,
+            ], 200),
         ]);
 
-        $service = new TwitchTokenService();
+        $service = new ApiClient();
 
         $token = $service->getTokenFromTwitch();
 
-        $this->assertEquals('12345', $token);
-    }
+        $this->assertEquals('test_access_token', $token);
 
-    public function testSendCurlPetitionToTwitchReturnsCorrectData()
-    {
-        $twitchStreamsUrl = 'https://api.twitch.tv/helix/streams';
-        $twitchToken = 'fake-token';
-        $twitchClientId = 'fake-client-id';
-
-        Http::fake([
-            $twitchStreamsUrl => Http::response(['data' => 'stream data'], 200, ['Headers' => 'Value'])
-        ]);
-
-        $client = new ApiClient();
-        $response = $client->sendCurlPetitionToTwitchForStreams($twitchStreamsUrl, $twitchToken, $twitchClientId);
-
-        $this->assertEquals(200, $response['status']);
-        $this->assertJson($response['body'], json_encode(['data' => 'stream data']));
+        Http::assertSent(function ($request) use ($service) {
+            return $request->hasHeader('Content-Type', 'application/x-www-form-urlencoded') && $request->url() == 'https://id.twitch.tv/oauth2/token' && $request['client_id'] === $service->getClientId() && $request['client_secret'] === $service->getClientSecret() && $request['grant_type'] === 'client_credentials';
+        });
     }
 }

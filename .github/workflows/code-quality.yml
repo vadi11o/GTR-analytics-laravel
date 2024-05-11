@@ -28,3 +28,9 @@ jobs:
       - name: Run GRUMPHP
         run: |
           ./vendor/bin/grumphp run
+
+      - name: Execute Feature Tests
+        run: vendor/bin/phpunit tests/Feature
+
+      - name: Execute Unit Tests
+        run: vendor/bin/phpunit tests/Unit

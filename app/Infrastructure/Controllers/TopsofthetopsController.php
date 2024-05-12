@@ -12,7 +12,7 @@ use App\Models\TopOfTheTop;
  */
 class TopsofthetopsController extends Controller
 {
-    protected $topsOfTheTopsService;
+    protected TopsofthetopsService $topsOfTheTopsService;
 
     public function __construct(TopsofthetopsService $topsOfTheTopsService)
     {

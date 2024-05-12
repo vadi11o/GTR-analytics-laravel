@@ -26,7 +26,7 @@ class UserController extends Controller
         try {
             $result = $this->userDataManager->execute($userId);
             return response()->json($result->getData(), $result->status(), [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-        } catch (Exception $e) {
+        } catch (Exception) {
             $response = [
                 'error' => 'No se pueden devolver usuarios en este momento, inténtalo más tarde'
             ];

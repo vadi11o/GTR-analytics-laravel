@@ -6,9 +6,8 @@ use App\Infrastructure\Clients\ApiClient;
 use App\Services\GetStreamsService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Http;
+use Mockery;
 use Tests\TestCase;
-use Carbon\Carbon;
 use Exception;
 
 /**
@@ -29,6 +28,52 @@ class StreamsTest extends TestCase
         $this->service   = new GetStreamsService($this->apiClient);
     }
 
+    public function testExecuteCallsGetTokenFromTwitch()
+    {
+        $this->apiClient->method('getTokenFromTwitch')
+            ->willReturn('someToken');
+
+        $this->apiClient->method('sendCurlPetitionToTwitch')
+            ->willReturn(['body' => json_encode(['data' => []])]);
+
+        $response = $this->service->execute();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+
+        Mockery::close();
+    }
+
+
+    public function testExecuteCallsSendCurlPetitionToTwitchWithCorrectParameters()
+    {
+        $token = 'someToken';
+        $url = env('TWITCH_URL') . '/streams';
+
+        $this->apiClient->method('getTokenFromTwitch')
+            ->willReturn($token);
+
+        $this->apiClient->method('sendCurlPetitionToTwitch')
+            ->with($url, $token)
+            ->willReturn(['body' => json_encode(['data' => []])]);
+
+        $this->service->execute();
+
+        $this->assertTrue(true);
+    }
+
+    public function testExecuteFailsWhenGetTokenFromTwitchReturnsInvalidToken()
+    {
+        $this->apiClient->method('getTokenFromTwitch')
+            ->will($this->throwException(new Exception("Failed to retrieve access token from Twitch: Unknown error", 400)));
+
+        $this->apiClient->expects($this->never())
+            ->method('sendCurlPetitionToTwitch');
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage("Failed to retrieve access token from Twitch: Unknown error");
+
+        $this->service->execute();
+    }
     /**
      * @test
      * @throws ConnectionException
@@ -105,87 +150,7 @@ class StreamsTest extends TestCase
         $this->assertEquals('Stream not found', $responseBody['message']);
     }
 
-    /** @test
-     * @throws ConnectionException
-     */
-    public function testParsesJsonFromTwitchResponseSuccessfully()
-    {
-        $token  = 'fake_token';
-        $userId = '12345';
-        $url    = 'https://api.twitch.tv/helix/users?id=' . $userId;
 
-        $fakeResponse = [
-            'data' => [
-                [
-                    'id'                => '12345',
-                    'login'             => 'testuser',
-                    'display_name'      => 'Test User',
-                    'type'              => '',
-                    'broadcaster_type'  => 'partner',
-                    'description'       => 'A great Twitch streamer',
-                    'profile_image_url' => 'https://example.com/image.jpg',
-                    'offline_image_url' => 'https://example.com/offline.jpg',
-                    'view_count'        => 100,
-                    'created_at'        => '2020-01-01T00:00:00Z'
-                ]
-            ]
-        ];
-
-        Http::fake([
-            $url => Http::response($fakeResponse, 200),
-        ]);
-
-        $this->apiClient->method('fetchUserDataFromTwitch')
-            ->willReturn($fakeResponse['data'][0]);
-
-        $response = $this->apiClient->fetchUserDataFromTwitch($token, $userId);
-
-        $this->assertEquals('12345', $response['id']);
-        $this->assertEquals('Test User', $response['display_name']);
-        $this->assertEquals(Carbon::parse('2020-01-01T00:00:00Z')->toDateTimeString(), Carbon::parse($response['created_at'])->toDateTimeString());
-
-        Http::fake([
-            'https://api.twitch.tv/helix/users?id=12345' => Http::response([
-                'data' => [
-                    [
-                        'id'                => '12345',
-                        'login'             => 'testuser',
-                        'display_name'      => 'Test User',
-                        'type'              => '',
-                        'broadcaster_type'  => 'partner',
-                        'description'       => 'A great Twitch streamer',
-                        'profile_image_url' => 'https://example.com/image.jpg',
-                        'offline_image_url' => 'https://example.com/offline.jpg',
-                        'view_count'        => 100,
-                        'created_at'        => '2020-01-01T00:00:00Z'
-                    ]
-                ]
-            ], 200)
-        ]);
-    }
-
-    /** @test
-     * @throws ConnectionException
-     */
-    public function testParsesJsonFromTwitchResponseUnsuccessfully()
-    {
-        $token  = 'fake_token';
-        $userId = 'wrong_id';
-        $url    = 'https://api.twitch.tv/helix/users?id=' . $userId;
-
-        Http::fake([
-            $url => Http::response(['message' => 'Not Found'], 404),
-        ]);
-
-        $this->apiClient->method('fetchUserDataFromTwitch')
-            ->willReturn(['error' => 'Failed to fetch data from Twitch', 'status_code' => 404]);  // Assume this is the format your method returns on error
-
-        $response = $this->apiClient->fetchUserDataFromTwitch($token, $userId);
-
-        $this->assertArrayHasKey('error', $response);
-        $this->assertEquals('Failed to fetch data from Twitch', $response['error']);
-        $this->assertEquals(404, $response['status_code']);
-    }
 
     /** @test
      * @throws ConnectionException

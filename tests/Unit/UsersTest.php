@@ -14,7 +14,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
+use PHPUnit\Framework\MockObject\Exception;
 use Tests\TestCase;
+
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
@@ -22,6 +24,9 @@ class UsersTest extends TestCase
 {
     use MockeryPHPUnitIntegration;
 
+    /** @Test
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -32,7 +37,7 @@ class UsersTest extends TestCase
 
         $this->getUserService = $this->createMock(GetUserService::class);
 
-        $this->streamsService = new GetStreamsService($this->apiClient, $this->dbClient);
+        $this->streamsService  = new GetStreamsService($this->apiClient, $this->dbClient);
         $this->userDataManager = new UserDataManager($this->getUserService, $this->dbClient);
 
     }
@@ -44,7 +49,7 @@ class UsersTest extends TestCase
 
     public function testExecuteReturnsUserFromDBIfFound()
     {
-        $userId = '123';
+        $userId     = '123';
         $userFromDB = ['id' => $userId, 'name' => 'John Doe'];
 
         $this->dbClient->method('getUserByIdFromDB')
@@ -63,7 +68,7 @@ class UsersTest extends TestCase
 
     public function testExecuteCallsGetUserServiceIfUserNotFoundInDB()
     {
-        $userId = '123';
+        $userId          = '123';
         $userFromService = new JsonResponse(['id' => $userId, 'name' => 'John Doe'], 200);
 
         $this->dbClient->method('getUserByIdFromDB')
@@ -82,7 +87,7 @@ class UsersTest extends TestCase
 
     public function testGetUserByIdFromDBIsCalled()
     {
-        $userId = '12345';
+        $userId   = '12345';
         $dbClient = Mockery::mock(DBClient::class);
         $dbClient->shouldReceive('getUserByIdFromDB')
             ->once()
@@ -98,15 +103,15 @@ class UsersTest extends TestCase
     public function testInsertUserToDBIsCalled()
     {
         $userData = [
-            'twitch_id' => '12345',
-            'login' => 'testlogin',
-            'display_name' => 'TestDisplayName',
-            'type' => 'staff',
-            'broadcaster_type' => 'partner',
-            'description' => 'User description here',
+            'twitch_id'         => '12345',
+            'login'             => 'testlogin',
+            'display_name'      => 'TestDisplayName',
+            'type'              => 'staff',
+            'broadcaster_type'  => 'partner',
+            'description'       => 'User description here',
             'profile_image_url' => 'http://example.com/profile.jpg',
             'offline_image_url' => 'http://example.com/offline.jpg',
-            'view_count' => 100,
+            'view_count'        => 100,
         ];
 
         $dbClient = Mockery::mock(DBClient::class);
@@ -123,8 +128,6 @@ class UsersTest extends TestCase
 
         Mockery::close();
     }
-
-
 
     public function testGetUserByIdFromDBReturnsNullIfNotFound()
     {
@@ -145,7 +148,7 @@ class UsersTest extends TestCase
         $this->assertNull($result);
     }
 
-    public function test_execute_with_valid_data()
+    public function testExecuteWithValidData()
     {
 
         $dbClientMock = Mockery::mock(DBClient::class);
@@ -171,7 +174,7 @@ class UsersTest extends TestCase
 
     }
 
-    public function test_execute_with_invalid_data()
+    public function testExecuteWithInvalidData()
     {
 
         $dbClientMock = Mockery::mock(DBClient::class);

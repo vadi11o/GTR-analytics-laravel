@@ -43,11 +43,10 @@ class StreamsTest extends TestCase
         Mockery::close();
     }
 
-
     public function testExecuteCallsSendCurlPetitionToTwitchWithCorrectParameters()
     {
         $token = 'someToken';
-        $url = env('TWITCH_URL') . '/streams';
+        $url   = env('TWITCH_URL') . '/streams';
 
         $this->apiClient->method('getTokenFromTwitch')
             ->willReturn($token);
@@ -64,13 +63,13 @@ class StreamsTest extends TestCase
     public function testExecuteFailsWhenGetTokenFromTwitchReturnsInvalidToken()
     {
         $this->apiClient->method('getTokenFromTwitch')
-            ->will($this->throwException(new Exception("Failed to retrieve access token from Twitch: Unknown error", 400)));
+            ->will($this->throwException(new Exception('Failed to retrieve access token from Twitch: Unknown error', 400)));
 
         $this->apiClient->expects($this->never())
             ->method('sendCurlPetitionToTwitch');
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage("Failed to retrieve access token from Twitch: Unknown error");
+        $this->expectExceptionMessage('Failed to retrieve access token from Twitch: Unknown error');
 
         $this->service->execute();
     }
@@ -149,8 +148,6 @@ class StreamsTest extends TestCase
         $this->assertEquals(404, $response['status']);
         $this->assertEquals('Stream not found', $responseBody['message']);
     }
-
-
 
     /** @test
      * @throws ConnectionException

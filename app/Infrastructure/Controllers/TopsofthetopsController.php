@@ -1,15 +1,18 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Infrastructure\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\TopsofthetopsService;
 use App\Models\TopGame;
 use App\Models\TopOfTheTop;
 
+/**
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
 class TopsofthetopsController extends Controller
 {
-    protected $topsOfTheTopsService;
+    protected TopsofthetopsService $topsOfTheTopsService;
 
     public function __construct(TopsofthetopsService $topsOfTheTopsService)
     {
@@ -26,6 +29,6 @@ class TopsofthetopsController extends Controller
 
         return response()->json([
             'data' => $topOfTheTopsData
-        ])->setEncodingOptions(JSON_PRETTY_PRINT| JSON_UNESCAPED_UNICODE);
+        ])->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 }

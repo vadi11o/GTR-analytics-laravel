@@ -10,7 +10,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users_ta', function (Blueprint $table) {
-            $table->id();
             $table->string('twitch_id', 255);
             $table->string('login', 255);
             $table->string('display_name', 255);

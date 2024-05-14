@@ -28,6 +28,7 @@ class User extends Model
         'profile_image_url',
         'offline_image_url',
         'view_count',
+        'created_at'
     ];
 
     /**
@@ -37,4 +38,3 @@ class User extends Model
      */
     public $timestamps = false;
 }
-

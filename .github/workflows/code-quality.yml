@@ -6,7 +6,6 @@ on:
       - master
     paths:
       - app/**
-
 jobs:
   code_quality_and_tests:
     runs-on: ubuntu-latest
@@ -28,3 +27,9 @@ jobs:
       - name: Run GRUMPHP
         run: |
           ./vendor/bin/grumphp run
+
+      - name: Execute Feature Tests
+        run: vendor/bin/phpunit tests/Feature
+
+      - name: Execute Unit Tests
+        run: vendor/bin/phpunit tests/Unit

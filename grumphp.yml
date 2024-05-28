@@ -28,3 +28,4 @@ grumphp:
       triggered_by: [php]
       exclude: []
       show_sniffs_error_path: true
+    phpunit:

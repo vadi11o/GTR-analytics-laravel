@@ -38,30 +38,6 @@ class ApiClient
 
     /**
      * @throws ConnectionException
-     * @throws \Exception
-     */
-    public function getTokenFromTwitch()
-    {
-        $response = Http::asForm()->post('https://id.twitch.tv/oauth2/token', [
-            'client_id'     => $this->clientId,
-            'client_secret' => $this->clientSecret,
-            'grant_type'    => 'client_credentials',
-        ]);
-
-        if ($response->successful() && isset($response->json()['access_token'])) {
-            return $response->json()['access_token'];
-        }
-
-        Log::warning('Failed to retrieve access token from Twitch', [
-            'status'        => $response->status(),
-            'response_body' => $response->json(),
-        ]);
-
-        throw new Exception('Failed to retrieve access token from Twitch: ' . $response->json()['error'] ?? 'Unknown error', $response->status());
-    }
-
-    /**
-     * @throws ConnectionException
      */
     public function fetchUserDataFromTwitch($token, $userId): array
     {

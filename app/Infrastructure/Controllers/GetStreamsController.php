@@ -2,15 +2,15 @@
 
 namespace App\Infrastructure\Controllers;
 
-use App\Services\StreamsDataManager;
+use App\Services\GetStreamsService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 
-class StreamsController extends Controller
+class GetStreamsController extends Controller
 {
-    private StreamsDataManager $streamsService;
+    private GetStreamsService $streamsService;
 
-    public function __construct(StreamsDataManager $streamsService)
+    public function __construct(GetStreamsService $streamsService)
     {
         $this->streamsService = $streamsService;
     }

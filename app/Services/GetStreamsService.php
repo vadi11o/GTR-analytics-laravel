@@ -12,7 +12,7 @@ class GetStreamsService
 
     public function __construct(ApiClient $apiClient = null, $twitchStreamsUrl = null)
     {
-        $this->apiClient        = $apiClient        ?? new ApiClient();
+        $this->apiClient        = $apiClient        ?? new ApiClient(new TokenProvider());
         $this->twitchStreamsUrl = $twitchStreamsUrl ?? env('TWITCH_URL') . '/streams';
     }
 
@@ -21,8 +21,7 @@ class GetStreamsService
      */
     public function execute(): \Illuminate\Http\JsonResponse
     {
-        $tokenFromTwitch = $this->apiClient->getTokenFromTwitch();
-        $streamsResponse = $this->apiClient->sendCurlPetitionToTwitch($this->twitchStreamsUrl, $tokenFromTwitch);
+        $streamsResponse = $this->apiClient->sendCurlPetitionToTwitch($this->twitchStreamsUrl);
 
         return $this->treatData($streamsResponse['body']);
     }

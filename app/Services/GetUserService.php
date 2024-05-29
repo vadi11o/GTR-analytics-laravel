@@ -19,13 +19,7 @@ class GetUserService
 
     public function execute(String $userId)
     {
-        $tokenFromTwitch = $this->dbClient->getTokenFromTwitch();
-
-        if (!$tokenFromTwitch) {
-            return response()->json(['error' => 'No se pudo obtener el token de acceso desde Twitch.'], 500);
-        }
-
-        $userData = $this->apiClient->fetchUserDataFromTwitch($tokenFromTwitch, $userId);
+        $userData = $this->apiClient->fetchUserDataFromTwitch($userId);
 
         if ($userData) {
             $this->dbClient->insertUserToDB($userData);
@@ -39,6 +33,5 @@ class GetUserService
         }
 
         return response()->json(['error' => 'No se encontraron datos de usuario para el ID proporcionado.'], 404);
-
     }
 }

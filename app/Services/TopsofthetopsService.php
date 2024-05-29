@@ -6,6 +6,7 @@ use App\Infrastructure\Clients\DBClient;
 use App\Models\TopGame;
 use App\Providers\TwitchTokenProvider;
 use Exception;
+use Illuminate\Http\Client\ConnectionException;
 
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
@@ -27,20 +28,32 @@ class TopsofthetopsService
 
     }
 
-    public function updateTopOfTheTops($since)
+    /**
+     * @throws ConnectionException
+     * @throws Exception
+     */
+    public function execute($since): void
     {
         $accessToken = $this->twitchTokenService->getTokenFromTwitch();
         if (!$accessToken) {
             throw new Exception('No se pudo obtener el token de Twitch.');
         }
 
-        $this->topGamesService->updateTopGames();
+        $this->topGamesService->execute();
 
+        $this->updateGamesSince($since);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function updateGamesSince($since)
+    {
         $games = TopGame::all();
 
         foreach ($games as $game) {
             if ($this->dbClient->needsUpdate($game->game_id, $since)) {
-                $this->topVideosService->updateTopVideos($game->game_id);
+                $this->topVideosService->execute($game->game_id);
                 $this->dbClient->updateTopForGame($game);
             }
         }

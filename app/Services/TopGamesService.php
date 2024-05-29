@@ -24,14 +24,26 @@ class TopGamesService
      * @throws ConnectionException
      * @throws Exception
      */
-    public function updateTopGames(): void
+    public function execute(): void
     {
         $accessToken = $this->twitchTokenService->getTokenFromTwitch();
         if (!$accessToken) {
             throw new Exception('No se pudo obtener el token de Twitch.');
         }
 
-        $url      = 'https://api.twitch.tv/helix/games/top?first=3';
+        $games = $this->updateGames($accessToken);
+
+        if (empty($games)) {
+            throw new Exception('No se encontraron datos válidos en la respuesta de la API de Twitch.');
+        }
+
+        $this->saveGames($games);
+    }
+
+
+    public function updateGames($accessToken)
+    {
+        $url = 'https://api.twitch.tv/helix/games/top?first=3';
         $response = Http::withHeaders([
             'Authorization' => "Bearer {$accessToken}",
             'Client-Id'     => env('TWITCH_CLIENT_ID'),
@@ -39,10 +51,11 @@ class TopGamesService
 
         $games = $response->json()['data'] ?? [];
 
-        if (empty($games)) {
-            throw new Exception('No se encontraron datos válidos en la respuesta de la API de Twitch.');
-        }
+        return $games;
+    }
 
+    public function saveGames($games): void
+    {
         TopGame::truncate();
 
         foreach ($games as $game) {

@@ -2,7 +2,10 @@
 
 namespace App\Infrastructure\Clients;
 
+use App\Models\TopOfTheTop;
+use App\Models\TopVideo;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Exception;
 
@@ -11,14 +14,6 @@ use Exception;
  */
 class DBClient
 {
-    private mixed $clientId;
-    private mixed $clientSecret;
-
-    public function __construct($clientId = null, $clientSecret = null)
-    {
-        $this->clientId     = $clientId     ?? env('TWITCH_CLIENT_ID');
-        $this->clientSecret = $clientSecret ?? env('TWITCH_CLIENT_SECRET');
-    }
     public function getUserByIdFromDB(String $userId)
     {
         $user = User::where('twitch_id', $userId)->first();
@@ -40,25 +35,52 @@ class DBClient
     {
         User::create($userData);
     }
-    public function getTokenFromTwitch()
+
+    public function needsUpdate($gameId, $since)
     {
-        try {
-            $response = Http::asForm()->post('https://id.twitch.tv/oauth2/token', [
-                'client_id'     => $this->clientId,
-                'client_secret' => $this->clientSecret,
-                'grant_type'    => 'client_credentials',
-            ]);
+        $topOfTheTop = TopOfTheTop::find($gameId);
 
-            if ($response->successful()) {
-                return $response->json()['access_token'];
-            }
-            if ($response->status() === 500) {
-                throw new Exception('Error al conectar con Twitch');
-            }
-            return null;
-
-        } catch (\Exception) {
-            return response()->json(['error' => 'No se puede establecer conexión con Twitch en este momento'], 503);
+        if (!$topOfTheTop || !$topOfTheTop->ultima_actualizacion) {
+            return true;
         }
+
+        $lastUpdate = Carbon::parse($topOfTheTop->ultima_actualizacion);
+        $now        = Carbon::now();
+
+        return $now->diffInSeconds($lastUpdate) > $since;
+    }
+
+    public function updateTopForGame($game)
+    {
+        $videos = TopVideo::where('game_id', $game->game_id)
+            ->orderByDesc('views')
+            ->get();
+
+        if ($videos->isEmpty()) {
+            return;
+        }
+
+        $mostViewedVideo = $videos->first();
+        $userName = $mostViewedVideo->user_name;
+
+        $userVideos = TopVideo::where('user_name', $userName)->get();
+
+        $totalViews      = $userVideos->sum('views');
+        $totalVideos     = $userVideos->count();
+
+        TopOfTheTop::updateOrCreate(
+            ['game_id' => $game->game_id],
+            [
+                'game_name'              => $game->game_name,
+                'user_name'              => $userName,
+                'total_videos'           => $totalVideos,
+                'total_views'            => $totalViews,
+                'most_viewed_title'      => $mostViewedVideo->title,
+                'most_viewed_views'      => $mostViewedVideo->views,
+                'most_viewed_duration'   => $mostViewedVideo->duration,
+                'most_viewed_created_at' => $mostViewedVideo->created_at,
+                'ultima_actualizacion'   => Carbon::now()
+            ]
+        );
     }
 }

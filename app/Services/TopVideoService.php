@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\TopVideo;
+use App\Providers\TwitchTokenProvider;
 use Illuminate\Support\Facades\Http;
 use Exception;
 
@@ -13,7 +14,7 @@ class TopVideoService
 {
     protected $twitchTokenService;
 
-    public function __construct(TwitchTokenService $twitchTokenService)
+    public function __construct(TwitchTokenProvider $twitchTokenService)
     {
         $this->twitchTokenService = $twitchTokenService;
     }

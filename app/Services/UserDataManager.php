@@ -15,6 +15,9 @@ class UserDataManager
         $this->dBClient       = $dBClient;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function execute(String $userId)
     {
         $userFromDB = $this->dBClient->getUserByIdFromDB($userId);

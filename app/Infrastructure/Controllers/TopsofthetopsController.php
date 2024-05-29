@@ -2,6 +2,7 @@
 
 namespace App\Infrastructure\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Services\TopsofthetopsService;
 use App\Models\TopGame;
@@ -19,7 +20,7 @@ class TopsofthetopsController extends Controller
         $this->topsOfTheTopsService = $topsOfTheTopsService;
     }
 
-    public function index(Request $request)
+    public function __invoke(Request $request): JsonResponse
     {
         $since = $request->query('since', 600);
         $this->topsOfTheTopsService->updateTopOfTheTops($since);

@@ -6,6 +6,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use App\Providers\TwitchTokenProvider;
 use Exception;
 
 /**
@@ -15,16 +16,17 @@ use Exception;
 class ApiClient
 {
     private mixed $clientId;
-    private mixed $clientSecret;
+    private TwitchTokenProvider $tokenProvider;
 
-    public function __construct($clientId = null, $clientSecret = null)
+    public function __construct(TwitchTokenProvider $tokenProvider, $clientId = null)
     {
         $this->clientId     = $clientId     ?? env('TWITCH_CLIENT_ID');
-        $this->clientSecret = $clientSecret ?? env('TWITCH_CLIENT_SECRET');
+        $this->tokenProvider = $tokenProvider;
     }
 
-    public function sendCurlPetitionToTwitch($twitchStreamsUrl, $twitchToken): array
+    public function sendCurlPetitionToTwitch($twitchStreamsUrl,$twitchToken): array
     {
+
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $twitchToken,
             'Client-Id'     => $this->clientId,
@@ -36,35 +38,9 @@ class ApiClient
         ];
     }
 
-    /**
-     * @throws ConnectionException
-     * @throws \Exception
-     */
-    public function getTokenFromTwitch()
+    public function fetchUserDataFromTwitch($userId): array
     {
-        $response = Http::asForm()->post('https://id.twitch.tv/oauth2/token', [
-            'client_id'     => $this->clientId,
-            'client_secret' => $this->clientSecret,
-            'grant_type'    => 'client_credentials',
-        ]);
-
-        if ($response->successful() && isset($response->json()['access_token'])) {
-            return $response->json()['access_token'];
-        }
-
-        Log::warning('Failed to retrieve access token from Twitch', [
-            'status'        => $response->status(),
-            'response_body' => $response->json(),
-        ]);
-
-        throw new Exception('Failed to retrieve access token from Twitch: ' . $response->json()['error'] ?? 'Unknown error', $response->status());
-    }
-
-    /**
-     * @throws ConnectionException
-     */
-    public function fetchUserDataFromTwitch($token, $userId): array
-    {
+        $token = $this->tokenProvider->getTokenFromTwitch();
         $url = 'https://api.twitch.tv/helix/users?id=' . $userId;
 
         $response = Http::withHeaders([
@@ -88,18 +64,6 @@ class ApiClient
                 'created_at'        => Carbon::parse($userData['created_at'])->toDateTimeString()
             ];
         }
-
         return ['error' => 'Failed to fetch data from Twitch', 'status_code' => $response->status()];
-
-    }
-
-    public function getClientId()
-    {
-        return $this->clientId;
-    }
-
-    public function getClientSecret()
-    {
-        return $this->clientSecret;
     }
 }

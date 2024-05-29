@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\TopGame;
+use App\Providers\TwitchTokenProvider;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Exception;
@@ -14,13 +15,14 @@ class TopGamesService
 {
     protected $twitchTokenService;
 
-    public function __construct(TwitchTokenService $twitchTokenService)
+    public function __construct(TwitchTokenProvider $twitchTokenService)
     {
         $this->twitchTokenService = $twitchTokenService;
     }
 
     /**
      * @throws ConnectionException
+     * @throws Exception
      */
     public function updateTopGames(): void
     {

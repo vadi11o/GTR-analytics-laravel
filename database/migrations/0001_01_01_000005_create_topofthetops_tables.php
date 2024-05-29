@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('video_id', 255)->primary();
             $table->string('game_id', 255);
             $table->string('title', 255);
-            $table->integer('views');
+            $table->string('views',255);
             $table->string('user_name', 255);
             $table->string('duration', 255);
             $table->string('created_at', 255);
@@ -28,10 +28,10 @@ return new class extends Migration
             $table->string('game_id', 255)->primary();
             $table->string('game_name', 255);
             $table->string('user_name', 255);
-            $table->integer('total_videos');
-            $table->integer('total_views');
+            $table->string('total_videos',255);
+            $table->string('total_views',255);
             $table->string('most_viewed_title', 255);
-            $table->integer('most_viewed_views');
+            $table->string('most_viewed_views',255);
             $table->string('most_viewed_duration', 255);
             $table->string('most_viewed_created_at', 255);
             $table->timestamp('ultima_actualizacion')->nullable();

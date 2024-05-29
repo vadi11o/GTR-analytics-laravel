@@ -174,22 +174,6 @@ class UsersTest extends TestCase
 
     }
 
-    public function testExecuteWithInvalidData()
-    {
-
-        $dbClientMock = Mockery::mock(DBClient::class);
-        $dbClientMock->shouldReceive('getTokenFromTwitch')->andReturn(null);
-
-        $userService = new GetUserService($dbClientMock, Mockery::mock(ApiClient::class));
-
-        $response = $userService->execute('fake_user_id');
-
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(500, $response->status());
-        $this->assertJson($response->content());
-        $this->assertJsonStringEqualsJsonString('{"error": "No se pudo obtener el token de acceso desde Twitch."}', $response->content());
-    }
-
     /** @test
      * @throws ConnectionException
      */

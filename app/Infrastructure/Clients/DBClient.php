@@ -3,9 +3,7 @@
 namespace App\Infrastructure\Clients;
 
 use App\Models\User;
-use App\Services\TokenProvider;
-use Illuminate\Support\Facades\Http;
-use Exception;
+use App\Models\UserAnalytics;
 
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
@@ -35,6 +33,18 @@ class DBClient
     public function insertUserToDB(array $userData): void
     {
         User::create($userData);
+    }
+    public function getUserAnalyticsByNameFromDB(String $userName)
+    {
+        $userAnalytics = UserAnalytics::where('username', $userName)->first();
+        if ($userAnalytics) {
+            return $userAnalytics;
+        }
+        return false;
+    }
+    public function insertUserAnalyticsToDB(array $userData): void
+    {
+        UserAnalytics::create($userData);
     }
 
 }

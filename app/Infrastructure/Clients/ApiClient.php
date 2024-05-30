@@ -22,7 +22,7 @@ class ApiClient
     public function sendCurlPetitionToTwitch($twitchStreamsUrl): array
     {
         $twitchToken = $this->tokenprovider->getTokenFromTwitch();
-        $response = Http::withHeaders([
+        $response    = Http::withHeaders([
             'Authorization' => 'Bearer ' . $twitchToken,
             'Client-Id'     => env('TWITCH_CLIENT_ID'),
         ])->get($twitchStreamsUrl);
@@ -63,5 +63,18 @@ class ApiClient
             ];
         }
         return ['error' => 'Failed to fetch data from Twitch', 'status_code' => $response->status()];
+    }
+    public function fetchUserFollowedStreamers($twitchStreamsUrl): array
+    {
+        $twitchToken = $this->tokenprovider->getTokenFromTwitch();
+        $response    = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $twitchToken,
+            'Client-Id'     => env('TWITCH_CLIENT_ID'),
+        ])->get($twitchStreamsUrl);
+
+        return [
+            'status' => $response->status(),
+            'body'   => $response->body(),
+        ];
     }
 }

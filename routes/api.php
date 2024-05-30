@@ -1,5 +1,6 @@
 <?php
 
+use App\Infrastructure\Controllers\TimelineFollowedStreamersController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Infrastructure\Controllers\GetStreamsController;
@@ -16,3 +17,5 @@ Route::get('/streams', GetStreamsController::class);
 Route::get('/users', UserController::class);
 
 Route::get('/topsofthetops', [TopsofthetopsController::class, 'index']);
+
+Route::get('/timeline/{userId}', TimelineFollowedStreamersController::class);

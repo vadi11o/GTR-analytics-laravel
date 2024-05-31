@@ -16,7 +16,4 @@ Route::get('/streams', GetStreamsController::class);
 
 Route::get('/users', UserController::class);
 
-Route::get('/topsofthetops', [TopsofthetopsController::class, 'index']);
-
-Route::post('/users', RegisterUserController::class);
-
+Route::get('/topsofthetops', TopsofthetopsController::class);

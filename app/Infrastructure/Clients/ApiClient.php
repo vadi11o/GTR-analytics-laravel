@@ -1,67 +1,68 @@
 <?php
 
-namespace App\Infrastructure\Clients;
+namespace App\Services;
 
-use App\Services\TokenProvider;
+use App\Models\TopGame;
+use App\Providers\TwitchTokenProvider;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
-use Carbon\Carbon;
+use Exception;
 
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
-
-class ApiClient
+class TopGamesService
 {
-    protected TokenProvider $tokenprovider;
-    public function __construct(TokenProvider $tokenProvider)
-    {
-        $this->tokenprovider = $tokenProvider;
-    }
+    protected $twitchTokenService;
 
-    public function sendCurlPetitionToTwitch($twitchStreamsUrl): array
+    public function __construct(TwitchTokenProvider $twitchTokenService)
     {
-        $twitchToken = $this->tokenprovider->getTokenFromTwitch();
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $twitchToken,
-            'Client-Id'     => env('TWITCH_CLIENT_ID'),
-        ])->get($twitchStreamsUrl);
-
-        return [
-            'status' => $response->status(),
-            'body'   => $response->body(),
-        ];
+        $this->twitchTokenService = $twitchTokenService;
     }
 
     /**
+     * @throws ConnectionException
+     * @throws Exception
      */
-    public function fetchUserDataFromTwitch($userId): array
+    public function execute(): void
     {
-        $url = 'https://api.twitch.tv/helix/users?id=' . $userId;
+        $accessToken = $this->twitchTokenService->getTokenFromTwitch();
+        if (!$accessToken) {
+            throw new Exception('No se pudo obtener el token de Twitch.');
+        }
 
-        $token = $this->tokenprovider->getTokenFromTwitch();
+        $games = $this->updateGames($accessToken);
 
+        if (empty($games)) {
+            throw new Exception('No se encontraron datos válidos en la respuesta de la API de Twitch.');
+        }
+
+        $this->saveGames($games);
+    }
+
+
+    public function updateGames($accessToken)
+    {
+        $url = 'https://api.twitch.tv/helix/games/top?first=3';
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => "Bearer {$accessToken}",
             'Client-Id'     => env('TWITCH_CLIENT_ID'),
         ])->get($url);
 
-        if ($response->successful()) {
-            $userData = $response->json()['data'][0];
+        $games = $response->json()['data'] ?? [];
 
-            return [
-                'twitch_id'         => $userData['id'],
-                'login'             => $userData['login'],
-                'display_name'      => $userData['display_name'],
-                'type'              => $userData['type'],
-                'broadcaster_type'  => $userData['broadcaster_type'],
-                'description'       => $userData['description'],
-                'profile_image_url' => $userData['profile_image_url'],
-                'offline_image_url' => $userData['offline_image_url'],
-                'view_count'        => $userData['view_count'],
-                'created_at'        => Carbon::parse($userData['created_at'])->toDateTimeString()
-            ];
+        return $games;
+    }
+
+    public function saveGames($games): void
+    {
+        TopGame::truncate();
+
+        foreach ($games as $game) {
+            TopGame::create([
+                'game_id'   => $game['id'],
+                'game_name' => $game['name'],
+            ]);
         }
-        return ['error' => 'Failed to fetch data from Twitch', 'status_code' => $response->status()];
     }
 }

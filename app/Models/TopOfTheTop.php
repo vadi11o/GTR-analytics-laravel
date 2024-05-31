@@ -5,6 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @method static find($gameId)
+ * @method static updateOrCreate(array $array, array $array1)
+ */
 class TopOfTheTop extends Model
 {
     use HasFactory;

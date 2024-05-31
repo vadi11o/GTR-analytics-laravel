@@ -4,6 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @method static where(string $string, String $userId)
+ * @method static create(array $userData)
+ */
 class User extends Model
 {
     /**

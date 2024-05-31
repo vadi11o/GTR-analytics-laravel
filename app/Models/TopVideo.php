@@ -5,6 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @method static where(string $string, $game_id)
+ * @method static truncate()
+ * @method static create(array $array)
+ */
 class TopVideo extends Model
 {
     use HasFactory;

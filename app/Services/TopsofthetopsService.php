@@ -41,21 +41,6 @@ class TopsofthetopsService
 
         $this->topGamesService->execute();
 
-        $this->updateGamesSince($since);
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function updateGamesSince($since)
-    {
-        $games = TopGame::all();
-
-        foreach ($games as $game) {
-            if ($this->dbClient->needsUpdate($game->game_id, $since)) {
-                $this->topVideosService->execute($game->game_id);
-                $this->dbClient->updateTopForGame($game);
-            }
-        }
+        $this->dbClient->updateGamesSince($since,$this->topVideosService);
     }
 }

@@ -5,9 +5,7 @@ namespace App\Infrastructure\Clients;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 use App\Providers\TwitchTokenProvider;
-use Exception;
 
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
@@ -38,6 +36,10 @@ class ApiClient
         ];
     }
 
+    /**
+     * @throws ConnectionException
+     * @throws \Exception
+     */
     public function fetchUserDataFromTwitch($userId): array
     {
         $token = $this->tokenProvider->getTokenFromTwitch();
@@ -65,5 +67,31 @@ class ApiClient
             ];
         }
         return ['error' => 'Failed to fetch data from Twitch', 'status_code' => $response->status()];
+    }
+
+    public function updateGames($accessToken)
+    {
+        $url = 'https://api.twitch.tv/helix/games/top?first=3';
+        $response = Http::withHeaders([
+            'Authorization' => "Bearer {$accessToken}",
+            'Client-Id'     => env('TWITCH_CLIENT_ID'),
+        ])->get($url);
+
+        $games = $response->json()['data'] ?? [];
+
+        return $games;
+    }
+
+    public function updateVideos($accessToken,$gameId)
+    {
+        $url      = "https://api.twitch.tv/helix/videos?game_id={$gameId}&first=40&sort=views";
+        $response = Http::withHeaders([
+            'Authorization' => "Bearer {$accessToken}",
+            'Client-Id'     => env('TWITCH_CLIENT_ID'),
+        ])->get($url);
+
+        $videos = $response->json()['data'] ?? [];
+
+        return $videos;
     }
 }

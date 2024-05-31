@@ -37,6 +37,7 @@ class DBClient
     {
         User::create($userData);
     }
+
     public function getUserAnalyticsByNameFromDB(String $userName)
     {
         $userAnalytics = UserAnalytics::where('username', $userName)->first();
@@ -49,6 +50,7 @@ class DBClient
     {
         UserAnalytics::create($userData);
     }
+
 
     public function needsUpdate($gameId, $since)
     {

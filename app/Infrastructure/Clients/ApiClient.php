@@ -2,10 +2,8 @@
 
 namespace App\Infrastructure\Clients;
 
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 use App\Providers\TwitchTokenProvider;
 use Exception;
 
@@ -15,22 +13,23 @@ use Exception;
 
 class ApiClient
 {
-    private mixed $clientId;
     private TwitchTokenProvider $tokenProvider;
 
-    public function __construct(TwitchTokenProvider $tokenProvider, $clientId = null)
+    public function __construct(TwitchTokenProvider $tokenProvider)
     {
-        $this->clientId     = $clientId     ?? env('TWITCH_CLIENT_ID');
         $this->tokenProvider = $tokenProvider;
     }
 
-    public function sendCurlPetitionToTwitch($twitchStreamsUrl,$twitchToken): array
+    /**
+     * @throws Exception
+     */
+    public function fetchStreamsFromTwitch(): array
     {
-
+        $token    = $this->tokenProvider->getTokenFromTwitch();
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $twitchToken,
-            'Client-Id'     => $this->clientId,
-        ])->get($twitchStreamsUrl);
+            'Authorization' => 'Bearer ' . $token,
+            'Client-Id'     => env('TWITCH_CLIENT_ID'),
+        ])->get(env('TWITCH_URL') . '/streams');
 
         return [
             'status' => $response->status(),
@@ -38,14 +37,17 @@ class ApiClient
         ];
     }
 
+    /**
+     * @throws Exception
+     */
     public function fetchUserDataFromTwitch($userId): array
     {
         $token = $this->tokenProvider->getTokenFromTwitch();
-        $url = 'https://api.twitch.tv/helix/users?id=' . $userId;
+        $url   = env('TWITCH_URL') . '/users?id=' . $userId;
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $token,
-            'Client-Id'     => $this->clientId,
+            'Client-Id'     => env('TWITCH_CLIENT_ID'),
         ])->get($url);
 
         if ($response->successful()) {

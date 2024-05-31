@@ -10,7 +10,6 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Exception;
 
-
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
@@ -27,9 +26,7 @@ class DBClient
             $newId = $user['twitch_id'];
             unset($user['twitch_id']);
 
-            $user = ['id' => $newId] + $user;
-
-            return $user;
+            return ['id' => $newId] + $user;
         }
         return null;
     }
@@ -50,7 +47,6 @@ class DBClient
     {
         UserAnalytics::create($userData);
     }
-
 
     public function needsUpdate($gameId, $since)
     {
@@ -77,12 +73,12 @@ class DBClient
         }
 
         $mostViewedVideo = $videos->first();
-        $userName = $mostViewedVideo->user_name;
+        $userName        = $mostViewedVideo->user_name;
 
         $userVideos = TopVideo::where('user_name', $userName)->get();
 
-        $totalViews      = $userVideos->sum('views');
-        $totalVideos     = $userVideos->count();
+        $totalViews  = $userVideos->sum('views');
+        $totalVideos = $userVideos->count();
 
         TopOfTheTop::updateOrCreate(
             ['game_id' => $game->game_id],

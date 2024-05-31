@@ -3,11 +3,13 @@
 namespace Tests\Unit;
 
 use App\Infrastructure\Clients\ApiClient;
+use App\Providers\TwitchTokenProvider;
 use App\Services\GetStreamsService;
-use App\Services\TokenProvider;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Http;
 use Mockery;
+use ReflectionMethod;
 use Tests\TestCase;
 use Exception;
 
@@ -25,89 +27,96 @@ class StreamsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->tokenProvider = $this->createMock(TokenProvider::class);
-        //$this->apiClient = $this->createMock(ApiClient::class);
+        $this->tokenProvider = $this->createMock(TwitchTokenProvider::class);
         $this->apiClient = $this->getMockBuilder(ApiClient::class)
             ->setConstructorArgs([$this->tokenProvider])
-            ->onlyMethods(['sendCurlPetitionToTwitch'])
+            ->onlyMethods(['fetchStreamsFromTwitch'])
             ->getMock();
         $this->service   = new GetStreamsService($this->apiClient);
     }
 
+    /**@test
+     * @throws ConnectionException
+     */
     public function testExecuteCallsGetTokenFromTwitch()
     {
-        $this->apiClient->method('sendCurlPetitionToTwitch')
+        $this->apiClient->method('fetchStreamsFromTwitch')
             ->willReturn(['body' => json_encode(['data' => []])]);
 
         $response = $this->service->execute();
 
         $this->assertInstanceOf(JsonResponse::class, $response);
-
         Mockery::close();
     }
 
-    public function testExecuteCallsSendCurlPetitionToTwitchWithCorrectParameters()
+    /**@test
+     * @throws ConnectionException
+     */
+    public function testGetStreamServiceReturnsValidJson()
     {
-        $url   = env('TWITCH_URL') . '/streams';
+        $fakeResponse = [
+            'body' => json_encode(['data' => [['title' => 'Stream 1', 'user_name' => 'User 1']]])
+        ];
 
-        $this->tokenProvider->method('getTokenFromTwitch')
-            ->willReturn('someToken');
-
-        $this->apiClient->expects($this->once())
-            ->method('sendCurlPetitionToTwitch')
-            ->with($url)
-            ->willReturn(['body' => json_encode(['data' => []])]);
+        $this->apiClient
+            ->method('fetchStreamsFromTwitch')
+            ->willReturn($fakeResponse);
 
         $response = $this->service->execute();
 
         $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertJsonStringEqualsJsonString(
+            json_encode([['title' => 'Stream 1', 'user_name' => 'User 1']], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            $response->getContent()
+        );
     }
 
-    /** @test */
-    public function testCurlPetitionToTwitch()
+    /**@test
+     * @throws ConnectionException
+     */
+    public function testGetStreamServiceExecuteHandlesEmptyData()
     {
-        $fakeResponse = [
-            'status' => 200,
-            'body'   => json_encode([
-                'data' => [
-                    [
-                        'id'        => '123456789',
-                        'user_name' => 'SandySanderman',
-                        'title'     => 'Cool Stream'
-                    ]
-                ]
-            ])
-        ];
-        $twitchStreamsUrl = 'https://api.twitch.tv/helix/streams';
-        $twitchToken      = 'some_fake_token';
+        $fakeResponse = ['body' => json_encode(['data' => []])];
 
-        $this->apiClient->method('sendCurlPetitionToTwitch')
-            ->with($twitchStreamsUrl, $twitchToken)
+        $this->apiClient
+            ->method('fetchStreamsFromTwitch')
             ->willReturn($fakeResponse);
 
-        $response = $this->apiClient->sendCurlPetitionToTwitch($twitchStreamsUrl, $twitchToken);
+        $response = $this->service->execute();
 
-        $this->assertEquals(200, $response['status']);
-        $this->assertEquals($fakeResponse['body'], $response['body']);
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertJsonStringEqualsJsonString(
+            json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            $response->getContent()
+        );
     }
 
-    /** @test */
-    public function testCurlPetitionToTwitchFailsWithNotFoundError()
+    public function testGetStreamsServiceTreatsDataWell()
     {
-        $twitchStreamsUrl = 'https://api.twitch.tv/helix/streams';
-        $twitchToken      = 'some_fake_token';
-        $errorMessage     = ['message' => 'Stream not found', 'status' => 404];
+        $rawData = json_encode(['data' => [['title' => 'Stream 1', 'user_name' => 'User 1']]]);
+        $expectedResponse = [['title' => 'Stream 1', 'user_name' => 'User 1']];
 
-        $this->apiClient->method('sendCurlPetitionToTwitch')
-            ->willReturn([
-                'status' => 404,
-                'body'   => json_encode($errorMessage)
-            ]);
+        $method = new ReflectionMethod(GetStreamsService::class, 'treatData');
 
-        $response     = $this->apiClient->sendCurlPetitionToTwitch($twitchStreamsUrl, $twitchToken);
-        $responseBody = json_decode($response['body'], true);
+        $response = $method->invoke($this->service, $rawData);
 
-        $this->assertEquals(404, $response['status']);
-        $this->assertEquals('Stream not found', $responseBody['message']);
+        $this->assertJsonStringEqualsJsonString(
+            json_encode($expectedResponse, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            $response->getContent()
+        );
+    }
+
+    public function testGetStreamsServiceTreatsEmptyDataWell()
+    {
+        $rawData = json_encode(['data' => []]);
+        $expectedResponse = [];
+        $method = new ReflectionMethod(GetStreamsService::class, 'treatData');
+
+        $response = $method->invoke($this->service, $rawData);
+
+        $this->assertJsonStringEqualsJsonString(
+            json_encode($expectedResponse, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            $response->getContent()
+        );
     }
 }

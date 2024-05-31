@@ -13,12 +13,11 @@ class GetUserService
     protected DBClient $dbClient;
     private TwitchTokenProvider $tokenProvider;
 
-
-    public function __construct(DBClient $dbClient, ApiClient $apiClient = null)
+    public function __construct(DBClient $dbClient, ApiClient $apiClient = null, TokenProvider $tokenProvider = null)
     {
         $this->tokenProvider = $tokenProvider ?? new TwitchTokenProvider();
-        $this->apiClient = $apiClient ?? new ApiClient($tokenProvider);
-        $this->dbClient  = $dbClient;
+        $this->apiClient     = $apiClient     ?? new ApiClient($this->$tokenProvider);
+        $this->dbClient      = $dbClient;
     }
 
     /**

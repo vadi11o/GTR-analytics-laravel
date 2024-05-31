@@ -13,8 +13,7 @@ use Exception;
  */
 class TopGamesService
 {
-    protected $twitchTokenService;
-
+    protected TwitchTokenProvider $twitchTokenService;
     public function __construct(TwitchTokenProvider $twitchTokenService)
     {
         $this->twitchTokenService = $twitchTokenService;
@@ -40,10 +39,9 @@ class TopGamesService
         $this->saveGames($games);
     }
 
-
     public function updateGames($accessToken)
     {
-        $url = 'https://api.twitch.tv/helix/games/top?first=3';
+        $url      = 'https://api.twitch.tv/helix/games/top?first=3';
         $response = Http::withHeaders([
             'Authorization' => "Bearer {$accessToken}",
             'Client-Id'     => env('TWITCH_CLIENT_ID'),

@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Infrastructure\Clients\ApiClient;
 use App\Services\GetStreamsService;
 use Tests\TestCase;
-use Illuminate\Http\JsonResponse;
 use Exception;
 
 class StreamsTest extends TestCase
@@ -13,7 +12,7 @@ class StreamsTest extends TestCase
     /** @test
      * @throws Exception|\PHPUnit\Framework\MockObject\Exception
      */
-    public function testStreamsReturnsProcessedJsonResponse()
+    public function GetsStreams()
     {
         $mockApiResponse = [
             'data' => [
@@ -31,7 +30,7 @@ class StreamsTest extends TestCase
 
         $apiClient = $this->createMock(ApiClient::class);
         $apiClient->expects($this->once())
-            ->method('sendCurlPetitionToTwitch')
+            ->method('fetchStreamsFromTwitch')
             ->willReturn([
                 'status' => 200,
                 'body'   => json_encode($mockApiResponse)

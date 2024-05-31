@@ -10,7 +10,6 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Exception;
 
-
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
@@ -51,7 +50,6 @@ class DBClient
         UserAnalytics::create($userData);
     }
 
-
     public function needsUpdate($gameId, $since)
     {
         $topOfTheTop = TopOfTheTop::find($gameId);
@@ -77,12 +75,12 @@ class DBClient
         }
 
         $mostViewedVideo = $videos->first();
-        $userName = $mostViewedVideo->user_name;
+        $userName        = $mostViewedVideo->user_name;
 
         $userVideos = TopVideo::where('user_name', $userName)->get();
 
-        $totalViews      = $userVideos->sum('views');
-        $totalVideos     = $userVideos->count();
+        $totalViews  = $userVideos->sum('views');
+        $totalVideos = $userVideos->count();
 
         TopOfTheTop::updateOrCreate(
             ['game_id' => $game->game_id],

@@ -28,7 +28,7 @@ class UserController extends Controller
             return response()->json($result->getData(), $result->status(), [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         } catch (Exception) {
             $response = [
-                'error' => 'No se pueden devolver usuarios en este momento, inténtalo más tarde'
+                'error' => 'No se pueden devolver usuarios en este momento, intentalo mas tarde'
             ];
             return response()->json($response, 503, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         }

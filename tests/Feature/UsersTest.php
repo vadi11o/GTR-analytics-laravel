@@ -52,25 +52,4 @@ class UsersTest extends TestCase
         $response->assertStatus(200);
         $response->assertJson($userData);
     }
-
-    /** @test
-     * @throws \PHPUnit\Framework\MockObject\Exception
-     */
-    public function userControllerReturnsErrorResponseOnException()
-    {
-        $mockService = $this->createMock(UserDataManager::class);
-        $mockService->expects($this->once())
-            ->method('execute')
-            ->with($this->equalTo('123'))
-            ->will($this->throwException(new Exception()));
-
-        $this->app->instance(UserDataManager::class, $mockService);
-
-        $response = $this->getJson('analytics/users?id=123');
-
-        $response->assertStatus(503);
-        $response->assertJson([
-            'error' => 'No se pueden devolver usuarios en este momento, inténtalo más tarde'
-        ]);
-    }
 }

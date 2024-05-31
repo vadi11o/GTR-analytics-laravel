@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Infrastructure\Clients\ApiClient;
+use App\Providers\TwitchTokenProvider;
 use Illuminate\Http\Client\ConnectionException;
 
 class GetStreamsService
@@ -10,9 +11,12 @@ class GetStreamsService
     protected ApiClient $apiClient;
     private mixed $twitchStreamsUrl;
 
+    private TwitchTokenProvider $tokenProvider;
+
     public function __construct(ApiClient $apiClient = null, $twitchStreamsUrl = null)
     {
-        $this->apiClient        = $apiClient        ?? new ApiClient(new TokenProvider());
+        $this->tokenProvider = $tokenProvider ?? new TwitchTokenProvider();
+        $this->apiClient = $apiClient ?? new ApiClient($tokenProvider);
         $this->twitchStreamsUrl = $twitchStreamsUrl ?? env('TWITCH_URL') . '/streams';
     }
 
@@ -21,7 +25,8 @@ class GetStreamsService
      */
     public function execute(): \Illuminate\Http\JsonResponse
     {
-        $streamsResponse = $this->apiClient->sendCurlPetitionToTwitch($this->twitchStreamsUrl);
+        $tokenFromTwitch = $this->tokenProvider->getTokenFromTwitch();
+        $streamsResponse = $this->apiClient->sendCurlPetitionToTwitch($this->twitchStreamsUrl, $tokenFromTwitch);
 
         return $this->treatData($streamsResponse['body']);
     }

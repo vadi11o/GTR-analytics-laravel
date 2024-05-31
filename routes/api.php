@@ -15,4 +15,4 @@ Route::get('/streams', GetStreamsController::class);
 
 Route::get('/users', UserController::class);
 
-Route::get('/topsofthetops', [TopsofthetopsController::class, 'index']);
+Route::get('/topsofthetops', TopsofthetopsController::class);

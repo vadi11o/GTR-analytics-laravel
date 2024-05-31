@@ -5,9 +5,11 @@ namespace App\Infrastructure\Clients;
 use App\Models\TopOfTheTop;
 use App\Models\TopVideo;
 use App\Models\User;
+use App\Models\UserAnalytics;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Exception;
+
 
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
@@ -34,6 +36,18 @@ class DBClient
     public function insertUserToDB(array $userData): void
     {
         User::create($userData);
+    }
+    public function getUserAnalyticsByNameFromDB(String $userName)
+    {
+        $userAnalytics = UserAnalytics::where('username', $userName)->first();
+        if ($userAnalytics) {
+            return $userAnalytics;
+        }
+        return false;
+    }
+    public function insertUserAnalyticsToDB(array $userData): void
+    {
+        UserAnalytics::create($userData);
     }
 
     public function needsUpdate($gameId, $since)

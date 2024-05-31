@@ -1,5 +1,6 @@
 <?php
 
+use App\Infrastructure\Controllers\RegisterUserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Infrastructure\Controllers\GetStreamsController;

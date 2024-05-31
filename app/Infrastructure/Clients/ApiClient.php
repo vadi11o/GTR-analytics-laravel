@@ -20,11 +20,11 @@ class ApiClient
 
     public function __construct(TwitchTokenProvider $tokenProvider, $clientId = null)
     {
-        $this->clientId     = $clientId     ?? env('TWITCH_CLIENT_ID');
+        $this->clientId      = $clientId ?? env('TWITCH_CLIENT_ID');
         $this->tokenProvider = $tokenProvider;
     }
 
-    public function sendCurlPetitionToTwitch($twitchStreamsUrl,$twitchToken): array
+    public function sendCurlPetitionToTwitch($twitchStreamsUrl, $twitchToken): array
     {
 
         $response = Http::withHeaders([
@@ -41,7 +41,7 @@ class ApiClient
     public function fetchUserDataFromTwitch($userId): array
     {
         $token = $this->tokenProvider->getTokenFromTwitch();
-        $url = 'https://api.twitch.tv/helix/users?id=' . $userId;
+        $url   = 'https://api.twitch.tv/helix/users?id=' . $userId;
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $token,

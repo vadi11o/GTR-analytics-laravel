@@ -5,7 +5,6 @@ namespace Tests\Unit;
 use App\Infrastructure\Clients\DBClient;
 use App\Services\UserService;
 use App\Services\UserServiceRegister;
-use Illuminate\Http\JsonResponse;
 use Mockery;
 use PHPUnit\Framework\MockObject\Exception;
 use Tests\TestCase;
@@ -18,7 +17,7 @@ class UserAnalyticsTest extends TestCase
 {
     private DBClient $dBClientMock;
     /**
-     * @throws Exception
+     * @throws Exception|\PHPUnit\Framework\MockObject\Exception
      */
     protected function setUp(): void
     {

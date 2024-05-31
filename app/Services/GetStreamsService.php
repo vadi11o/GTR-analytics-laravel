@@ -15,8 +15,8 @@ class GetStreamsService
 
     public function __construct(ApiClient $apiClient = null, $twitchStreamsUrl = null)
     {
-        $this->tokenProvider = $tokenProvider ?? new TwitchTokenProvider();
-        $this->apiClient = $apiClient ?? new ApiClient($tokenProvider);
+        $this->tokenProvider    = $tokenProvider    ?? new TwitchTokenProvider();
+        $this->apiClient        = $apiClient        ?? new ApiClient($tokenProvider);
         $this->twitchStreamsUrl = $twitchStreamsUrl ?? env('TWITCH_URL') . '/streams';
     }
 

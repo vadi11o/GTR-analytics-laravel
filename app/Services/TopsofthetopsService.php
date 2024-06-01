@@ -40,6 +40,6 @@ class TopsofthetopsService
 
         $this->topGamesService->execute();
 
-        $this->dbClient->updateGamesSince($since,$this->topVideosService);
+        $this->dbClient->updateGamesSince($since, $this->topVideosService);
     }
 }

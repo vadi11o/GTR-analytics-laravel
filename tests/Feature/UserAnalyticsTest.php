@@ -2,61 +2,53 @@
 
 namespace Tests\Feature;
 
-use App\Infrastructure\Controllers\RegisterUserController;
-use App\Services\UserService;
-use App\Services\UserServiceRegister;
-use Exception;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Mockery;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-/**
- * @SuppressWarnings(PHPMD.StaticAccess)
- */
 class UserAnalyticsTest extends TestCase
 {
-    /** @test */
-    public function givenNewUserAnalyticsGetInsert()
+    use RefreshDatabase;
+
+    public function testRegisterUserSuccessfully()
     {
-        $userServiceMock = Mockery::mock(UserService::class);
-        $userServiceMock->shouldReceive('execute')->once()->with('nuevoUsuario')->andReturn(false);
+        $response = $this->json('POST', '/users', [
+            'username' => 'testuser',
+            'password' => 'testpassword'
+        ]);
 
-        $registerMock = Mockery::mock(UserServiceRegister::class);
-        $registerMock->shouldReceive('execute')->once()->with('nuevoUsuario', 'passwordSeguro123');
-
-        $this->app->instance(UserService::class, $userServiceMock);
-        $this->app->instance(UserServiceRegister::class, $registerMock);
-
-        $controller = new RegisterUserController($userServiceMock, $registerMock);
-
-        $request = new Request(['username' => 'nuevoUsuario', 'password' => 'passwordSeguro123']);
-
-        $response = $controller->__invoke($request);
-
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(201, $response->status());
+        $response->assertStatus(201); // Comprueba que el estado HTTP es 201 Created
+        $response->assertJson([
+            'username' => 'testuser',
+            'message' => 'Usuario creado correctamente'
+        ]);
     }
 
-    /** @test */
-    public function givenUserAnalyticsAlreadyRegisteredGetError()
+    public function testRegisterUserFailsWhenUsernameAlreadyExists()
     {
-        $userServiceMock = Mockery::mock(UserService::class);
-        $userServiceMock->shouldReceive('execute')->once()->with('usuarioExistente')->andReturn(true);
+        // Crear un usuario existente
+        $this->json('POST', '/users', [
+            'username' => 'existinguser',
+            'password' => 'existingpassword'
+        ]);
 
-        $registerMock = Mockery::mock(UserServiceRegister::class);
-        $registerMock->shouldReceive('execute')->zeroOrMoreTimes()->with('usuarioExistente', 'passwordSeguro123');
+        // Intentar registrar el mismo usuario nuevamente
+        $response = $this->json('POST', '/users', [
+            'username' => 'existinguser',
+            'password' => 'newpassword'
+        ]);
 
-        $this->app->instance(UserService::class, $userServiceMock);
-        $this->app->instance(UserServiceRegister::class, $registerMock);
+        $response->assertStatus(409); // Comprueba que el estado HTTP es 409 Conflict
+        $response->assertJson(['message' => 'El nombre de usuario ya está en uso']);
+    }
 
-        $controller = new RegisterUserController($userServiceMock, $registerMock);
+    public function testRegisterUserValidationFailsWithIncompleteData()
+    {
+        // Intentar registrar un usuario sin contraseña
+        $response = $this->json('POST', '/users', [
+            'username' => 'newuser'
+        ]);
 
-        $request = new Request(['username' => 'usuarioExistente', 'password' => 'passwordSeguro123']);
-
-        $response = $controller->__invoke($request);
-
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(409, $response->status());
+        $response->assertStatus(422); // Comprueba que el estado HTTP es 422 Unprocessable Entity
+        $response->assertJsonValidationErrors(['password']); // Comprueba que hay errores de validación en el campo 'password'
     }
 }

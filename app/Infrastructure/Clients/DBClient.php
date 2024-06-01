@@ -42,9 +42,23 @@ class DBClient
         }
         return false;
     }
+
+    public function getUserAnalyticsByIdFromDB(int $userId)
+    {
+        $userAnalytics = UserAnalytics::where('id', $userId)->first();
+        if ($userAnalytics) {
+            return $userAnalytics;
+        }
+        return false;
+    }
     public function insertUserAnalyticsToDB(array $userData): void
     {
         UserAnalytics::create($userData);
+    }
+
+    public function updateUserAnalyticsInDB($userData): void
+    {
+        $userData->save();
     }
 
     public function needsUpdate($gameId, $since): bool
@@ -125,7 +139,7 @@ class DBClient
         }
     }
 
-    public function updateGamesSince($since,$topVideosService): void
+    public function updateGamesSince($since, $topVideosService): void
     {
         $games = TopGame::all();
 

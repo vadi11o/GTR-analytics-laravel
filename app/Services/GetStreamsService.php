@@ -5,33 +5,31 @@ namespace App\Services;
 use App\Infrastructure\Clients\ApiClient;
 use App\Providers\TwitchTokenProvider;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\JsonResponse;
 
 class GetStreamsService
 {
     protected ApiClient $apiClient;
-    private mixed $twitchStreamsUrl;
-
     private TwitchTokenProvider $tokenProvider;
 
-    public function __construct(ApiClient $apiClient = null, $twitchStreamsUrl = null)
+    public function __construct(ApiClient $apiClient = null, TwitchTokenProvider $tokenProvider = null)
     {
-        $this->tokenProvider    = $tokenProvider    ?? new TwitchTokenProvider();
-        $this->apiClient        = $apiClient        ?? new ApiClient($tokenProvider);
-        $this->twitchStreamsUrl = $twitchStreamsUrl ?? env('TWITCH_URL') . '/streams';
+        $this->tokenProvider = $tokenProvider ?? new TwitchTokenProvider();
+        $this->apiClient     = $apiClient     ?? new ApiClient($this->tokenProvider);
     }
 
     /**
      * @throws ConnectionException
+     * @throws \Exception
      */
-    public function execute(): \Illuminate\Http\JsonResponse
+    public function execute(): JsonResponse
     {
-        $tokenFromTwitch = $this->tokenProvider->getTokenFromTwitch();
-        $streamsResponse = $this->apiClient->sendCurlPetitionToTwitch($this->twitchStreamsUrl, $tokenFromTwitch);
+        $streamsResponse = $this->apiClient->fetchStreamsFromTwitch();
 
         return $this->treatData($streamsResponse['body']);
     }
 
-    protected function treatData($rawData): \Illuminate\Http\JsonResponse
+    private function treatData($rawData): JsonResponse
     {
         $data           = json_decode($rawData, true);
         $treatedStreams = [];

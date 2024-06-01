@@ -5,6 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @method static truncate()
+ * @method static create(array $array)
+ */
 class TopGame extends Model
 {
     use HasFactory;

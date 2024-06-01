@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
+/**
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
 class TwitchTokenProvider
 {
     private mixed $clientId;

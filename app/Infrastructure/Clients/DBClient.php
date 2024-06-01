@@ -2,6 +2,7 @@
 
 namespace App\Infrastructure\Clients;
 
+use App\Models\TopGame;
 use App\Models\TopOfTheTop;
 use App\Models\TopVideo;
 use App\Models\User;
@@ -94,5 +95,17 @@ class DBClient
                 'ultima_actualizacion'   => Carbon::now()
             ]
         );
+    }
+
+    public function saveGames($games): void
+    {
+        TopGame::truncate();
+
+        foreach ($games as $game) {
+            TopGame::create([
+                'game_id'   => $game['id'],
+                'game_name' => $game['name'],
+            ]);
+        }
     }
 }

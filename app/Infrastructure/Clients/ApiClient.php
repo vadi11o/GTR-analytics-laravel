@@ -68,4 +68,17 @@ class ApiClient
         }
         return ['error' => 'Failed to fetch data from Twitch', 'status_code' => $response->status()];
     }
+
+    public function updateGames($accessToken)
+    {
+        $url      = 'https://api.twitch.tv/helix/games/top?first=3';
+        $response = Http::withHeaders([
+            'Authorization' => "Bearer {$accessToken}",
+            'Client-Id'     => env('TWITCH_CLIENT_ID'),
+        ])->get($url);
+
+        $games = $response->json()['data'] ?? [];
+
+        return $games;
+    }
 }

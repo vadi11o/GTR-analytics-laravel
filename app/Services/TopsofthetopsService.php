@@ -24,7 +24,7 @@ class TopsofthetopsService
         $this->twitchTokenService = $twitchTokenService;
         $this->topVideosService   = $topVideosService;
         $this->topGamesService    = $topGamesService;
-        $this->dbClient  = $dbClient;
+        $this->dbClient           = $dbClient;
 
     }
 

@@ -27,16 +27,16 @@ class TopVideoService
             throw new Exception('No se pudo obtener el token de Twitch.');
         }
 
-        $videos = $this->updateVideos($accessToken,$gameId);
+        $videos = $this->updateVideos($accessToken, $gameId);
 
         if (empty($videos)) {
             throw new Exception('No se encontraron datos válidos en la respuesta de la API de Twitch.');
         }
 
-        $this->saveGames($videos,$gameId);
+        $this->saveGames($videos, $gameId);
     }
 
-    public function updateVideos($accessToken,$gameId)
+    public function updateVideos($accessToken, $gameId)
     {
         $url      = "https://api.twitch.tv/helix/videos?game_id={$gameId}&first=40&sort=views";
         $response = Http::withHeaders([
@@ -49,7 +49,7 @@ class TopVideoService
         return $videos;
     }
 
-    public function saveGames($videos,$gameId): void
+    public function saveGames($videos, $gameId): void
     {
         TopVideo::truncate();
 

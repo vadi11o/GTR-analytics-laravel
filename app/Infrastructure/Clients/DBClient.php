@@ -125,4 +125,16 @@ class DBClient
             ]);
         }
     }
+
+    public function updateGamesSince($since,$topVideosService): void
+    {
+        $games = TopGame::all();
+
+        foreach ($games as $game) {
+            if ($this->needsUpdate($game->game_id, $since)) {
+                $topVideosService->execute($game->game_id);
+                $this->updateTopForGame($game);
+            }
+        }
+    }
 }

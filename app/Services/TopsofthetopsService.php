@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Infrastructure\Clients\DBClient;
-use App\Models\TopGame;
 use App\Providers\TwitchTokenProvider;
 use Exception;
 use Illuminate\Http\Client\ConnectionException;
@@ -13,13 +12,13 @@ use Illuminate\Http\Client\ConnectionException;
  */
 class TopsofthetopsService
 {
-    protected $twitchTokenService;
-    protected $topVideosService;
+    protected TwitchTokenProvider $twitchTokenService;
+    protected TopVideoService $topVideosService;
 
-    protected $topGamesService;
+    protected TopGamesService $topGamesService;
     protected DBClient $dbClient;
 
-    public function __construct(DBClient $dbClient = null, TwitchTokenProvider $twitchTokenService, TopVideoService $topVideosService, TopGamesService $topGamesService)
+    public function __construct(DBClient $dbClient, TwitchTokenProvider $twitchTokenService, TopVideoService $topVideosService, TopGamesService $topGamesService)
     {
         $this->twitchTokenService = $twitchTokenService;
         $this->topVideosService   = $topVideosService;
@@ -41,21 +40,6 @@ class TopsofthetopsService
 
         $this->topGamesService->execute();
 
-        $this->updateGamesSince($since);
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function updateGamesSince($since)
-    {
-        $games = TopGame::all();
-
-        foreach ($games as $game) {
-            if ($this->dbClient->needsUpdate($game->game_id, $since)) {
-                $this->topVideosService->execute($game->game_id);
-                $this->dbClient->updateTopForGame($game);
-            }
-        }
+        $this->dbClient->updateGamesSince($since,$this->topVideosService);
     }
 }

@@ -47,11 +47,7 @@ class DBClient
         UserAnalytics::create($userData);
     }
 
-<<<<<<< HEAD
-    public function needsUpdate($gameId, $since)
-=======
     public function needsUpdate($gameId, $since): bool
->>>>>>> master
     {
         $topOfTheTop = TopOfTheTop::find($gameId);
 

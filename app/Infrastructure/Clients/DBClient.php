@@ -15,24 +15,24 @@ use Exception;
  */
 class DBClient
 {
-    public function getUserByIdFromDB(String $userId)
+    public function getStreamerByIdFromDB(String $streamerId)
     {
-        $user = User::where('twitch_id', $userId)->first();
+        $streamer = User::where('twitch_id', $streamerId)->first();
 
-        if ($user) {
-            $user->makeHidden(['id']);
+        if ($streamer) {
+            $streamer->makeHidden(['id']);
 
-            $user  = $user->toArray();
-            $newId = $user['twitch_id'];
-            unset($user['twitch_id']);
+            $streamer = $streamer->toArray();
+            $newId    = $streamer['twitch_id'];
+            unset($streamer['twitch_id']);
 
-            return ['id' => $newId] + $user;
+            return ['id' => $newId] + $streamer;
         }
         return null;
     }
-    public function insertUserToDB(array $userData): void
+    public function insertStreamerToDB(array $streamerData): void
     {
-        User::create($userData);
+        User::create($streamerData);
     }
 
     public function getUserAnalyticsByNameFromDB(String $userName)

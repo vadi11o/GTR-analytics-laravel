@@ -5,8 +5,8 @@ use App\Infrastructure\Clients\ApiClient;
 use App\Infrastructure\Clients\DBClient;
 use App\Models\User;
 use App\Services\GetStreamsService;
-use App\Services\GetUserService;
-use App\Services\UserDataManager;
+use App\Services\GetStreamerService;
+use App\Services\StreamerDataManager;
 use Carbon\Carbon;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\JsonResponse;
@@ -35,10 +35,10 @@ class UsersTest extends TestCase
 
         $this->dbClient = $this->createMock(DBClient::class);
 
-        $this->getUserService = $this->createMock(GetUserService::class);
+        $this->getUserService = $this->createMock(GetStreamerService::class);
 
         $this->streamsService  = new GetStreamsService($this->apiClient);
-        $this->userDataManager = new UserDataManager($this->getUserService, $this->dbClient);
+        $this->userDataManager = new StreamerDataManager($this->getUserService, $this->dbClient);
 
     }
 
@@ -52,11 +52,11 @@ class UsersTest extends TestCase
         $userId     = '123';
         $userFromDB = ['id' => $userId, 'name' => 'John Doe'];
 
-        $this->dbClient->method('getUserByIdFromDB')
+        $this->dbClient->method('getStreamerByIdFromDB')
             ->with($userId)
             ->willReturn($userFromDB);
 
-        // Expect not to call GetUserService
+        // Expect not to call GetStreamerService
         $this->getUserService->expects($this->never())
             ->method('execute');
 
@@ -71,7 +71,7 @@ class UsersTest extends TestCase
         $userId          = '123';
         $userFromService = new JsonResponse(['id' => $userId, 'name' => 'John Doe'], 200);
 
-        $this->dbClient->method('getUserByIdFromDB')
+        $this->dbClient->method('getStreamerByIdFromDB')
             ->with($userId)
             ->willReturn(null);
 
@@ -89,12 +89,12 @@ class UsersTest extends TestCase
     {
         $userId   = '12345';
         $dbClient = Mockery::mock(DBClient::class);
-        $dbClient->shouldReceive('getUserByIdFromDB')
+        $dbClient->shouldReceive('getStreamerByIdFromDB')
             ->once()
             ->with($userId)
             ->andReturn(['id' => $userId]);
 
-        $result = $dbClient->getUserByIdFromDB($userId);
+        $result = $dbClient->getStreamerByIdFromDB($userId);
 
         $this->assertNotEmpty($result);
         Mockery::close();
@@ -115,14 +115,14 @@ class UsersTest extends TestCase
         ];
 
         $dbClient = Mockery::mock(DBClient::class);
-        $dbClient->shouldReceive('insertUserToDB')
+        $dbClient->shouldReceive('insertStreamerToDB')
             ->once()
             ->with(Mockery::on(function ($arg) use ($userData) {
                 return $arg === $userData;
             }))
             ->andReturnNull();
 
-        $dbClient->insertUserToDB($userData);
+        $dbClient->insertStreamerToDB($userData);
 
         $this->assertTrue(true);
 
@@ -143,7 +143,7 @@ class UsersTest extends TestCase
             ->once()
             ->andReturn(null);
 
-        $result = $this->dbClient->getUserByIdFromDB($userId);
+        $result = $this->dbClient->getStreamerByIdFromDB($userId);
 
         $this->assertNull($result);
     }
@@ -161,7 +161,7 @@ class UsersTest extends TestCase
 
         ]);
 
-        $userService = new GetUserService($dbClientMock, $apiClientMock);
+        $userService = new GetStreamerService($dbClientMock, $apiClientMock);
 
         $response = $userService->execute('fake_user_id');
 
@@ -204,10 +204,10 @@ class UsersTest extends TestCase
             $url => Http::response($fakeResponse, 200),
         ]);
 
-        $this->apiClient->method('fetchUserDataFromTwitch')
+        $this->apiClient->method('fetchStreamerDataFromTwitch')
             ->willReturn($fakeResponse['data'][0]);
 
-        $response = $this->apiClient->fetchUserDataFromTwitch($token, $userId);
+        $response = $this->apiClient->fetchStreamerDataFromTwitch($token, $userId);
 
         $this->assertEquals('12345', $response['id']);
         $this->assertEquals('Test User', $response['display_name']);
@@ -246,10 +246,10 @@ class UsersTest extends TestCase
             $url => Http::response(['message' => 'Not Found'], 404),
         ]);
 
-        $this->apiClient->method('fetchUserDataFromTwitch')
+        $this->apiClient->method('fetchStreamerDataFromTwitch')
             ->willReturn(['error' => 'Failed to fetch data from Twitch', 'status_code' => 404]);  // Assume this is the format your method returns on error
 
-        $response = $this->apiClient->fetchUserDataFromTwitch($token, $userId);
+        $response = $this->apiClient->fetchStreamerDataFromTwitch($token, $userId);
 
         $this->assertArrayHasKey('error', $response);
         $this->assertEquals('Failed to fetch data from Twitch', $response['error']);

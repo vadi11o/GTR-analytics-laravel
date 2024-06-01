@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use Exception;
 use Tests\TestCase;
 use Illuminate\Http\JsonResponse;
-use App\Services\UserDataManager;
+use App\Services\StreamerDataManager;
 
 /**
  * @group exclude
@@ -27,10 +27,10 @@ class UsersTest extends TestCase
     /** @test
      * @throws \PHPUnit\Framework\MockObject\Exception
      */
-    public function userControllerReturnsSuccessfulResponse()
+    public function streamerControllerReturnsSuccessfulResponse()
     {
-        $mockService = $this->createMock(UserDataManager::class);
-        $userData    = [
+        $mockService = $this->createMock(StreamerDataManager::class);
+        $streamerData    = [
             'id'                => '83232866',
             'login'             => 'ibai',
             'display_name'      => 'ibai',
@@ -42,18 +42,18 @@ class UsersTest extends TestCase
             'view_count'        => 0,
             'created_at'        => '2015-02-20T16:47:56Z'
         ];
-        $mockResult = new JsonResponse($userData, 200);
+        $mockResult = new JsonResponse($streamerData, 200);
 
         $mockService->expects($this->once())
             ->method('execute')
             ->with($this->equalTo('83232866'))
             ->willReturn($mockResult);
 
-        $this->app->instance(UserDataManager::class, $mockService);
+        $this->app->instance(StreamerDataManager::class, $mockService);
 
-        $response = $this->getJson('analytics/users?id=83232866');
+        $response = $this->getJson('analytics/streamers?id=83232866');
 
         $response->assertStatus(200);
-        $response->assertJson($userData);
+        $response->assertJson($streamerData);
     }
 }

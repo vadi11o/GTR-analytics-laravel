@@ -40,10 +40,10 @@ class ApiClient
     /**
      * @throws Exception
      */
-    public function fetchUserDataFromTwitch($userId): array
+    public function fetchStreamerDataFromTwitch($streamerId): array
     {
         $token = $this->tokenProvider->getTokenFromTwitch();
-        $url   = env('TWITCH_URL') . '/users?id=' . $userId;
+        $url   = env('TWITCH_URL') . '/users?id=' . $streamerId;
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $token,
@@ -51,19 +51,19 @@ class ApiClient
         ])->get($url);
 
         if ($response->successful()) {
-            $userData = $response->json()['data'][0];
+            $streamerData = $response->json()['data'][0];
 
             return [
-                'twitch_id'         => $userData['id'],
-                'login'             => $userData['login'],
-                'display_name'      => $userData['display_name'],
-                'type'              => $userData['type'],
-                'broadcaster_type'  => $userData['broadcaster_type'],
-                'description'       => $userData['description'],
-                'profile_image_url' => $userData['profile_image_url'],
-                'offline_image_url' => $userData['offline_image_url'],
-                'view_count'        => $userData['view_count'],
-                'created_at'        => Carbon::parse($userData['created_at'])->toDateTimeString()
+                'twitch_id'         => $streamerData['id'],
+                'login'             => $streamerData['login'],
+                'display_name'      => $streamerData['display_name'],
+                'type'              => $streamerData['type'],
+                'broadcaster_type'  => $streamerData['broadcaster_type'],
+                'description'       => $streamerData['description'],
+                'profile_image_url' => $streamerData['profile_image_url'],
+                'offline_image_url' => $streamerData['offline_image_url'],
+                'view_count'        => $streamerData['view_count'],
+                'created_at'        => Carbon::parse($streamerData['created_at'])->toDateTimeString()
             ];
         }
         return ['error' => 'Failed to fetch data from Twitch', 'status_code' => $response->status()];

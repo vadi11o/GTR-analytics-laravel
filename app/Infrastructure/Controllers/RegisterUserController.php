@@ -2,35 +2,33 @@
 
 namespace App\Infrastructure\Controllers;
 
-use App\Services\UserService;
-use App\Services\UserServiceRegister;
+use App\Services\UserRegisterService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class RegisterUserController
+class RegisterUserController extends Controller
 {
-    private UserService $userService;
-    private UserServiceRegister $userServiceRegister;
-    public function __construct(UserService $userService, UserServiceRegister $userServiceRegister)
+    protected UserRegisterService $userRegisterService;
+
+    public function __construct(UserRegisterService $userRegisterService)
     {
-        $this->userService         = $userService;
-        $this->userServiceRegister = $userServiceRegister;
+        $this->userRegisterService = $userRegisterService;
     }
 
     public function __invoke(Request $request): JsonResponse
     {
-        $nombreUsuario = $request->input('username');
-        $password      = $request->input('password');
-        $userExist     = $this->userService->execute($nombreUsuario);
-        if($userExist) {
-            return response()->json(['message' => 'El nombre de usuario ya está en uso'], 409);
+        $username = $request->input('username');
+        $password = $request->input('password');
+
+        if (!$username || !$password) {
+            return response()->json(['error' => 'Falta el nombre de usuario o la contraseña'], 400);
         }
+
         try {
-            $this->userServiceRegister->execute($nombreUsuario, $password);
-        } catch (Exception) {
-            return response()->json(['message' => 'Error del servidor al crear el usuario'], 500);
+            return $this->userRegisterService->execute($username, $password);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
         }
-        return response()->json(['username' => $nombreUsuario,'message' => 'Usuario creado correctamente'], 201);
     }
 }

@@ -9,7 +9,6 @@ use App\Models\User;
 use App\Models\UserAnalytics;
 use Carbon\Carbon;
 
-
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */

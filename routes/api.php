@@ -1,6 +1,7 @@
 <?php
 
 use App\Infrastructure\Controllers\FollowStreamerController;
+use App\Infrastructure\Controllers\UnfollowStreamerController;
 use App\Infrastructure\Controllers\RegisterUserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -25,3 +26,5 @@ Route::get('/topsofthetops', TopsofthetopsController::class);
 Route::post('/users', RegisterUserController::class);
 
 Route::post('/follow', FollowStreamerController::class);
+
+Route::delete('/unfollow', UnfollowStreamerController::class);

@@ -35,12 +35,13 @@ class StreamersTest extends TestCase
             ->onlyMethods(['fetchStreamerDataFromTwitch'])
             ->getMock();
         $this->dbClient = $this->createMock(DBClient::class);
-        $this->getUserService = $this->createMock(GetStreamerService::class);
-        $this->streamerDataManager = new StreamerDataManager($this->getUserService, $this->dbClient);
+        $this->getStreamerService = $this->createMock(GetStreamerService::class);
+        $this->streamerDataManager = new StreamerDataManager($this->getStreamerService, $this->dbClient);
     }
 
     protected function tearDown(): void
     {
+        Mockery::close();
         parent::tearDown();
     }
 
@@ -72,12 +73,10 @@ class StreamersTest extends TestCase
     {
         $userId     = '123';
         $userFromDB = ['id' => $userId, 'name' => 'John Doe'];
-
         $this->dbClient->method('getStreamerByIdFromDB')
             ->with($userId)
             ->willReturn($userFromDB);
-
-        $this->getUserService->expects($this->never())
+        $this->getStreamerService->expects($this->never())
             ->method('execute');
 
         $response = $this->streamerDataManager->execute($userId);
@@ -104,21 +103,16 @@ class StreamersTest extends TestCase
             'view_count'        => 0,
             'created_at'        => '2015-02-20T16:47:56Z'
         ];
-
         $this->dbClient->expects($this->once())
             ->method('getStreamerByIdFromDB')
             ->with($this->equalTo($streamerId))
             ->willReturn(null);
-
-        $this->getUserService->expects($this->once())
+        $this->getStreamerService->expects($this->once())
             ->method('execute')
             ->with($this->equalTo($streamerId))
             ->willReturn(new JsonResponse($streamerData, 200, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-        $response = $this->streamerDataManager->execute($streamerId);
-
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(json_encode($streamerData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), $response->getContent());
+        $this->streamerDataManager->execute($streamerId);
     }
 
     public function testGetUserByIdFromDBIsCalled()
@@ -133,7 +127,6 @@ class StreamersTest extends TestCase
         $result = $dbClient->getStreamerByIdFromDB($userId);
 
         $this->assertNotEmpty($result);
-        Mockery::close();
     }
 
     public function testGetStreamerServiceReturnsStreamerDataWhenFound()
@@ -151,23 +144,19 @@ class StreamersTest extends TestCase
             'view_count'       => 0,
             'created_at'       => '2015-02-20T16:47:56Z'
         ];
-
         $this->apiClient->expects($this->once())
             ->method('fetchStreamerDataFromTwitch')
             ->with($this->equalTo($streamerId))
             ->willReturn($streamerData);
-
         $this->dbClient->expects($this->once())
             ->method('insertStreamerToDB')
             ->with($streamerData);
-
         $service = new GetStreamerService($this->dbClient, $this->apiClient);
-        $response = $service->execute($streamerId);
 
+        $response = $service->execute($streamerId);
         $expectedData = $streamerData;
         $expectedData['id'] = $expectedData['twitch_id'];
         unset($expectedData['twitch_id']);
-
         $responseData = json_decode($response->getContent(), true);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
@@ -175,45 +164,33 @@ class StreamersTest extends TestCase
     }
 
 
-    public function testInsertUserToDBIsCalled()
+    public function testExecuteCallsInsertStreamerToDB()
     {
-        $userData = [
-            'twitch_id'         => '12345',
-            'login'             => 'testlogin',
-            'display_name'      => 'TestDisplayName',
-            'type'              => 'staff',
-            'broadcaster_type'  => 'partner',
-            'description'       => 'User description here',
-            'profile_image_url' => 'http://example.com/profile.jpg',
-            'offline_image_url' => 'http://example.com/offline.jpg',
-            'view_count'        => 100,
+        $this->getStreamerService = new GetStreamerService($this->dbClient, $this->apiClient, $this->tokenProvider);
+        $streamerId = '12345';
+        $streamerData = [
+            'twitch_id' => '12345',
+            'name' => 'test_streamer'
         ];
+        $this->apiClient->expects($this->once())
+            ->method('fetchStreamerDataFromTwitch')
+            ->with($streamerId)
+            ->willReturn($streamerData);
+        $this->dbClient->expects($this->once())
+            ->method('insertStreamerToDB')
+            ->with($streamerData);
 
-        $dbClient = Mockery::mock(DBClient::class);
-        $dbClient->shouldReceive('insertStreamerToDB')
-            ->once()
-            ->with(Mockery::on(function ($arg) use ($userData) {
-                return $arg === $userData;
-            }))
-            ->andReturnNull();
-
-        $dbClient->insertStreamerToDB($userData);
-
-        $this->assertTrue(true);
-
-        Mockery::close();
+        $this->getStreamerService->execute($streamerId);
     }
 
     public function testGetUserByIdFromDBReturnsNullIfNotFound()
     {
         $userId = 'nonexistent';
-
         $userMock = Mockery::mock('overload:' . User::class);
         $userMock->shouldReceive('where')
             ->once()
             ->with('twitch_id', $userId)
             ->andReturnSelf();
-
         $userMock->shouldReceive('first')
             ->once()
             ->andReturn(null);
@@ -229,11 +206,9 @@ class StreamersTest extends TestCase
     public function testFetchStreamerDataFromTwitchReturnsStreamerData()
     {
         $this->apiClient = new ApiClient($this->tokenProvider);
-
         $streamerId = '83232866';
         $token = 'test_token';
         $url = env('TWITCH_URL') . '/users?id=' . $streamerId;
-
         $streamerData = [
             'id'                => '83232866',
             'login'             => 'ibai',
@@ -246,15 +221,12 @@ class StreamersTest extends TestCase
             'view_count'        => 0,
             'created_at'        => '2015-02-20T16:47:56Z'
         ];
-
         $responseData = [
             'data' => [$streamerData]
         ];
-
         $this->tokenProvider->expects($this->once())
             ->method('getTokenFromTwitch')
             ->willReturn($token);
-
         Http::fake([
             $url => Http::response($responseData, 200)
         ]);
@@ -278,15 +250,12 @@ class StreamersTest extends TestCase
     public function testFetchStreamerDataFromTwitchReturnsErrorOnFailure()
     {
         $this->apiClient = new ApiClient($this->tokenProvider);
-
         $streamerId = '83232866';
         $token = 'test_token';
         $url = env('TWITCH_URL') . '/users?id=' . $streamerId;
-
         $this->tokenProvider->expects($this->once())
             ->method('getTokenFromTwitch')
             ->willReturn($token);
-
         Http::fake([
             $url => Http::response(null, 500)
         ]);

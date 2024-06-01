@@ -44,26 +44,11 @@ class StreamsTest extends TestCase
     /**@test
      * @throws ConnectionException
      */
-    public function testExecuteCallsGetTokenFromTwitch()
-    {
-        $this->apiClient->method('fetchStreamsFromTwitch')
-            ->willReturn(['body' => json_encode(['data' => []])]);
-
-        $response = $this->service->execute();
-
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        Mockery::close();
-    }
-
-    /**@test
-     * @throws ConnectionException
-     */
     public function testGetStreamServiceReturnsValidJson()
     {
         $fakeResponse = [
             'body' => json_encode(['data' => [['title' => 'Stream 1', 'user_name' => 'User 1']]])
         ];
-
         $this->apiClient
             ->method('fetchStreamsFromTwitch')
             ->willReturn($fakeResponse);
@@ -83,7 +68,6 @@ class StreamsTest extends TestCase
     public function testGetStreamServiceExecuteHandlesEmptyData()
     {
         $fakeResponse = ['body' => json_encode(['data' => []])];
-
         $this->apiClient
             ->method('fetchStreamsFromTwitch')
             ->willReturn($fakeResponse);
@@ -101,7 +85,6 @@ class StreamsTest extends TestCase
     {
         $rawData = json_encode(['data' => [['title' => 'Stream 1', 'user_name' => 'User 1']]]);
         $expectedResponse = [['title' => 'Stream 1', 'user_name' => 'User 1']];
-
         $method = new ReflectionMethod(GetStreamsService::class, 'treatData');
 
         $response = $method->invoke($this->service, $rawData);
@@ -129,7 +112,6 @@ class StreamsTest extends TestCase
     public function testFetchStreamsFromTwitchReturnsSuccess()
     {
         $this->apiClient = new ApiClient($this->tokenProvider);
-
         $token = 'test_token';
         $streamsData = [
             'data' => [
@@ -141,11 +123,9 @@ class StreamsTest extends TestCase
                 ]
             ]
         ];
-
         $this->tokenProvider->expects($this->once())
             ->method('getTokenFromTwitch')
             ->willReturn($token);
-
         Http::fake([
             env('TWITCH_URL') . '/streams' => Http::response($streamsData, 200)
         ]);
@@ -160,11 +140,9 @@ class StreamsTest extends TestCase
     {
         $this->apiClient = new ApiClient($this->tokenProvider);
         $token = 'test_token';
-
         $this->tokenProvider->expects($this->once())
             ->method('getTokenFromTwitch')
             ->willReturn($token);
-
         Http::fake([
             env('TWITCH_URL') . '/streams' => Http::response(null, 500)
         ]);
@@ -179,11 +157,9 @@ class StreamsTest extends TestCase
     {
         $this->apiClient = new ApiClient($this->tokenProvider);
         $token = 'test_token';
-
         $this->tokenProvider->expects($this->once())
             ->method('getTokenFromTwitch')
             ->willReturn($token);
-
         Http::fake();
 
         $this->apiClient->fetchStreamsFromTwitch();

@@ -31,19 +31,16 @@ class StreamersTest extends TestCase
             'view_count'        => 0,
             'created_at'        => '2015-02-20T16:47:56Z'
         ];
-
         $mockDBClient = $this->createMock(DBClient::class);
         $mockDBClient->expects($this->once())
             ->method('getStreamerByIdFromDB')
             ->with($this->equalTo('83232866'))
             ->willReturn(null);
-
         $mockApiClient = $this->createMock(ApiClient::class);
         $mockApiClient->expects($this->once())
             ->method('fetchStreamerDataFromTwitch')
             ->with($this->equalTo('83232866'))
             ->willReturn($streamerData);
-
         $this->app->instance(DBClient::class, $mockDBClient);
         $this->app->instance(ApiClient::class, $mockApiClient);
 
@@ -67,17 +64,14 @@ class StreamersTest extends TestCase
             'view_count'        => 0,
             'created_at'        => '2015-02-20T16:47:56Z'
         ];
-
         $mockDBClient = $this->createMock(DBClient::class);
         $mockDBClient->expects($this->once())
             ->method('getStreamerByIdFromDB')
             ->with($this->equalTo('83232866'))
             ->willReturn($streamerData);
-
         $mockApiClient = $this->createMock(ApiClient::class);
         $mockApiClient->expects($this->never())
             ->method('fetchStreamerDataFromTwitch');
-
         $this->app->instance(DBClient::class, $mockDBClient);
         $this->app->instance(ApiClient::class, $mockApiClient);
 

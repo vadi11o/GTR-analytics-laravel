@@ -7,14 +7,13 @@ use App\Infrastructure\Controllers\GetStreamsController;
 use App\Infrastructure\Controllers\UserController;
 use App\Infrastructure\Controllers\TopsofthetopsController;
 
-
-Route::get('/user', function (Request $request) {
+Route::get('/users', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
 Route::get('/streams', GetStreamsController::class);
 
-Route::get('/users', UserController::class);
+Route::get('/streamer', UserController::class);
 
 Route::get('/topsofthetops', TopsofthetopsController::class);
 

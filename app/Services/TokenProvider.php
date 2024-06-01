@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Http;
 
 class TokenProvider
 {
-
     public function __construct()
     {
 

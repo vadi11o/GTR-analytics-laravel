@@ -2,6 +2,7 @@
 
 namespace App\Infrastructure\Clients;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 use App\Providers\TwitchTokenProvider;
@@ -69,16 +70,31 @@ class ApiClient
         return ['error' => 'Failed to fetch data from Twitch', 'status_code' => $response->status()];
     }
 
+    /**
+     * @throws ConnectionException
+     */
     public function updateGames($accessToken)
     {
         $url      = 'https://api.twitch.tv/helix/games/top?first=3';
         $response = Http::withHeaders([
-            'Authorization' => "Bearer {$accessToken}",
+            'Authorization' => "Bearer $accessToken",
             'Client-Id'     => env('TWITCH_CLIENT_ID'),
         ])->get($url);
 
-        $games = $response->json()['data'] ?? [];
+        return $response->json()['data'] ?? [];
+    }
 
-        return $games;
+    /**
+     * @throws ConnectionException
+     */
+    public function updateVideos($accessToken, $gameId)
+    {
+        $url      = "https://api.twitch.tv/helix/videos?game_id=$gameId&first=40&sort=views";
+        $response = Http::withHeaders([
+            'Authorization' => "Bearer $accessToken",
+            'Client-Id'     => env('TWITCH_CLIENT_ID'),
+        ])->get($url);
+
+        return $response->json()['data'] ?? [];
     }
 }

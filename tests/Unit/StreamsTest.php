@@ -41,7 +41,8 @@ class StreamsTest extends TestCase
         parent::tearDown();
     }
 
-    /**@test
+    /**
+     * @test
      * @throws ConnectionException
      */
     public function getStreamServiceReturnsValidJson()
@@ -62,7 +63,8 @@ class StreamsTest extends TestCase
         );
     }
 
-    /**@test
+    /**
+     * @test
      * @throws ConnectionException
      */
     public function getStreamServiceExecuteHandlesEmptyData()
@@ -81,7 +83,8 @@ class StreamsTest extends TestCase
         );
     }
 
-    /** @test
+    /**
+     * @test
      * @throws \ReflectionException
      */
     public function getStreamsServiceTreatsDataWell()
@@ -98,7 +101,8 @@ class StreamsTest extends TestCase
         );
     }
 
-    /** @test
+    /**
+     * @test
      * @throws \ReflectionException
      */
     public function getStreamsServiceTreatsEmptyDataWell()
@@ -115,7 +119,8 @@ class StreamsTest extends TestCase
         );
     }
 
-    /** @test
+    /**
+     * @test
      */
     public function fetchStreamsFromTwitchReturnsSuccess()
     {
@@ -144,7 +149,8 @@ class StreamsTest extends TestCase
         $this->assertEquals(json_encode($streamsData), $result['body']);
     }
 
-    /** @test
+    /**
+     * @test
      */
     public function fetchStreamsFromTwitchReturnsFailure()
     {
@@ -163,7 +169,8 @@ class StreamsTest extends TestCase
         $this->assertEquals('', $result['body']);
     }
 
-    /** @test
+    /**
+     * @test
      */
     public function fetchStreamsFromTwitchUsesCorrectToken()
     {

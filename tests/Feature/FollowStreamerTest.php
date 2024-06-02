@@ -14,7 +14,7 @@ use Mockery;
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
-class FollowStreamerControllerTest extends TestCase
+class FollowStreamerTest extends TestCase
 {
     protected DBClient $dbClientMock;
     protected ApiClient $apiClientMock;

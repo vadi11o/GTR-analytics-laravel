@@ -5,6 +5,7 @@ use App\Infrastructure\Clients\ApiClient;
 use App\Infrastructure\Clients\DBClient;
 use App\Providers\TwitchTokenProvider;
 use PHPUnit\Framework\TestCase;
+use Exception;
 
 class TopVideoServiceTest extends TestCase
 {
@@ -21,8 +22,8 @@ class TopVideoServiceTest extends TestCase
         parent::setUp();
 
         $this->mockTokenProvider = $this->createMock(TwitchTokenProvider::class);
-        $this->mockApiClient = $this->createMock(ApiClient::class);
-        $this->mockDbClient = $this->createMock(DBClient::class);
+        $this->mockApiClient     = $this->createMock(ApiClient::class);
+        $this->mockDbClient      = $this->createMock(DBClient::class);
 
         $this->service = new TopVideoService($this->mockDbClient, $this->mockApiClient, $this->mockTokenProvider);
     }
@@ -67,4 +68,3 @@ class TopVideoServiceTest extends TestCase
         $this->service->execute('123');
     }
 }
-

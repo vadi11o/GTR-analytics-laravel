@@ -7,9 +7,6 @@ use App\Infrastructure\Clients\DBClient;
 use PHPUnit\Framework\MockObject\Exception;
 use Tests\TestCase;
 
-/**
- * @group exclude
- */
 class StreamersTest extends TestCase
 {
     /** @test

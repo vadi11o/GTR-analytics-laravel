@@ -9,9 +9,6 @@ use Tests\TestCase;
 use Illuminate\Http\JsonResponse;
 use App\Services\StreamerDataManager;
 
-/**
- * @group exclude
- */
 class StreamersTest extends TestCase
 {
     /** @test

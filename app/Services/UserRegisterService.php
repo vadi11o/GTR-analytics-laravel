@@ -21,8 +21,8 @@ class UserRegisterService
             return new JsonResponse(['message' => 'El nombre de usuario ya está en uso'], 409);
         }
 
-        $datos = ['username' => $username, 'password' => $password];
-        $this->dBClient->insertUserAnalyticsToDB($datos);
+        $dates = ['username' => $username, 'password' => $password];
+        $this->dBClient->insertUserAnalyticsToDB($dates);
 
         return new JsonResponse(['username' => $username, 'message' => 'Usuario creado correctamente'], 201);
     }

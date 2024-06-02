@@ -28,11 +28,11 @@ class StreamsTest extends TestCase
     {
         parent::setUp();
         $this->tokenProvider = $this->createMock(TwitchTokenProvider::class);
-        $this->apiClient = $this->getMockBuilder(ApiClient::class)
+        $this->apiClient     = $this->getMockBuilder(ApiClient::class)
             ->setConstructorArgs([$this->tokenProvider])
             ->onlyMethods(['fetchStreamsFromTwitch'])
             ->getMock();
-        $this->service   = new GetStreamsService($this->apiClient);
+        $this->service = new GetStreamsService($this->apiClient);
     }
 
     protected function tearDown(): void
@@ -86,9 +86,9 @@ class StreamsTest extends TestCase
      */
     public function getStreamsServiceTreatsDataWell()
     {
-        $rawData = json_encode(['data' => [['title' => 'Stream 1', 'user_name' => 'User 1']]]);
+        $rawData          = json_encode(['data' => [['title' => 'Stream 1', 'user_name' => 'User 1']]]);
         $expectedResponse = [['title' => 'Stream 1', 'user_name' => 'User 1']];
-        $method = new ReflectionMethod(GetStreamsService::class, 'treatData');
+        $method           = new ReflectionMethod(GetStreamsService::class, 'treatData');
 
         $response = $method->invoke($this->service, $rawData);
 
@@ -103,9 +103,9 @@ class StreamsTest extends TestCase
      */
     public function getStreamsServiceTreatsEmptyDataWell()
     {
-        $rawData = json_encode(['data' => []]);
+        $rawData          = json_encode(['data' => []]);
         $expectedResponse = [];
-        $method = new ReflectionMethod(GetStreamsService::class, 'treatData');
+        $method           = new ReflectionMethod(GetStreamsService::class, 'treatData');
 
         $response = $method->invoke($this->service, $rawData);
 
@@ -120,14 +120,14 @@ class StreamsTest extends TestCase
     public function fetchStreamsFromTwitchReturnsSuccess()
     {
         $this->apiClient = new ApiClient($this->tokenProvider);
-        $token = 'test_token';
-        $streamsData = [
+        $token           = 'test_token';
+        $streamsData     = [
             'data' => [
                 [
-                    'id' => '1',
+                    'id'        => '1',
                     'user_name' => 'streamer1',
-                    'game_id' => '1234',
-                    'title' => 'Stream Title 1',
+                    'game_id'   => '1234',
+                    'title'     => 'Stream Title 1',
                 ]
             ]
         ];
@@ -149,7 +149,7 @@ class StreamsTest extends TestCase
     public function fetchStreamsFromTwitchReturnsFailure()
     {
         $this->apiClient = new ApiClient($this->tokenProvider);
-        $token = 'test_token';
+        $token           = 'test_token';
         $this->tokenProvider->expects($this->once())
             ->method('getTokenFromTwitch')
             ->willReturn($token);
@@ -168,7 +168,7 @@ class StreamsTest extends TestCase
     public function fetchStreamsFromTwitchUsesCorrectToken()
     {
         $this->apiClient = new ApiClient($this->tokenProvider);
-        $token = 'test_token';
+        $token           = 'test_token';
         $this->tokenProvider->expects($this->once())
             ->method('getTokenFromTwitch')
             ->willReturn($token);

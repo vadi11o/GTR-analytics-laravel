@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @method static truncate()
  * @method static create(array $array)
+ * @method static shouldReceive(string $string)
  */
 class TopGame extends Model
 {

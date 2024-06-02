@@ -39,13 +39,16 @@ class StreamersTest extends TestCase
         $this->streamerDataManager = new StreamerDataManager($this->getStreamerService, $this->dbClient);
     }
 
+
     protected function tearDown(): void
     {
         Mockery::close();
         parent::tearDown();
     }
 
-    public function testStreamerControllerHandlesMissingIdParameter()
+    /** @test
+     */
+    public function streamerControllerHandlesMissingIdParameter()
     {
         $response = $this->getJson('analytics/streamers');
 
@@ -55,7 +58,9 @@ class StreamersTest extends TestCase
         ]);
     }
 
-    public function testStreamerControllerHandlesInvalidIdParameter()
+    /** @test
+     */
+    public function streamerControllerHandlesInvalidIdParameter()
     {
         $response = $this->getJson('analytics/streamers?id=invalid_id');
 
@@ -68,7 +73,7 @@ class StreamersTest extends TestCase
     /**@test
      * @throws \Exception
      */
-    public function testExecuteReturnsStreamerFromDBIfFound()
+    public function executeReturnsStreamerFromDBIfFound()
     {
         $userId     = '123';
         $userFromDB = ['id' => $userId, 'name' => 'John Doe'];
@@ -87,7 +92,7 @@ class StreamersTest extends TestCase
     /**@test
      * @throws \Exception
      */
-    public function testExecuteCallsGetStreamerServiceWhenNotInDB()
+    public function executeCallsGetStreamerServiceWhenNotInDB()
     {
         $streamerId   = '83232866';
         $streamerData = [
@@ -114,7 +119,9 @@ class StreamersTest extends TestCase
         $this->streamerDataManager->execute($streamerId);
     }
 
-    public function testGetUserByIdFromDBIsCalled()
+    /** @test
+     */
+    public function getUserByIdFromDBIsCalled()
     {
         $userId   = '12345';
         $dbClient = Mockery::mock(DBClient::class);
@@ -128,7 +135,10 @@ class StreamersTest extends TestCase
         $this->assertNotEmpty($result);
     }
 
-    public function testGetStreamerServiceReturnsStreamerDataWhenFound()
+    /** @test
+     * @throws \Exception
+     */
+    public function getStreamerServiceReturnsStreamerDataWhenFound()
     {
         $streamerId   = '83232866';
         $streamerData = [
@@ -162,7 +172,10 @@ class StreamersTest extends TestCase
         $this->assertEquals($expectedData, $responseData);
     }
 
-    public function testExecuteCallsInsertStreamerToDB()
+    /** @test
+     * @throws \Exception
+     */
+    public function executeCallsInsertStreamerToDB()
     {
         $this->getStreamerService = new GetStreamerService($this->dbClient, $this->apiClient, $this->tokenProvider);
         $streamerId               = '12345';
@@ -181,7 +194,9 @@ class StreamersTest extends TestCase
         $this->getStreamerService->execute($streamerId);
     }
 
-    public function testGetUserByIdFromDBReturnsNullIfNotFound()
+    /** @test
+     */
+    public function getUserByIdFromDBReturnsNullIfNotFound()
     {
         $userId   = 'nonexistent';
         $userMock = Mockery::mock('overload:' . User::class);
@@ -201,7 +216,7 @@ class StreamersTest extends TestCase
     /**@test
      * @throws \Exception
      */
-    public function testFetchStreamerDataFromTwitchReturnsStreamerData()
+    public function fetchStreamerDataFromTwitchReturnsStreamerData()
     {
         $this->apiClient = new ApiClient($this->tokenProvider);
         $streamerId      = '83232866';
@@ -226,7 +241,7 @@ class StreamersTest extends TestCase
             ->method('getTokenFromTwitch')
             ->willReturn($token);
         Http::fake([
-            $url => Http::response($responseData, 200)
+            $url => Http::response($responseData)
         ]);
 
         $result = $this->apiClient->fetchStreamerDataFromTwitch($streamerId);
@@ -245,7 +260,10 @@ class StreamersTest extends TestCase
         ], $result);
     }
 
-    public function testFetchStreamerDataFromTwitchReturnsErrorOnFailure()
+    /** @test
+     * @throws \Exception
+     */
+    public function fetchStreamerDataFromTwitchReturnsErrorOnFailure()
     {
         $this->apiClient = new ApiClient($this->tokenProvider);
         $streamerId      = '83232866';

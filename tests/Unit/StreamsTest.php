@@ -44,7 +44,7 @@ class StreamsTest extends TestCase
     /**@test
      * @throws ConnectionException
      */
-    public function testGetStreamServiceReturnsValidJson()
+    public function getStreamServiceReturnsValidJson()
     {
         $fakeResponse = [
             'body' => json_encode(['data' => [['title' => 'Stream 1', 'user_name' => 'User 1']]])
@@ -65,7 +65,7 @@ class StreamsTest extends TestCase
     /**@test
      * @throws ConnectionException
      */
-    public function testGetStreamServiceExecuteHandlesEmptyData()
+    public function getStreamServiceExecuteHandlesEmptyData()
     {
         $fakeResponse = ['body' => json_encode(['data' => []])];
         $this->apiClient
@@ -81,7 +81,10 @@ class StreamsTest extends TestCase
         );
     }
 
-    public function testGetStreamsServiceTreatsDataWell()
+    /** @test
+     * @throws \ReflectionException
+     */
+    public function getStreamsServiceTreatsDataWell()
     {
         $rawData          = json_encode(['data' => [['title' => 'Stream 1', 'user_name' => 'User 1']]]);
         $expectedResponse = [['title' => 'Stream 1', 'user_name' => 'User 1']];
@@ -95,7 +98,10 @@ class StreamsTest extends TestCase
         );
     }
 
-    public function testGetStreamsServiceTreatsEmptyDataWell()
+    /** @test
+     * @throws \ReflectionException
+     */
+    public function getStreamsServiceTreatsEmptyDataWell()
     {
         $rawData          = json_encode(['data' => []]);
         $expectedResponse = [];
@@ -109,7 +115,9 @@ class StreamsTest extends TestCase
         );
     }
 
-    public function testFetchStreamsFromTwitchReturnsSuccess()
+    /** @test
+     */
+    public function fetchStreamsFromTwitchReturnsSuccess()
     {
         $this->apiClient = new ApiClient($this->tokenProvider);
         $token           = 'test_token';
@@ -136,7 +144,9 @@ class StreamsTest extends TestCase
         $this->assertEquals(json_encode($streamsData), $result['body']);
     }
 
-    public function testFetchStreamsFromTwitchReturnsFailure()
+    /** @test
+     */
+    public function fetchStreamsFromTwitchReturnsFailure()
     {
         $this->apiClient = new ApiClient($this->tokenProvider);
         $token           = 'test_token';
@@ -153,7 +163,9 @@ class StreamsTest extends TestCase
         $this->assertEquals('', $result['body']);
     }
 
-    public function testFetchStreamsFromTwitchUsesCorrectToken()
+    /** @test
+     */
+    public function fetchStreamsFromTwitchUsesCorrectToken()
     {
         $this->apiClient = new ApiClient($this->tokenProvider);
         $token           = 'test_token';

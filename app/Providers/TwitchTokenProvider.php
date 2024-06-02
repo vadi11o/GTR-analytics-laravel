@@ -21,7 +21,7 @@ class TwitchTokenProvider
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function getTokenFromTwitch(): string
     {

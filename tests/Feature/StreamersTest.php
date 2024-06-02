@@ -4,17 +4,15 @@ namespace Tests\Feature;
 
 use App\Infrastructure\Clients\ApiClient;
 use App\Infrastructure\Clients\DBClient;
-use Exception;
+use PHPUnit\Framework\MockObject\Exception;
 use Tests\TestCase;
-use Illuminate\Http\JsonResponse;
-use App\Services\StreamerDataManager;
 
 class StreamersTest extends TestCase
 {
     /** @test
-     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws Exception
      */
-    public function testStreamerControllerReturnsSuccessfulResponseWhenStreamerNotInDB()
+    public function streamerControllerReturnsSuccessfulResponseWhenStreamerNotInDB()
     {
         $streamerData = [
             'id'                => '83232866',
@@ -47,7 +45,11 @@ class StreamersTest extends TestCase
         $response->assertJson($streamerData);
     }
 
-    public function testStreamerControllerReturnsSuccessfulResponseWhenStreamerInDB()
+    /** @test
+     *
+     * @throws Exception
+     */
+    public function streamerControllerReturnsSuccessfulResponseWhenStreamerInDB()
     {
         $streamerData = [
             'id'                => '83232866',

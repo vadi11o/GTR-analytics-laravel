@@ -29,9 +29,9 @@ class FollowStreamerService
         } catch (\Exception $e) {
             if ($e->getCode() === 401) {
                 return new JsonResponse(['message' => 'Token de autenticación no proporcionado o inválido'], 401);
-            } elseif ($e->getCode() === 403) {
+            } if ($e->getCode() === 403) {
                 return new JsonResponse(['message' => 'Acceso denegado debido a permisos insuficientes'], 403);
-            } elseif ($e->getCode() === 404) {
+            } if ($e->getCode() === 404) {
                 return new JsonResponse(['message' => 'Streamer especificado no existe en la API'], 404);
             } else {
                 return new JsonResponse(['message' => 'Error del servidor al seguir al streamer'], 500);
@@ -52,6 +52,6 @@ class FollowStreamerService
         $userData->followed_streamers = $followedStreamers;
         $this->dBClient->updateUserAnalyticsInDB($userData);
 
-        return new JsonResponse(['username' => $userId, 'message' => 'Streamer seguido correctamente'], 200);
+        return new JsonResponse(['message' => 'Ahora sigues a '. $streamerId], 200);
     }
 }

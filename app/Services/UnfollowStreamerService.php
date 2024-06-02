@@ -46,6 +46,6 @@ class UnfollowStreamerService
         $userData->followed_streamers = json_encode($newList);
         $this->dBClient->updateUserAnalyticsInDB($userData);
 
-        return new JsonResponse(['username' => $userId, 'message' => 'Streamer dejado de seguir correctamente'], 200);
+        return new JsonResponse(['message' => 'Dejaste de seguir a ' . $streamerId], 200);
     }
 }

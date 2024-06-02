@@ -6,6 +6,7 @@ use App\Infrastructure\Clients\DBClient;
 use App\Providers\TwitchTokenProvider;
 use PHPUnit\Framework\TestCase;
 use Illuminate\Http\Client\ConnectionException;
+use Exception;
 
 class TopGamesServiceTest extends TestCase
 {
@@ -22,8 +23,8 @@ class TopGamesServiceTest extends TestCase
         parent::setUp();
 
         $this->mockTokenProvider = $this->createMock(TwitchTokenProvider::class);
-        $this->mockApiClient = $this->createMock(ApiClient::class);
-        $this->mockDbClient = $this->createMock(DBClient::class);
+        $this->mockApiClient     = $this->createMock(ApiClient::class);
+        $this->mockDbClient      = $this->createMock(DBClient::class);
 
         $this->service = new TopGamesService($this->mockDbClient, $this->mockApiClient, $this->mockTokenProvider);
     }
@@ -70,4 +71,3 @@ class TopGamesServiceTest extends TestCase
         $this->service->execute();
     }
 }
-

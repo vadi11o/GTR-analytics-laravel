@@ -18,50 +18,53 @@ use App\Models\TopGame;
 use App\Models\TopOfTheTop;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 
+/**
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
 class TopsofthetopsTest extends TestCase
 {
     use WithoutMiddleware;
 
     protected DBClient $dbClientMock;
     protected ApiClient $apiClientMock;
-    protected TwitchTokenProvider $twitchTokenProviderMock;
-    protected TopsofthetopsService $topsofthetopsService;
+    protected TwitchTokenProvider $tokenProviderMock;
+    protected TopsofthetopsService $topsService;
     protected TopGamesService $topGamesService;
     protected TopVideoService $topVideosService;
-    protected TopsofthetopsController $topsofthetopsController;
+    protected TopsofthetopsController $topsController;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->dbClientMock = Mockery::mock(DBClient::class);
-        $this->apiClientMock = Mockery::mock(ApiClient::class);
-        $this->twitchTokenProviderMock = Mockery::mock(TwitchTokenProvider::class);
+        $this->dbClientMock      = Mockery::mock(DBClient::class);
+        $this->apiClientMock     = Mockery::mock(ApiClient::class);
+        $this->tokenProviderMock = Mockery::mock(TwitchTokenProvider::class);
 
         $this->topGamesService = new TopGamesService(
             $this->dbClientMock,
             $this->apiClientMock,
-            $this->twitchTokenProviderMock
+            $this->tokenProviderMock
         );
 
         $this->topVideosService = new TopVideoService(
             $this->dbClientMock,
             $this->apiClientMock,
-            $this->twitchTokenProviderMock
+            $this->tokenProviderMock
         );
 
-        $this->topsofthetopsService = new TopsofthetopsService(
+        $this->topsService = new TopsofthetopsService(
             $this->dbClientMock,
-            $this->twitchTokenProviderMock,
+            $this->tokenProviderMock,
             $this->topVideosService,
             $this->topGamesService
         );
 
-        $this->topsofthetopsController = new TopsofthetopsController(
-            $this->topsofthetopsService
+        $this->topsController = new TopsofthetopsController(
+            $this->topsService
         );
 
-        $this->app->instance(TopsofthetopsController::class, $this->topsofthetopsController);
+        $this->app->instance(TopsofthetopsController::class, $this->topsController);
     }
 
     public function tearDown(): void
@@ -80,34 +83,34 @@ class TopsofthetopsTest extends TestCase
         ];
         $mockTopOfTheTops = [
             [
-                'game_id' => 1,
-                'game_name' => 'Test Game',
-                'user_name' => 'Test User',
-                'total_videos' => 10,
-                'total_views' => 100,
-                'most_viewed_title' => 'Test Title',
-                'most_viewed_views' => 50,
-                'most_viewed_duration' => 3600,
+                'game_id'                => 1,
+                'game_name'              => 'Test Game',
+                'user_name'              => 'Test User',
+                'total_videos'           => 10,
+                'total_views'            => 100,
+                'most_viewed_title'      => 'Test Title',
+                'most_viewed_views'      => 50,
+                'most_viewed_duration'   => 3600,
                 'most_viewed_created_at' => now()->toDateTimeString(),
-                'ultima_actualizacion' => now()->toDateTimeString()
+                'ultima_actualizacion'   => now()->toDateTimeString()
             ]
         ];
         $expectedResponse = [
             [
-                'game_id' => 1,
-                'game_name' => 'Test Game',
-                'user_name' => 'Test User',
-                'total_videos' => 10,
-                'total_views' => 100,
-                'most_viewed_title' => 'Test Title',
-                'most_viewed_views' => 50,
-                'most_viewed_duration' => 3600,
+                'game_id'                => 1,
+                'game_name'              => 'Test Game',
+                'user_name'              => 'Test User',
+                'total_videos'           => 10,
+                'total_views'            => 100,
+                'most_viewed_title'      => 'Test Title',
+                'most_viewed_views'      => 50,
+                'most_viewed_duration'   => 3600,
                 'most_viewed_created_at' => now()->toDateTimeString(),
-                'ultima_actualizacion' => now()->toDateTimeString()
+                'ultima_actualizacion'   => now()->toDateTimeString()
             ]
         ];
         $this->dbClientMock->shouldReceive('updateGamesSince')->once()->with(600, $this->topVideosService);
-        $this->twitchTokenProviderMock->shouldReceive('getTokenFromTwitch')->andReturn('valid_token');
+        $this->tokenProviderMock->shouldReceive('getTokenFromTwitch')->andReturn('valid_token');
         $this->dbClientMock->shouldReceive('getTopGames')->andReturn(collect($mockTopGames));
         $this->dbClientMock->shouldReceive('getTopOfTheTopsData')->andReturn(collect($mockTopOfTheTops));
         $this->apiClientMock->shouldReceive('updateGames')->andReturn($mockTopGames);
@@ -119,7 +122,7 @@ class TopsofthetopsTest extends TestCase
         $topOfTheTopMock->shouldReceive('get')->andReturn(collect($mockTopOfTheTops));
         $request = Request::create('analytics/topsofthetops', 'GET', ['since' => 600]);
 
-        $response = $this->topsofthetopsController->__invoke($request);
+        $response = $this->topsController->__invoke($request);
 
         $responseArray = json_decode($response->getContent(), true);
         $this->assertInstanceOf(JsonResponse::class, $response);
@@ -132,15 +135,14 @@ class TopsofthetopsTest extends TestCase
      */
     public function itShouldThrowConnectionExceptionWhenTokenRetrievalFails()
     {
-        $this->twitchTokenProviderMock->shouldReceive('getTokenFromTwitch')->andThrow(new ConnectionException());
+        $this->tokenProviderMock->shouldReceive('getTokenFromTwitch')->andThrow(new ConnectionException());
 
         $request = Request::create('analytics/topsofthetops', 'GET', ['since' => 600]);
 
         try {
-            $this->topsofthetopsController->__invoke($request);
+            $this->topsController->__invoke($request);
         } catch (ConnectionException $e) {
             $this->assertInstanceOf(ConnectionException::class, $e);
         }
     }
 }
-

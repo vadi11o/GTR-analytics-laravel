@@ -11,20 +11,23 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Mockery;
 
+/**
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
 class FollowStreamerControllerTest extends TestCase
 {
     protected DBClient $dbClientMock;
     protected ApiClient $apiClientMock;
-    protected FollowStreamerService $followStreamerService;
-    protected FollowStreamerController $followStreamerController;
+    protected FollowStreamerService $followService;
+    protected FollowStreamerController $followController;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dbClientMock = Mockery::mock('App\Infrastructure\Clients\DBClient');
-        $this->apiClientMock = Mockery::mock('App\Infrastructure\Clients\ApiClient');
-        $this->followStreamerService = new FollowStreamerService($this->dbClientMock, $this->apiClientMock);
-        $this->followStreamerController = new FollowStreamerController($this->followStreamerService);
+        $this->dbClientMock     = Mockery::mock('App\Infrastructure\Clients\DBClient');
+        $this->apiClientMock    = Mockery::mock('App\Infrastructure\Clients\ApiClient');
+        $this->followService    = new FollowStreamerService($this->dbClientMock, $this->apiClientMock);
+        $this->followController = new FollowStreamerController($this->followService);
     }
 
     /** @test */
@@ -36,7 +39,7 @@ class FollowStreamerControllerTest extends TestCase
             ->with('456')
             ->andReturn(null);
 
-        $response = $this->followStreamerController->__invoke($request);
+        $response = $this->followController->__invoke($request);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(404, $response->status());
@@ -61,7 +64,7 @@ class FollowStreamerControllerTest extends TestCase
         $this->dbClientMock->shouldReceive('updateUserAnalyticsInDB')
             ->never();
 
-        $response = $this->followStreamerController->__invoke($request);
+        $response = $this->followController->__invoke($request);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(409, $response->status());
@@ -85,12 +88,12 @@ class FollowStreamerControllerTest extends TestCase
             ->andReturn(['display_name' => 'StreamerName']);
         $this->dbClientMock->shouldReceive('updateUserAnalyticsInDB')
             ->once()
-            ->with(Mockery::on(function($userData) {
+            ->with(Mockery::on(function ($userData) {
                 $decoded = json_decode($userData->followed_streamers, true);
                 return is_array($decoded) && count($decoded) == 1 && $decoded[0]['id'] == '123';
             }));
 
-        $response = $this->followStreamerController->__invoke($request);
+        $response = $this->followController->__invoke($request);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(200, $response->status());

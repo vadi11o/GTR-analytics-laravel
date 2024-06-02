@@ -27,7 +27,7 @@ class FollowStreamerService
 
         $streamerData = $this->getStreamerData($streamerId);
         if ($streamerData instanceof JsonResponse) {
-            return $streamerData; // Return the error response if there's an issue with fetching streamer data
+            return $streamerData;
         }
 
         return $this->followStreamer($userData, $streamerId, $streamerData);
@@ -47,12 +47,12 @@ class FollowStreamerService
         }
     }
 
-    private function handleStreamerDataException(Exception $e): JsonResponse
+    private function handleStreamerDataException(Exception $exception): JsonResponse
     {
-        return match ($e->getCode()) {
-            401 => new JsonResponse(['message' => 'Token de autenticación no proporcionado o inválido'], 401),
-            403 => new JsonResponse(['message' => 'Acceso denegado debido a permisos insuficientes'], 403),
-            404 => new JsonResponse(['message' => 'Streamer especificado no existe en la API'], 404),
+        return match ($exception->getCode()) {
+            401     => new JsonResponse(['message' => 'Token de autenticación no proporcionado o inválido'], 401),
+            403     => new JsonResponse(['message' => 'Acceso denegado debido a permisos insuficientes'], 403),
+            404     => new JsonResponse(['message' => 'Streamer especificado no existe en la API'], 404),
             default => new JsonResponse(['message' => 'Error del servidor al seguir al streamer'], 500),
         };
     }
@@ -90,7 +90,7 @@ class FollowStreamerService
 
     private function updateFollowedStreamers($userData, array &$followedStreamers, string $streamerId, array $streamerData): void
     {
-        $followedStreamers[] = ['id' => $streamerId, 'display_name' => $streamerData['display_name']];
+        $followedStreamers[]          = ['id' => $streamerId, 'display_name' => $streamerData['display_name']];
         $userData->followed_streamers = json_encode($followedStreamers);
         $this->dBClient->updateUserAnalyticsInDB($userData);
     }

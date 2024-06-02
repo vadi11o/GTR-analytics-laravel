@@ -10,6 +10,9 @@ use App\Infrastructure\Clients\ApiClient;
 use Illuminate\Http\JsonResponse;
 use Mockery;
 
+/**
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
 class FollowStreamerServiceTest extends TestCase
 {
     protected DBClient $dbClientMock;
@@ -19,9 +22,9 @@ class FollowStreamerServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dbClientMock = Mockery::mock(DBClient::class);
+        $this->dbClientMock  = Mockery::mock(DBClient::class);
         $this->apiClientMock = Mockery::mock(ApiClient::class);
-        $this->service = new FollowStreamerService($this->dbClientMock, $this->apiClientMock);
+        $this->service       = new FollowStreamerService($this->dbClientMock, $this->apiClientMock);
     }
 
     /** @test

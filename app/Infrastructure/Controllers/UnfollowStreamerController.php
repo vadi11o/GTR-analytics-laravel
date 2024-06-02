@@ -9,11 +9,11 @@ use Exception;
 
 class UnfollowStreamerController extends Controller
 {
-    protected UnfollowStreamerService $unfollowStreamerService;
+    protected UnfollowStreamerService $unfollowService;
 
-    public function __construct(UnfollowStreamerService $unfollowStreamerService)
+    public function __construct(UnfollowStreamerService $unfollowService)
     {
-        $this->unfollowStreamerService = $unfollowStreamerService;
+        $this->unfollowService = $unfollowService;
     }
 
     public function __invoke(Request $request): JsonResponse
@@ -26,7 +26,7 @@ class UnfollowStreamerController extends Controller
         }
 
         try {
-            return $this->unfollowStreamerService->execute($userId, $streamerId);
+            return $this->unfollowService->execute($userId, $streamerId);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }

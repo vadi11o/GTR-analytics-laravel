@@ -9,11 +9,11 @@ use Exception;
 
 class FollowStreamerController extends Controller
 {
-    protected FollowStreamerService $followStreamerService;
+    protected FollowStreamerService $followService;
 
-    public function __construct(FollowStreamerService $followStreamerService)
+    public function __construct(FollowStreamerService $followService)
     {
-        $this->followStreamerService = $followStreamerService;
+        $this->followService = $followService;
     }
 
     public function __invoke(Request $request): JsonResponse
@@ -26,7 +26,7 @@ class FollowStreamerController extends Controller
         }
 
         try {
-            return $this->followStreamerService->execute($userId, $streamerId);
+            return $this->followService->execute($userId, $streamerId);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }

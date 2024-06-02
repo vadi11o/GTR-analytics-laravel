@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @method static updateOrCreate(array $array, array $array1)
  * @method static find($gameId)
+ * @method static shouldReceive(string $string)
  */
 class TopOfTheTop extends Model
 {

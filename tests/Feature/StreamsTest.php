@@ -12,7 +12,7 @@ class StreamsTest extends TestCase
     /** @test
      * @throws Exception|\PHPUnit\Framework\MockObject\Exception
      */
-    public function GetsStreams()
+    public function itShouldReturnStreamsDataSuccessfully()
     {
         $mockApiResponse = [
             'data' => [

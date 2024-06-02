@@ -28,7 +28,7 @@ class TopsofthetopsTest extends TestCase
     protected DBClient $dbClientMock;
     protected ApiClient $apiClientMock;
     protected TwitchTokenProvider $tokenProviderMock;
-    protected TopsofthetopsService $topsofthetopsService;
+    protected TopsofthetopsService $topsService;
     protected TopGamesService $topGamesService;
     protected TopVideoService $topVideosService;
     protected TopsofthetopsController $topsController;
@@ -53,7 +53,7 @@ class TopsofthetopsTest extends TestCase
             $this->tokenProviderMock
         );
 
-        $this->topsofthetopsService = new TopsofthetopsService(
+        $this->topsService = new TopsofthetopsService(
             $this->dbClientMock,
             $this->tokenProviderMock,
             $this->topVideosService,
@@ -61,7 +61,7 @@ class TopsofthetopsTest extends TestCase
         );
 
         $this->topsController = new TopsofthetopsController(
-            $this->topsofthetopsService
+            $this->topsService
         );
 
         $this->app->instance(TopsofthetopsController::class, $this->topsController);

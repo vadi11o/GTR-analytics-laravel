@@ -14,23 +14,21 @@ use App\Infrastructure\Clients\DBClient;
 use App\Infrastructure\Clients\ApiClient;
 use App\Providers\TwitchTokenProvider;
 use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Support\Facades\Http;
 use App\Models\TopGame;
 use App\Models\TopOfTheTop;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 
 class TopsofthetopsTest extends TestCase
 {
-    use WithoutMiddleware; // Para evitar la necesidad de autenticación y otras verificaciones de middleware
+    use WithoutMiddleware;
 
-    protected $dbClientMock;
-    protected $apiClientMock;
-    protected $twitchTokenProviderMock;
-    protected $topsofthetopsService;
-    protected $topGamesService;
-    protected $topVideosService;
-    protected $topsofthetopsController;
+    protected DBClient $dbClientMock;
+    protected ApiClient $apiClientMock;
+    protected TwitchTokenProvider $twitchTokenProviderMock;
+    protected TopsofthetopsService $topsofthetopsService;
+    protected TopGamesService $topGamesService;
+    protected TopVideoService $topVideosService;
+    protected TopsofthetopsController $topsofthetopsController;
 
     public function setUp(): void
     {
@@ -72,12 +70,14 @@ class TopsofthetopsTest extends TestCase
         parent::tearDown();
     }
 
-    public function testInvokeReturnsJsonResponse()
+    /**@test
+     * @throws ConnectionException
+     */
+    public function itShouldReturnJsonResponseWithTopGamesAndTopVideosData()
     {
         $mockTopGames = [
             ['game_id' => 1, 'game_name' => 'Test Game']
         ];
-
         $mockTopOfTheTops = [
             [
                 'game_id' => 1,
@@ -92,7 +92,6 @@ class TopsofthetopsTest extends TestCase
                 'ultima_actualizacion' => now()->toDateTimeString()
             ]
         ];
-
         $expectedResponse = [
             [
                 'game_id' => 1,
@@ -107,34 +106,31 @@ class TopsofthetopsTest extends TestCase
                 'ultima_actualizacion' => now()->toDateTimeString()
             ]
         ];
-
         $this->dbClientMock->shouldReceive('updateGamesSince')->once()->with(600, $this->topVideosService);
         $this->twitchTokenProviderMock->shouldReceive('getTokenFromTwitch')->andReturn('valid_token');
         $this->dbClientMock->shouldReceive('getTopGames')->andReturn(collect($mockTopGames));
         $this->dbClientMock->shouldReceive('getTopOfTheTopsData')->andReturn(collect($mockTopOfTheTops));
         $this->apiClientMock->shouldReceive('updateGames')->andReturn($mockTopGames);
         $this->dbClientMock->shouldReceive('saveGames')->andReturnNull();
-
         $topGameMock = Mockery::mock('alias:' . TopGame::class);
         $topGameMock->shouldReceive('pluck')->andReturn(collect([1]));
-
         $topOfTheTopMock = Mockery::mock('alias:' . TopOfTheTop::class);
         $topOfTheTopMock->shouldReceive('whereIn')->andReturnSelf();
         $topOfTheTopMock->shouldReceive('get')->andReturn(collect($mockTopOfTheTops));
-
         $request = Request::create('analytics/topsofthetops', 'GET', ['since' => 600]);
 
         $response = $this->topsofthetopsController->__invoke($request);
 
         $responseArray = json_decode($response->getContent(), true);
-
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals($expectedResponse, $responseArray);
-
     }
 
-    public function testInvokeThrowsConnectionException()
+    /**
+     * @test
+     */
+    public function itShouldThrowConnectionExceptionWhenTokenRetrievalFails()
     {
         $this->twitchTokenProviderMock->shouldReceive('getTokenFromTwitch')->andThrow(new ConnectionException());
 
@@ -147,4 +143,4 @@ class TopsofthetopsTest extends TestCase
         }
     }
 }
-?>
+

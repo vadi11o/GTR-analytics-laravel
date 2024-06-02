@@ -9,63 +9,65 @@ use Illuminate\Http\Client\ConnectionException;
 
 class TopGamesServiceTest extends TestCase
 {
+    protected TwitchTokenProvider $mockTokenProvider;
+    protected ApiClient $mockApiClient;
+    protected DBClient $mockDbClient;
+    protected TopGamesService $service;
+
+    /**
+     * @throws \PHPUnit\Framework\MockObject\Exception
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->mockTokenProvider = $this->createMock(TwitchTokenProvider::class);
+        $this->mockApiClient = $this->createMock(ApiClient::class);
+        $this->mockDbClient = $this->createMock(DBClient::class);
+
+        $this->service = new TopGamesService($this->mockDbClient, $this->mockApiClient, $this->mockTokenProvider);
+    }
+
     /**
      * @test
      * @throws \PHPUnit\Framework\MockObject\Exception
      * @throws ConnectionException
      */
-    public function executeSuccessfully()
+    public function itShouldSaveGamesSuccessfullyWhenTokenAndGamesAreValid()
     {
-        $mockTokenProvider = $this->createMock(TwitchTokenProvider::class);
-        $mockTokenProvider->method('getTokenFromTwitch')->willReturn('fake_token');
+        $this->mockTokenProvider->method('getTokenFromTwitch')->willReturn('fake_token');
+        $this->mockApiClient->method('updateGames')->willReturn([['id' => '123', 'name' => 'Fake Game']]);
+        $this->mockDbClient->expects($this->once())->method('saveGames')->with([['id' => '123', 'name' => 'Fake Game']]);
 
-        $mockApiClient = $this->createMock(ApiClient::class);
-        $mockApiClient->method('updateGames')->willReturn([['id' => '123', 'name' => 'Fake Game']]);
-
-        $mockDbClient = $this->createMock(DBClient::class);
-        $mockDbClient->expects($this->once())->method('saveGames')->with([['id' => '123', 'name' => 'Fake Game']]);
-
-        $service = new TopGamesService($mockDbClient, $mockApiClient, $mockTokenProvider);
-        $service->execute();
+        $this->service->execute();
     }
 
     /**
-     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @test
      * @throws ConnectionException
      */
-    public function testExecuteThrowsExceptionWhenNoToken()
+    public function itShouldThrowExceptionWhenTokenRetrievalFails()
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Failed to retrieve access token from Twitch');
+        $this->mockTokenProvider->method('getTokenFromTwitch')->will($this->throwException(new Exception('Failed to retrieve access token from Twitch')));
 
-        $mockTokenProvider = $this->createMock(TwitchTokenProvider::class);
-        $mockTokenProvider->method('getTokenFromTwitch')->will($this->throwException(new Exception('Failed to retrieve access token from Twitch')));
-
-        $mockApiClient = $this->createMock(ApiClient::class);
-        $mockDbClient = $this->createMock(DBClient::class);
-
-        $service = new TopGamesService($mockDbClient, $mockApiClient, $mockTokenProvider);
-        $service->execute();
+        $this->service->execute();
     }
 
     /**
+     * @test
      * @throws \PHPUnit\Framework\MockObject\Exception
      * @throws ConnectionException
      */
-    public function testExecuteThrowsExceptionWhenNoGames()
+    public function itShouldThrowExceptionWhenNoGamesAreFoundInApiResponse()
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('No se encontraron datos válidos en la respuesta de la API de Twitch.');
+        $this->mockTokenProvider->method('getTokenFromTwitch')->willReturn('fake_token');
+        $this->mockApiClient->method('updateGames')->willReturn([]);
 
-        $mockTokenProvider = $this->createMock(TwitchTokenProvider::class);
-        $mockTokenProvider->method('getTokenFromTwitch')->willReturn('fake_token');
-
-        $mockApiClient = $this->createMock(ApiClient::class);
-        $mockApiClient->method('updateGames')->willReturn([]);
-
-        $mockDbClient = $this->createMock(DBClient::class);
-
-        $service = new TopGamesService($mockDbClient, $mockApiClient, $mockTokenProvider);
-        $service->execute();
+        $this->service->execute();
     }
 }
+

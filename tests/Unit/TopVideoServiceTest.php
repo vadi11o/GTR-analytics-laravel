@@ -8,60 +8,63 @@ use PHPUnit\Framework\TestCase;
 
 class TopVideoServiceTest extends TestCase
 {
+    protected TwitchTokenProvider $mockTokenProvider;
+    protected ApiClient $mockApiClient;
+    protected DBClient $mockDbClient;
+    protected TopVideoService $service;
+
     /**
+     * @throws \PHPUnit\Framework\MockObject\Exception
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->mockTokenProvider = $this->createMock(TwitchTokenProvider::class);
+        $this->mockApiClient = $this->createMock(ApiClient::class);
+        $this->mockDbClient = $this->createMock(DBClient::class);
+
+        $this->service = new TopVideoService($this->mockDbClient, $this->mockApiClient, $this->mockTokenProvider);
+    }
+
+    /**
+     * @test
      * @throws \PHPUnit\Framework\MockObject\Exception
      * @throws Exception
      */
-    public function testExecuteSuccessfully()
+    public function itShouldSaveVideosSuccessfullyWhenTokenAndVideosAreValid()
     {
-        $mockTokenProvider = $this->createMock(TwitchTokenProvider::class);
-        $mockTokenProvider->method('getTokenFromTwitch')->willReturn('fake_token');
+        $this->mockTokenProvider->method('getTokenFromTwitch')->willReturn('fake_token');
+        $this->mockApiClient->method('updateVideos')->willReturn([['id' => '456', 'title' => 'Fake Video']]);
+        $this->mockDbClient->expects($this->once())->method('saveVideos')->with([['id' => '456', 'title' => 'Fake Video']], '123');
 
-        $mockApiClient = $this->createMock(ApiClient::class);
-        $mockApiClient->method('updateVideos')->willReturn([['id' => '456', 'title' => 'Fake Video']]);
-
-        $mockDbClient = $this->createMock(DBClient::class);
-        $mockDbClient->expects($this->once())->method('saveVideos')->with([['id' => '456', 'title' => 'Fake Video']], '123');
-
-        $service = new TopVideoService($mockDbClient, $mockApiClient, $mockTokenProvider);
-        $service->execute('123');
+        $this->service->execute('123');
     }
 
     /**
-     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @test
      */
-    public function testExecuteThrowsExceptionWhenNoToken()
+    public function itShouldThrowExceptionWhenTokenRetrievalFails()
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Failed to retrieve access token from Twitch');
+        $this->mockTokenProvider->method('getTokenFromTwitch')->will($this->throwException(new Exception('Failed to retrieve access token from Twitch')));
 
-        $mockTokenProvider = $this->createMock(TwitchTokenProvider::class);
-        $mockTokenProvider->method('getTokenFromTwitch')->will($this->throwException(new Exception('Failed to retrieve access token from Twitch')));
-
-        $mockApiClient = $this->createMock(ApiClient::class);
-        $mockDbClient = $this->createMock(DBClient::class);
-
-        $service = new TopVideoService($mockDbClient, $mockApiClient, $mockTokenProvider);
-        $service->execute('123');
+        $this->service->execute('123');
     }
 
     /**
+     * @test
      * @throws \PHPUnit\Framework\MockObject\Exception
      */
-    public function testExecuteThrowsExceptionWhenNoVideos()
+    public function itShouldThrowExceptionWhenNoVideosAreFoundInApiResponse()
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('No se encontraron datos válidos en la respuesta de la API de Twitch.');
+        $this->mockTokenProvider->method('getTokenFromTwitch')->willReturn('fake_token');
+        $this->mockApiClient->method('updateVideos')->willReturn([]);
 
-        $mockTokenProvider = $this->createMock(TwitchTokenProvider::class);
-        $mockTokenProvider->method('getTokenFromTwitch')->willReturn('fake_token');
-
-        $mockApiClient = $this->createMock(ApiClient::class);
-        $mockApiClient->method('updateVideos')->willReturn([]);
-
-        $mockDbClient = $this->createMock(DBClient::class);
-
-        $service = new TopVideoService($mockDbClient, $mockApiClient, $mockTokenProvider);
-        $service->execute('123');
+        $this->service->execute('123');
     }
 }
+

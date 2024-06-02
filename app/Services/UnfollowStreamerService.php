@@ -32,11 +32,11 @@ class UnfollowStreamerService
         $newList = [];
         $found   = false;
         foreach ($followedStreamers as $streamer) {
-            if ($streamer['id'] != $streamerId) {
-                $newList[] = $streamer;
-            } else {
+            if ($streamer['id'] == $streamerId) {
                 $found = true;
+                continue;
             }
+            $newList[] = $streamer;
         }
 
         if (!$found) {

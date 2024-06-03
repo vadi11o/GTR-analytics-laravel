@@ -11,20 +11,23 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Mockery;
 
+/**
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
 class UnfollowStreamerTest extends TestCase
 {
     protected DBClient $dbClientMock;
     protected ApiClient $apiClientMock;
-    protected UnfollowStreamerService $unfollowStreamerService;
-    protected UnfollowStreamerController $unfollowStreamerController;
+    protected UnfollowStreamerService $unfollowService;
+    protected UnfollowStreamerController $unfollowControler;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->dbClientMock = Mockery::mock('App\Infrastructure\Clients\DBClient');
         $this->apiClientMock = Mockery::mock('App\Infrastructure\Clients\ApiClient');
-        $this->unfollowStreamerService = new UnfollowStreamerService($this->dbClientMock, $this->apiClientMock);
-        $this->unfollowStreamerController = new UnfollowStreamerController($this->unfollowStreamerService);
+        $this->unfollowService = new UnfollowStreamerService($this->dbClientMock, $this->apiClientMock);
+        $this->unfollowControler = new UnfollowStreamerController($this->unfollowService);
     }
 
     /** @test */
@@ -36,7 +39,7 @@ class UnfollowStreamerTest extends TestCase
             ->with('456')
             ->andReturn(null);
 
-        $response = $this->unfollowStreamerController->__invoke($request);
+        $response = $this->unfollowControler->__invoke($request);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(404, $response->status());
@@ -57,7 +60,7 @@ class UnfollowStreamerTest extends TestCase
         $this->dbClientMock->shouldReceive('updateUserAnalyticsInDB')
             ->never();
 
-        $response = $this->unfollowStreamerController->__invoke($request);
+        $response = $this->unfollowControler->__invoke($request);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(404, $response->status());
@@ -78,7 +81,7 @@ class UnfollowStreamerTest extends TestCase
         $this->dbClientMock->shouldReceive('updateUserAnalyticsInDB')
             ->never();
 
-        $response = $this->unfollowStreamerController->__invoke($request);
+        $response = $this->unfollowControler->__invoke($request);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(500, $response->status());
@@ -103,7 +106,7 @@ class UnfollowStreamerTest extends TestCase
                 return is_array($decoded) && count($decoded) == 1 && $decoded[0]['id'] == '789';
             }));
 
-        $response = $this->unfollowStreamerController->__invoke($request);
+        $response = $this->unfollowControler->__invoke($request);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(200, $response->status());

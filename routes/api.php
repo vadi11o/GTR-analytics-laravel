@@ -3,6 +3,7 @@
 use App\Infrastructure\Controllers\FollowStreamerController;
 use App\Infrastructure\Controllers\UnfollowStreamerController;
 use App\Infrastructure\Controllers\RegisterUserController;
+use App\Infrastructure\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Infrastructure\Controllers\GetStreamsController;
@@ -24,6 +25,8 @@ Route::get('/streamers', StreamerController::class);
 Route::get('/topsofthetops', TopsofthetopsController::class);
 
 Route::post('/users', RegisterUserController::class);
+
+Route::get('/users', UserController::class);
 
 Route::post('/follow', FollowStreamerController::class);
 

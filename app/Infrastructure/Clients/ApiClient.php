@@ -75,7 +75,7 @@ class ApiClient
      */
     public function updateGames($accessToken)
     {
-        $url      = 'https://api.twitch.tv/helix/games/top?first=3';
+        $url      = env('TWITCH_URL') . '/games/top?first=3';
         $response = Http::withHeaders([
             'Authorization' => "Bearer $accessToken",
             'Client-Id'     => env('TWITCH_CLIENT_ID'),
@@ -89,7 +89,7 @@ class ApiClient
      */
     public function updateVideos($accessToken, $gameId)
     {
-        $url      = "https://api.twitch.tv/helix/videos?game_id=$gameId&first=40&sort=views";
+        $url      = env('TWITCH_URL') . "/videos?game_id=$gameId&first=40&sort=views";
         $response = Http::withHeaders([
             'Authorization' => "Bearer $accessToken",
             'Client-Id'     => env('TWITCH_CLIENT_ID'),

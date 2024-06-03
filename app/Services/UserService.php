@@ -26,7 +26,7 @@ class UserService
 
             foreach ($users as $user) {
                 $followedStreamers = $user->followed_streamers ? json_decode($user->followed_streamers, true) : [];
-                $streamerNames = array_map(function($streamer) {
+                $streamerNames = array_map(function ($streamer) {
                     return $streamer['display_name'];
                 }, $followedStreamers);
 
@@ -35,9 +35,8 @@ class UserService
                     'followedStreamers' => $streamerNames
                 ];
             }
-
-            return response()->json($result, 200, [], JSON_PRETTY_PRINT| JSON_UNESCAPED_SLASHES);
-        } catch (Exception) {
+            return response()->json($result, 200, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        } catch (Exception $e) {
             return new JsonResponse(['message' => 'Error del servidor al obtener la lista de usuarios'], 500);
         }
     }

@@ -8,12 +8,17 @@ use App\Models\TopVideo;
 use App\Models\User;
 use App\Models\UserAnalytics;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
 class DBClient
 {
+    public function getAllUsersFromDB(): Collection
+    {
+        return UserAnalytics::all();
+    }
     public function getStreamerByIdFromDB(String $streamerId)
     {
         $streamer = User::where('twitch_id', $streamerId)->first();

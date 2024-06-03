@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Requests\UnfollowRequest;
 use App\Infrastructure\Clients\ApiClient;
 use App\Infrastructure\Clients\DBClient;
 use Tests\TestCase;
@@ -33,7 +34,7 @@ class UnfollowStreamerTest extends TestCase
     /** @test */
     public function itReturns404WhenUserNotFound()
     {
-        $request = Request::create('/unfollow', 'POST', ['userId' => '456', 'streamerId' => '123']);
+        $request = UnfollowRequest::create('/unfollow', 'POST', ['userId' => '456', 'streamerId' => '123']);
         $this->dbClientMock->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
@@ -52,7 +53,7 @@ class UnfollowStreamerTest extends TestCase
         $userData = (object) [
             'followed_streamers' => json_encode([['id' => '789']])
         ];
-        $request = Request::create('/unfollow', 'POST', ['userId' => '456', 'streamerId' => '123']);
+        $request = UnfollowRequest::create('/unfollow', 'POST', ['userId' => '456', 'streamerId' => '123']);
         $this->dbClientMock->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
@@ -73,7 +74,7 @@ class UnfollowStreamerTest extends TestCase
         $userData = (object) [
             'followed_streamers' => 'invalid_json'
         ];
-        $request = Request::create('/unfollow', 'POST', ['userId' => '456', 'streamerId' => '123']);
+        $request = UnfollowRequest::create('/unfollow', 'POST', ['userId' => '456', 'streamerId' => '123']);
         $this->dbClientMock->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
@@ -94,7 +95,7 @@ class UnfollowStreamerTest extends TestCase
         $userData = (object) [
             'followed_streamers' => json_encode([['id' => '123'], ['id' => '789']])
         ];
-        $request = Request::create('/unfollow', 'POST', ['userId' => '456', 'streamerId' => '123']);
+        $request = UnfollowRequest::create('/unfollow', 'POST', ['userId' => '456', 'streamerId' => '123']);
         $this->dbClientMock->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')

@@ -2,6 +2,7 @@
 
 namespace App\Infrastructure\Controllers;
 
+use App\Http\Requests\RegisterRequest;
 use App\Services\UserRegisterService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -16,14 +17,10 @@ class RegisterUserController extends Controller
         $this->userRegisterService = $userRegisterService;
     }
 
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(RegisterRequest $request): JsonResponse
     {
         $username = $request->input('username');
         $password = $request->input('password');
-
-        if (!$username || !$password) {
-            return response()->json(['error' => 'Falta el nombre de usuario o la contraseña'], 400);
-        }
 
         try {
             return $this->userRegisterService->execute($username, $password);

@@ -1,5 +1,6 @@
 <?php
 
+use App\Infrastructure\Controllers\TimelineController;
 use App\Infrastructure\Controllers\FollowStreamerController;
 use App\Infrastructure\Controllers\UnfollowStreamerController;
 use App\Infrastructure\Controllers\RegisterUserController;
@@ -28,3 +29,6 @@ Route::post('/users', RegisterUserController::class);
 Route::post('/follow', FollowStreamerController::class);
 
 Route::delete('/unfollow', UnfollowStreamerController::class);
+
+Route::get('/timeline', TimelineController::class);
+

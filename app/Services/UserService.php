@@ -21,17 +21,17 @@ class UserService
     public function execute(): JsonResponse
     {
         try {
-            $users = $this->dBClient->getAllUsersFromDB();
+            $users  = $this->dBClient->getAllUsersFromDB();
             $result = [];
 
             foreach ($users as $user) {
                 $followedStreamers = $user->followed_streamers ? json_decode($user->followed_streamers, true) : [];
-                $streamerNames = array_map(function ($streamer) {
+                $streamerNames     = array_map(function ($streamer) {
                     return $streamer['display_name'];
                 }, $followedStreamers);
 
                 $result[] = [
-                    'username' => $user->username,
+                    'username'          => $user->username,
                     'followedStreamers' => $streamerNames
                 ];
             }

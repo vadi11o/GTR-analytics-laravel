@@ -2,6 +2,7 @@
 
 namespace App\Infrastructure\Controllers;
 
+use App\Http\Requests\UnfollowRequest;
 use App\Services\UnfollowStreamerService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -19,14 +20,10 @@ class UnfollowStreamerController extends Controller
         $this->unfollowService = $unfollowService;
     }
 
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(UnfollowRequest $request): JsonResponse
     {
         $userId     = $request->input('userId');
         $streamerId = $request->input('streamerId');
-
-        if (!$streamerId || !$userId) {
-            return response()->json(['error' => 'Falta el ID del usuario o del streamer'], 400);
-        }
 
         try {
             return $this->unfollowService->execute($userId, $streamerId);

@@ -6,6 +6,9 @@ use App\Infrastructure\Clients\DBClient;
 use Illuminate\Http\JsonResponse;
 use Exception;
 
+/**
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
 class UserService
 {
     protected DBClient $dBClient;

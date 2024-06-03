@@ -5,6 +5,9 @@ namespace App\Infrastructure\Controllers;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 
+/**
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
 class UserController extends Controller
 {
     protected UserService $userService;

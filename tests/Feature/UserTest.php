@@ -11,6 +11,9 @@ use Illuminate\Http\JsonResponse;
 use Mockery;
 use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
 class UserTest extends TestCase
 {
     protected DBClient $dbClientMock;

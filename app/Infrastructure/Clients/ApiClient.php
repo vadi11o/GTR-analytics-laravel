@@ -97,4 +97,28 @@ class ApiClient
 
         return $response->json()['data'] ?? [];
     }
+
+    /**
+     * @throws ConnectionException
+     * @throws Exception
+     */
+    public function getStreamsByUserId($userId)
+    {
+        $token = $this->tokenProvider->getTokenFromTwitch();
+        $url   = env('TWITCH_URL') .'/videos';
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+            'Client-Id'     => env('TWITCH_CLIENT_ID'),
+        ])->get($url, [
+            'user_id' => $userId,
+            'first'   => 5,
+        ]);
+
+        if ($response->successful()) {
+            return $response->json()['data'] ?? [];
+        }
+
+        return ['error' => 'Failed to fetch data from Twitch', 'status_code' => $response->status()];
+    }
 }

@@ -31,13 +31,7 @@ class TimelineService
         }
 
         $followedStreamers = json_decode($userAnalytics->followed_streamers, true);
-        $streams           = $this->sortStreams($followedStreamers);
-
-        usort($streams, function ($streamA, $streamB) {
-            return strtotime($streamB['startedAt']) - strtotime($streamA['startedAt']);
-        });
-
-        return $streams;
+        return $this->sortStreams($followedStreamers);
     }
 
     public function sortStreams($followedStreamers): array
@@ -62,6 +56,9 @@ class TimelineService
                 ];
             }
         }
+        usort($streams, function ($streamA, $streamB) {
+            return strtotime($streamB['startedAt']) - strtotime($streamA['startedAt']);
+        });
         return $streams;
     }
 }

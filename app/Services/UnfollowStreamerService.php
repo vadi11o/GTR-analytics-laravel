@@ -6,6 +6,9 @@ use App\Infrastructure\Clients\DBClient;
 use App\Infrastructure\Clients\ApiClient;
 use Illuminate\Http\JsonResponse;
 
+/**
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
 class UnfollowStreamerService
 {
     protected DBClient $dBClient;

@@ -9,6 +9,9 @@ use App\Infrastructure\Clients\ApiClient;
 use Illuminate\Http\JsonResponse;
 use Mockery;
 
+/**
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
 class UnfollowStreamerTest extends TestCase
 {
     protected DBClient $dbClientMock;

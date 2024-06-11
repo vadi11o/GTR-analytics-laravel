@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Collection;
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
-class UserTest extends TestCase
+class UserServiceTest extends TestCase
 {
     protected DBClient $dbClientMock;
     protected UserService $userService;

@@ -16,7 +16,7 @@ use Exception;
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
-class StreamsTest extends TestCase
+class GetStreamsServiceTest extends TestCase
 {
     protected ApiClient $apiClient;
     private GetStreamsService $service;

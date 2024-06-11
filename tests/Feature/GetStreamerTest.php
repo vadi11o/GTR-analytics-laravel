@@ -7,7 +7,7 @@ use App\Infrastructure\Clients\DBClient;
 use PHPUnit\Framework\MockObject\Exception;
 use Tests\TestCase;
 
-class StreamersTest extends TestCase
+class GetStreamerTest extends TestCase
 {
     /** @test
      * @throws Exception

@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
-class TimelineeTest extends TestCase
+class TimelineServiceTest extends TestCase
 {
     protected DBClient $dbClientMock;
     protected APIClient $apiClientMock;

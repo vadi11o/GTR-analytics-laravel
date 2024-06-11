@@ -17,16 +17,16 @@ use Mockery;
  */
 class FollowStreamerServiceTest extends TestCase
 {
-    protected DBClient $dbClientMock;
-    protected ApiClient $apiClientMock;
+    protected DBClient $dbClient;
+    protected ApiClient $apiClient;
     protected FollowStreamerService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dbClientMock  = Mockery::mock(DBClient::class);
-        $this->apiClientMock = Mockery::mock(ApiClient::class);
-        $this->service       = new FollowStreamerService($this->dbClientMock, $this->apiClientMock);
+        $this->dbClient  = Mockery::mock(DBClient::class);
+        $this->apiClient = Mockery::mock(ApiClient::class);
+        $this->service       = new FollowStreamerService($this->dbClient, $this->apiClient);
     }
 
     /** @test
@@ -34,7 +34,7 @@ class FollowStreamerServiceTest extends TestCase
      */
     public function executeReturns404WhenUserNotFound()
     {
-        $this->dbClientMock->shouldReceive('getUserAnalyticsByIdFromDB')
+        $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with(456)
             ->andReturn(false);
@@ -54,15 +54,15 @@ class FollowStreamerServiceTest extends TestCase
         $userData = (object) [
             'followed_streamers' => json_encode([['id' => '123']])
         ];
-        $this->dbClientMock->shouldReceive('getUserAnalyticsByIdFromDB')
+        $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
             ->andReturn($userData);
-        $this->apiClientMock->shouldReceive('fetchStreamerDataFromTwitch')
+        $this->apiClient->shouldReceive('fetchStreamerDataFromTwitch')
             ->once()
             ->with('123')
             ->andReturn(['display_name' => 'StreamerName']);
-        $this->dbClientMock->shouldReceive('updateUserAnalyticsInDB')
+        $this->dbClient->shouldReceive('updateUserAnalyticsInDB')
             ->never();
 
         $response = $this->service->execute('456', '123');
@@ -80,15 +80,15 @@ class FollowStreamerServiceTest extends TestCase
         $userData = (object) [
             'followed_streamers' => json_encode([])
         ];
-        $this->dbClientMock->shouldReceive('getUserAnalyticsByIdFromDB')
+        $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with(456)
             ->andReturn($userData);
-        $this->apiClientMock->shouldReceive('fetchStreamerDataFromTwitch')
+        $this->apiClient->shouldReceive('fetchStreamerDataFromTwitch')
             ->once()
             ->with('123')
             ->andReturn(['display_name' => 'StreamerName']);
-        $this->dbClientMock->shouldReceive('updateUserAnalyticsInDB')
+        $this->dbClient->shouldReceive('updateUserAnalyticsInDB')
             ->once()
             ->with($userData);
 

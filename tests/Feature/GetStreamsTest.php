@@ -14,7 +14,7 @@ class GetStreamsTest extends TestCase
      */
     public function itShouldReturnStreamsDataSuccessfully()
     {
-        $mockApiResponse = [
+        $apiResponse = [
             'data' => [
                 ['title' => 'MSI MAIN EVENT GENG VS TES - #MSI2024', 'user_name' => 'Caedrel'],
                 ['title' => '#ZLAN2024 : 2e jour ! En direct de Montpellier, 198 jugadores s\'affrontent pour 52024€ de cashprize', 'user_name' => 'ZeratoR'],
@@ -31,7 +31,7 @@ class GetStreamsTest extends TestCase
             ->method('fetchStreamsFromTwitch')
             ->willReturn([
                 'status' => 200,
-                'body'   => json_encode($mockApiResponse)
+                'body'   => json_encode($apiResponse)
             ]);
         $streamsService = new GetStreamsService($apiClient);
         $this->app->instance(GetStreamsService::class, $streamsService);

@@ -24,9 +24,9 @@ use Illuminate\Foundation\Testing\WithoutMiddleware;
 class TopsofthetopsTest extends TestCase
 {
 
-    protected DBClient $dbClientMock;
-    protected ApiClient $apiClientMock;
-    protected TwitchTokenProvider $tokenProviderMock;
+    protected DBClient $dbClient;
+    protected ApiClient $apiClient;
+    protected TwitchTokenProvider $tokenProvider;
     protected TopsofthetopsService $topsService;
     protected TopGamesService $topGamesService;
     protected TopVideoService $topVideosService;
@@ -36,25 +36,25 @@ class TopsofthetopsTest extends TestCase
     {
         parent::setUp();
 
-        $this->dbClientMock      = Mockery::mock(DBClient::class);
-        $this->apiClientMock     = Mockery::mock(ApiClient::class);
-        $this->tokenProviderMock = Mockery::mock(TwitchTokenProvider::class);
+        $this->dbClient      = Mockery::mock(DBClient::class);
+        $this->apiClient     = Mockery::mock(ApiClient::class);
+        $this->tokenProvider = Mockery::mock(TwitchTokenProvider::class);
 
         $this->topGamesService = new TopGamesService(
-            $this->dbClientMock,
-            $this->apiClientMock,
-            $this->tokenProviderMock
+            $this->dbClient,
+            $this->apiClient,
+            $this->tokenProvider
         );
 
         $this->topVideosService = new TopVideoService(
-            $this->dbClientMock,
-            $this->apiClientMock,
-            $this->tokenProviderMock
+            $this->dbClient,
+            $this->apiClient,
+            $this->tokenProvider
         );
 
         $this->topsService = new TopsofthetopsService(
-            $this->dbClientMock,
-            $this->tokenProviderMock,
+            $this->dbClient,
+            $this->tokenProvider,
             $this->topVideosService,
             $this->topGamesService
         );
@@ -108,12 +108,12 @@ class TopsofthetopsTest extends TestCase
                 'ultima_actualizacion'   => now()->toDateTimeString()
             ]
         ];
-        $this->dbClientMock->shouldReceive('updateGamesSince')->once()->with(600, $this->topVideosService);
-        $this->tokenProviderMock->shouldReceive('getTokenFromTwitch')->andReturn('valid_token');
-        $this->dbClientMock->shouldReceive('getTopGames')->andReturn(collect($mockTopGames));
-        $this->dbClientMock->shouldReceive('getTopOfTheTopsData')->andReturn(collect($mockTopOfTheTops));
-        $this->apiClientMock->shouldReceive('updateGames')->andReturn($mockTopGames);
-        $this->dbClientMock->shouldReceive('saveGames')->andReturnNull();
+        $this->dbClient->shouldReceive('updateGamesSince')->once()->with(600, $this->topVideosService);
+        $this->tokenProvider->shouldReceive('getTokenFromTwitch')->andReturn('valid_token');
+        $this->dbClient->shouldReceive('getTopGames')->andReturn(collect($mockTopGames));
+        $this->dbClient->shouldReceive('getTopOfTheTopsData')->andReturn(collect($mockTopOfTheTops));
+        $this->apiClient->shouldReceive('updateGames')->andReturn($mockTopGames);
+        $this->dbClient->shouldReceive('saveGames')->andReturnNull();
         $topGameMock = Mockery::mock('alias:' . TopGame::class);
         $topGameMock->shouldReceive('pluck')->andReturn(collect([1]));
         $topOfTheTopMock = Mockery::mock('alias:' . TopOfTheTop::class);
@@ -134,7 +134,7 @@ class TopsofthetopsTest extends TestCase
      */
     public function errorIfTokenRetrievalFails()
     {
-        $this->tokenProviderMock->shouldReceive('getTokenFromTwitch')->andThrow(new ConnectionException());
+        $this->tokenProvider->shouldReceive('getTokenFromTwitch')->andThrow(new ConnectionException());
 
         $request = Request::create('analytics/topsofthetops', 'GET', ['since' => 600]);
 

@@ -15,14 +15,14 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class UserServiceTest extends TestCase
 {
-    protected DBClient $dbClientMock;
+    protected DBClient $dbClient;
     protected UserService $userService;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dbClientMock = Mockery::mock(DBClient::class);
-        $this->userService = new UserService($this->dbClientMock);
+        $this->dbClient = Mockery::mock(DBClient::class);
+        $this->userService = new UserService($this->dbClient);
     }
 
     public function testExecuteReturns200WithListOfUsers()
@@ -31,7 +31,7 @@ class UserServiceTest extends TestCase
             (object) ['username' => 'usuario1', 'followed_streamers' => json_encode([['display_name' => 'streamer1'], ['display_name' => 'streamer2']])],
             (object) ['username' => 'usuario2', 'followed_streamers' => json_encode([['display_name' => 'streamer2'], ['display_name' => 'streamer3']])]
         ]);
-        $this->dbClientMock->shouldReceive('getAllUsersFromDB')
+        $this->dbClient->shouldReceive('getAllUsersFromDB')
             ->once()
             ->andReturn($users);
 
@@ -53,7 +53,7 @@ class UserServiceTest extends TestCase
 
     public function testExecuteReturns500OnServerError()
     {
-        $this->dbClientMock->shouldReceive('getAllUsersFromDB')
+        $this->dbClient->shouldReceive('getAllUsersFromDB')
             ->once()
             ->andThrow(new Exception('Error'));
 

@@ -6,6 +6,7 @@ use App\Infrastructure\Clients\DBClient;
 use App\Infrastructure\Clients\APIClient;
 use Exception;
 use Illuminate\Http\Client\ConnectionException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class TimelineService
 {
@@ -27,13 +28,16 @@ class TimelineService
         $userAnalytics = $this->dbClient->getUserAnalyticsByIdFromDB($userId);
 
         if (!$userAnalytics) {
-            throw new Exception('User not found');
+            throw new NotFoundHttpException('User not found');
         }
 
         $followedStreamers = json_decode($userAnalytics->followed_streamers, true);
         return $this->sortStreams($followedStreamers);
     }
 
+    /**
+     * @throws ConnectionException
+     */
     public function sortStreams($followedStreamers): array
     {
         $streams = [];

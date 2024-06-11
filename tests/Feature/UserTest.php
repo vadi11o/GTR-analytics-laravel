@@ -16,15 +16,15 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class UserTest extends TestCase
 {
-    protected DBClient $dbClientMock;
+    protected DBClient $dBClient;
     protected UserService $userService;
     protected UserController $userController;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dbClientMock = Mockery::mock('App\Infrastructure\Clients\DBClient');
-        $this->userService = new UserService($this->dbClientMock);
+        $this->dBClient = Mockery::mock('App\Infrastructure\Clients\DBClient');
+        $this->userService = new UserService($this->dBClient);
         $this->userController = new UserController($this->userService);
     }
 
@@ -35,7 +35,7 @@ class UserTest extends TestCase
             (object) ['username' => 'usuario1', 'followed_streamers' => json_encode([['display_name' => 'streamer1'], ['display_name' => 'streamer2']])],
             (object) ['username' => 'usuario2', 'followed_streamers' => json_encode([['display_name' => 'streamer2'], ['display_name' => 'streamer3']])]
         ]);
-        $this->dbClientMock->shouldReceive('getAllUsersFromDB')
+        $this->dBClient->shouldReceive('getAllUsersFromDB')
             ->once()
             ->andReturn($users);
 
@@ -58,7 +58,7 @@ class UserTest extends TestCase
     /** @test */
     public function itReturns500OnServerError()
     {
-        $this->dbClientMock->shouldReceive('getAllUsersFromDB')
+        $this->dBClient->shouldReceive('getAllUsersFromDB')
             ->once()
             ->andThrow(new Exception('Error'));
 
@@ -73,7 +73,7 @@ class UserTest extends TestCase
     public function returnsEmptyListWhenNoUsers()
     {
         $users = new Collection([]);
-        $this->dbClientMock->shouldReceive('getAllUsersFromDB')
+        $this->dBClient->shouldReceive('getAllUsersFromDB')
             ->once()
             ->andReturn($users);
 
@@ -90,7 +90,7 @@ class UserTest extends TestCase
         $users = new Collection([
             (object) ['username' => 'usuario1', 'followed_streamers' => json_encode([])],
         ]);
-        $this->dbClientMock->shouldReceive('getAllUsersFromDB')
+        $this->dBClient->shouldReceive('getAllUsersFromDB')
             ->once()
             ->andReturn($users);
 

@@ -24,11 +24,12 @@ class TokenProviderTest extends TestCase
 
     /**
      * @test
+     * @throws Exception
      */
     public function SuccesRetrievingTokenFromTwitch()
     {
         Http::fake([
-            'https://id.twitch.tv/oauth2/token' => Http::response(['access_token' => 'test_token'], 200),
+            'https://id.twitch.tv/oauth2/token' => Http::response(['access_token' => 'test_token']),
         ]);
 
         $token = $this->tokenProvider->getTokenFromTwitch();

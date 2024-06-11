@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Infrastructure\Clients\ApiClient;
 use App\Infrastructure\Clients\DBClient;
+use App\Managers\TwitchManager;
 use PHPUnit\Framework\MockObject\Exception;
 use Tests\TestCase;
 
@@ -30,10 +30,10 @@ class GetStreamerTest extends TestCase
         ];
 
         $this->dbClient = $this->createMock(DBClient::class);
-        $this->apiClient = $this->createMock(ApiClient::class);
+        $this->apiClient = $this->createMock(TwitchManager::class);
 
         $this->app->instance(DBClient::class, $this->dbClient);
-        $this->app->instance(ApiClient::class, $this->apiClient);
+        $this->app->instance(TwitchManager::class, $this->apiClient);
     }
 
     /** @test

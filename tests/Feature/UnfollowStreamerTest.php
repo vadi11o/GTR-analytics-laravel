@@ -3,14 +3,13 @@
 namespace Tests\Feature;
 
 use App\Http\Requests\UnfollowRequest;
-use App\Infrastructure\Clients\ApiClient;
 use App\Infrastructure\Clients\DBClient;
-use Tests\TestCase;
-use App\Services\UnfollowStreamerService;
 use App\Infrastructure\Controllers\UnfollowStreamerController;
-use Illuminate\Http\Request;
+use App\Managers\TwitchManager;
+use App\Services\UnfollowStreamerService;
 use Illuminate\Http\JsonResponse;
 use Mockery;
+use Tests\TestCase;
 
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
@@ -18,7 +17,7 @@ use Mockery;
 class UnfollowStreamerTest extends TestCase
 {
     protected DBClient $dbClient;
-    protected ApiClient $apiClient;
+    protected TwitchManager $apiClient;
     protected UnfollowStreamerService $unfollowService;
     protected UnfollowStreamerController $unfollowControler;
 
@@ -26,7 +25,7 @@ class UnfollowStreamerTest extends TestCase
     {
         parent::setUp();
         $this->dbClient = Mockery::mock('App\Infrastructure\Clients\DBClient');
-        $this->apiClient = Mockery::mock('App\Infrastructure\Clients\ApiClient');
+        $this->apiClient = Mockery::mock('App\Managers\TwitchManager');
         $this->unfollowService = new UnfollowStreamerService($this->dbClient, $this->apiClient);
         $this->unfollowControler = new UnfollowStreamerController($this->unfollowService);
     }

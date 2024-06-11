@@ -1,10 +1,9 @@
 <?php
 
 use App\Infrastructure\Clients\DBClient;
-use App\Infrastructure\Clients\APIClient;
+use App\Managers\TwitchManager;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\TestCase;
-use Mockery;
 use Exception;
 
 /**
@@ -13,15 +12,15 @@ use Exception;
 class TimelineTest extends TestCase
 {
     protected DBClient $dbClient;
-    protected APIClient $apiClient;
+    protected TwitchManager $apiClient;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dbClient = Mockery::mock(DBClient::class);
-        $this->apiClient = Mockery::mock(APIClient::class);
+        $this->dbClient  = Mockery::mock(DBClient::class);
+        $this->apiClient = Mockery::mock(TwitchManager::class);
         $this->app->instance(DBClient::class, $this->dbClient);
-        $this->app->instance(APIClient::class, $this->apiClient);
+        $this->app->instance(TwitchManager::class, $this->apiClient);
     }
 
     protected function tearDown(): void
@@ -65,7 +64,6 @@ class TimelineTest extends TestCase
         $response->assertStatus(500);
         $response->assertJson(['error' => 'Server error']);
     }
-
 
     /**
      * @test

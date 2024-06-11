@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use App\Infrastructure\Clients\ApiClient;
 use App\Infrastructure\Clients\DBClient;
+use App\Managers\TwitchManager;
 use App\Providers\TwitchTokenProvider;
-use Illuminate\Http\Client\ConnectionException;
 use Exception;
+use Illuminate\Http\Client\ConnectionException;
 
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
@@ -15,12 +15,12 @@ class TopGamesService
 {
     protected TwitchTokenProvider $tokenProvider;
     protected DBClient $dbClient;
-    protected ApiClient $apiClient;
+    protected TwitchManager $apiClient;
 
-    public function __construct(DBClient $dbClient, ApiClient $apiClient = null, TwitchTokenProvider $tokenProvider = null)
+    public function __construct(DBClient $dbClient, TwitchManager $apiClient = null, TwitchTokenProvider $tokenProvider = null)
     {
         $this->tokenProvider = $tokenProvider ?? new TwitchTokenProvider();
-        $this->apiClient     = $apiClient     ?? new ApiClient($this->$tokenProvider);
+        $this->apiClient     = $apiClient     ?? new TwitchManager($this->$tokenProvider);
         $this->dbClient      = $dbClient;
     }
 

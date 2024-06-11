@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Infrastructure\Clients\DBClient;
-use App\Infrastructure\Clients\ApiClient;
+use App\Managers\TwitchManager;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -12,9 +12,9 @@ use Illuminate\Http\JsonResponse;
 class UnfollowStreamerService
 {
     protected DBClient $dBClient;
-    protected ApiClient $apiClient;
+    protected TwitchManager $apiClient;
 
-    public function __construct(DBClient $dBClient, ApiClient $apiClient)
+    public function __construct(DBClient $dBClient, TwitchManager $apiClient)
     {
         $this->dBClient  = $dBClient;
         $this->apiClient = $apiClient;

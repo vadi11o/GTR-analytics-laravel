@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Infrastructure\Clients\DBClient;
-use App\Infrastructure\Clients\APIClient;
+use App\Managers\TwitchManager;
 use Exception;
 use Illuminate\Http\Client\ConnectionException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -11,9 +11,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class TimelineService
 {
     protected DBClient $dbClient;
-    protected APIClient $apiClient;
+    protected TwitchManager $apiClient;
 
-    public function __construct(DBClient $dbClient, APIClient $apiClient)
+    public function __construct(DBClient $dbClient, TwitchManager $apiClient)
     {
         $this->dbClient  = $dbClient;
         $this->apiClient = $apiClient;

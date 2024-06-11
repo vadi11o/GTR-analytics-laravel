@@ -2,8 +2,8 @@
 
 namespace Services;
 
-use App\Infrastructure\Clients\ApiClient;
 use App\Infrastructure\Clients\DBClient;
+use App\Managers\TwitchManager;
 use App\Services\FollowStreamerService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -18,14 +18,14 @@ use Tests\TestCase;
 class FollowStreamerServiceTest extends TestCase
 {
     protected DBClient $dbClient;
-    protected ApiClient $apiClient;
+    protected TwitchManager $apiClient;
     protected FollowStreamerService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->dbClient  = Mockery::mock(DBClient::class);
-        $this->apiClient = Mockery::mock(ApiClient::class);
+        $this->apiClient = Mockery::mock(TwitchManager::class);
         $this->service   = new FollowStreamerService($this->dbClient, $this->apiClient);
     }
 

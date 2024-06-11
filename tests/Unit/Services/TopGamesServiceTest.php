@@ -2,8 +2,8 @@
 
 namespace Services;
 
-use App\Infrastructure\Clients\ApiClient;
 use App\Infrastructure\Clients\DBClient;
+use App\Managers\TwitchManager;
 use App\Providers\TwitchTokenProvider;
 use App\Services\TopGamesService;
 use Exception;
@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 class TopGamesServiceTest extends TestCase
 {
     protected TwitchTokenProvider $tokenProvider;
-    protected ApiClient $apiClient;
+    protected TwitchManager $apiClient;
     protected DBClient $dbClient;
     protected TopGamesService $service;
 
@@ -25,7 +25,7 @@ class TopGamesServiceTest extends TestCase
         parent::setUp();
 
         $this->tokenProvider = $this->createMock(TwitchTokenProvider::class);
-        $this->apiClient     = $this->createMock(ApiClient::class);
+        $this->apiClient     = $this->createMock(TwitchManager::class);
         $this->dbClient      = $this->createMock(DBClient::class);
 
         $this->service = new TopGamesService($this->dbClient, $this->apiClient, $this->tokenProvider);

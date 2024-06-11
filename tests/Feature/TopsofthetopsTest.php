@@ -2,21 +2,20 @@
 
 namespace Tests\Feature;
 
-use App\Infrastructure\Controllers\TopsofthetopsController;
-use App\Services\TopGamesService;
-use App\Services\TopVideoService;
-use App\Services\TopsOfTheTopsService;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Tests\TestCase;
-use Mockery;
 use App\Infrastructure\Clients\DBClient;
-use App\Infrastructure\Clients\ApiClient;
-use App\Providers\TwitchTokenProvider;
-use Illuminate\Http\Client\ConnectionException;
+use App\Infrastructure\Controllers\TopsofthetopsController;
+use App\Managers\TwitchManager;
 use App\Models\TopGame;
 use App\Models\TopOfTheTop;
-use Illuminate\Foundation\Testing\WithoutMiddleware;
+use App\Providers\TwitchTokenProvider;
+use App\Services\TopGamesService;
+use App\Services\TopsOfTheTopsService;
+use App\Services\TopVideoService;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Mockery;
+use Tests\TestCase;
 
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
@@ -25,7 +24,7 @@ class TopsofthetopsTest extends TestCase
 {
 
     protected DBClient $dbClient;
-    protected ApiClient $apiClient;
+    protected TwitchManager $apiClient;
     protected TwitchTokenProvider $tokenProvider;
     protected TopsOfTheTopsService $topsService;
     protected TopGamesService $topGamesService;
@@ -37,7 +36,7 @@ class TopsofthetopsTest extends TestCase
         parent::setUp();
 
         $this->dbClient      = Mockery::mock(DBClient::class);
-        $this->apiClient     = Mockery::mock(ApiClient::class);
+        $this->apiClient     = Mockery::mock(TwitchManager::class);
         $this->tokenProvider = Mockery::mock(TwitchTokenProvider::class);
 
         $this->topGamesService = new TopGamesService(

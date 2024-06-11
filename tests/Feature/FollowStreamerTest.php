@@ -3,14 +3,13 @@
 namespace Tests\Feature;
 
 use App\Http\Requests\FollowRequest;
-use App\Infrastructure\Clients\ApiClient;
 use App\Infrastructure\Clients\DBClient;
-use Tests\TestCase;
 use App\Infrastructure\Controllers\FollowStreamerController;
+use App\Managers\TwitchManager;
 use App\Services\FollowStreamerService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Mockery;
+use Tests\TestCase;
 
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
@@ -18,7 +17,7 @@ use Mockery;
 class FollowStreamerTest extends TestCase
 {
     protected DBClient $dbClient;
-    protected ApiClient $apiClient;
+    protected TwitchManager $apiClient;
     protected FollowStreamerService $followService;
     protected FollowStreamerController $followController;
 
@@ -26,7 +25,7 @@ class FollowStreamerTest extends TestCase
     {
         parent::setUp();
         $this->dbClient     = Mockery::mock('App\Infrastructure\Clients\DBClient');
-        $this->apiClient    = Mockery::mock('App\Infrastructure\Clients\ApiClient');
+        $this->apiClient    = Mockery::mock('App\Managers\TwitchManager');
         $this->followService    = new FollowStreamerService($this->dbClient, $this->apiClient);
         $this->followController = new FollowStreamerController($this->followService);
     }

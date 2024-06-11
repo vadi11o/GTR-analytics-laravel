@@ -7,7 +7,7 @@ use App\Services\GetStreamsService;
 use Tests\TestCase;
 use Exception;
 
-class StreamsTest extends TestCase
+class GetStreamsTest extends TestCase
 {
     /** @test
      * @throws Exception|\PHPUnit\Framework\MockObject\Exception

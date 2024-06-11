@@ -19,7 +19,7 @@ use Tests\TestCase;
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
-class StreamersTest extends TestCase
+class GetStreamerServiceTest extends TestCase
 {
     use MockeryPHPUnitIntegration;
 

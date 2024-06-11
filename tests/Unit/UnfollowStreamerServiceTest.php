@@ -12,7 +12,7 @@ use Mockery;
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
-class UnfollowStreamerTest extends TestCase
+class UnfollowStreamerServiceTest extends TestCase
 {
     protected DBClient $dbClientMock;
     protected ApiClient $apiClientMock;

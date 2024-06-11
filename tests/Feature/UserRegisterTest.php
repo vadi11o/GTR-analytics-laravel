@@ -10,7 +10,7 @@ use Tests\TestCase;
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
-class RegisterUserTest extends TestCase
+class UserRegisterTest extends TestCase
 {
     /**
      * @Test

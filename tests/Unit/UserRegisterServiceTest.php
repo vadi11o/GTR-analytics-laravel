@@ -11,7 +11,7 @@ use Tests\TestCase;
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
-class RegisterUserTest extends TestCase
+class UserRegisterServiceTest extends TestCase
 {
     public function tearDown(): void
     {

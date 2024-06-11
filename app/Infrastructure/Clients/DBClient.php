@@ -66,20 +66,6 @@ class DBClient
         $userData->save();
     }
 
-    public function needsUpdate($gameId, $since): bool
-    {
-        $topOfTheTop = TopOfTheTop::find($gameId);
-
-        if (!$topOfTheTop || !$topOfTheTop->ultima_actualizacion) {
-            return true;
-        }
-
-        $lastUpdate = Carbon::parse($topOfTheTop->ultima_actualizacion);
-        $now        = Carbon::now();
-
-        return $now->diffInSeconds($lastUpdate) > $since;
-    }
-
     public function updateTopForGame($game): void
     {
         $videos = TopVideo::where('game_id', $game->game_id)
@@ -154,5 +140,19 @@ class DBClient
                 $this->updateTopForGame($game);
             }
         }
+    }
+
+    private function needsUpdate($gameId, $since): bool
+    {
+        $topOfTheTop = TopOfTheTop::find($gameId);
+
+        if (!$topOfTheTop || !$topOfTheTop->ultima_actualizacion) {
+            return true;
+        }
+
+        $lastUpdate = Carbon::parse($topOfTheTop->ultima_actualizacion);
+        $now        = Carbon::now();
+
+        return $now->diffInSeconds($lastUpdate) > $since;
     }
 }

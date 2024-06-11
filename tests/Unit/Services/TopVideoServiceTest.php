@@ -1,11 +1,13 @@
 <?php
 
-use App\Services\TopVideoService;
+namespace Services;
+
 use App\Infrastructure\Clients\ApiClient;
 use App\Infrastructure\Clients\DBClient;
 use App\Providers\TwitchTokenProvider;
-use PHPUnit\Framework\TestCase;
+use App\Services\TopVideoService;
 use Exception;
+use PHPUnit\Framework\TestCase;
 
 class TopVideoServiceTest extends TestCase
 {
@@ -33,7 +35,7 @@ class TopVideoServiceTest extends TestCase
      * @throws \PHPUnit\Framework\MockObject\Exception
      * @throws Exception
      */
-    public function itShouldSaveVideosSuccessfullyWhenTokenAndVideosAreValid()
+    public function updatesVideos()
     {
         $this->tokenProvider->method('getTokenFromTwitch')->willReturn('fake_token');
         $this->apiClient->method('updateVideos')->willReturn([['id' => '456', 'title' => 'Fake Video']]);
@@ -45,7 +47,7 @@ class TopVideoServiceTest extends TestCase
     /**
      * @test
      */
-    public function itShouldThrowExceptionWhenTokenRetrievalFails()
+    public function errorIfTokenRetrievalFails()
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Failed to retrieve access token from Twitch');
@@ -58,7 +60,7 @@ class TopVideoServiceTest extends TestCase
      * @test
      * @throws \PHPUnit\Framework\MockObject\Exception
      */
-    public function itShouldThrowExceptionWhenNoVideosAreFoundInApiResponse()
+    public function errorIfVideosAreNotFound()
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('No se encontraron datos válidos en la respuesta de la API de Twitch.');

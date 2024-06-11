@@ -1,8 +1,13 @@
 <?php
 
-use App\Infrastructure\Clients\DBClient;
+namespace Services;
+
 use App\Infrastructure\Clients\APIClient;
+use App\Infrastructure\Clients\DBClient;
 use App\Services\TimelineService;
+use Exception;
+use Illuminate\Http\Client\ConnectionException;
+use Mockery;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -13,6 +18,7 @@ class TimelineServiceTest extends TestCase
     protected DBClient $dbClient;
     protected APIClient $apiClient;
     protected TimelineService $timelineService;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -25,43 +31,7 @@ class TimelineServiceTest extends TestCase
 
     /**
      * @test
-     */
-    public function sortStreamsSortsWell()
-    {
-        $this->apiClient->shouldReceive('getStreamsByUserId')
-            ->with('123')
-            ->andReturn([
-                ['title' => 'Stream1', 'view_count' => 100, 'created_at' => '2023-01-01T00:00:00Z'],
-                ['title' => 'Stream2', 'view_count' => 200, 'created_at' => '2023-01-02T00:00:00Z']
-            ]);
-
-        $expected = [
-            [
-                'streamerId'   => '123',
-                'streamerName' => 'Streamer1',
-                'title'        => 'Stream2',
-                'viewerCount'  => 200,
-                'startedAt'    => '2023-01-02T00:00:00Z'
-            ],
-            [
-                'streamerId'   => '123',
-                'streamerName' => 'Streamer1',
-                'title'        => 'Stream1',
-                'viewerCount'  => 100,
-                'startedAt'    => '2023-01-01T00:00:00Z'
-            ]
-        ];
-
-        $followedStreamers = [['id' => '123', 'display_name' => 'Streamer1']];
-
-        $result = $this->timelineService->sortStreams($followedStreamers);
-
-        $this->assertEquals($expected, $result);
-    }
-
-    /**
-     * @test
-     * @throws \Illuminate\Http\Client\ConnectionException
+     * @throws ConnectionException
      */
     public function userNotFound()
     {
@@ -77,9 +47,9 @@ class TimelineServiceTest extends TestCase
 
     /**
      * @test
-     * @throws \Illuminate\Http\Client\ConnectionException
+     * @throws ConnectionException
      */
-    public function executeSortsStreamsByStartedAt()
+    public function streamsAreSortedInTheCorrectOrder()
     {
         $expected = [
             [
@@ -104,11 +74,9 @@ class TimelineServiceTest extends TestCase
                 'startedAt'    => '2023-01-01T10:00:00Z'
             ]
         ];
-
         $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->with(1)
-            ->andReturn((object) ['followed_streamers' => json_encode([['id' => '123', 'display_name' => 'Streamer1']])]);
-
+            ->andReturn((object)['followed_streamers' => json_encode([['id' => '123', 'display_name' => 'Streamer1']])]);
         $this->apiClient->shouldReceive('getStreamsByUserId')
             ->with('123')
             ->andReturn([

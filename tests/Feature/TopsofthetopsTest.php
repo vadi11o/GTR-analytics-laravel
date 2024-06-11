@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Infrastructure\Controllers\TopsofthetopsController;
 use App\Services\TopGamesService;
 use App\Services\TopVideoService;
-use App\Services\TopsofthetopsService;
+use App\Services\TopsOfTheTopsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Tests\TestCase;
@@ -27,7 +27,7 @@ class TopsofthetopsTest extends TestCase
     protected DBClient $dbClient;
     protected ApiClient $apiClient;
     protected TwitchTokenProvider $tokenProvider;
-    protected TopsofthetopsService $topsService;
+    protected TopsOfTheTopsService $topsService;
     protected TopGamesService $topGamesService;
     protected TopVideoService $topVideosService;
     protected TopsofthetopsController $topsController;
@@ -52,7 +52,7 @@ class TopsofthetopsTest extends TestCase
             $this->tokenProvider
         );
 
-        $this->topsService = new TopsofthetopsService(
+        $this->topsService = new TopsOfTheTopsService(
             $this->dbClient,
             $this->tokenProvider,
             $this->topVideosService,

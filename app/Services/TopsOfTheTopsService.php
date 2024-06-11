@@ -10,7 +10,7 @@ use Illuminate\Http\Client\ConnectionException;
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
-class TopsofthetopsService
+class TopsOfTheTopsService
 {
     protected TwitchTokenProvider $twitchTokenService;
     protected TopVideoService $topVideosService;

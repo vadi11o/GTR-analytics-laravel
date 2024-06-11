@@ -26,7 +26,7 @@ class TokenProviderTest extends TestCase
      * @test
      * @throws Exception
      */
-    public function SuccesRetrievingTokenFromTwitch()
+    public function succesRetrievingTokenFromTwitch()
     {
         Http::fake([
             'https://id.twitch.tv/oauth2/token' => Http::response(['access_token' => 'test_token']),
@@ -39,7 +39,7 @@ class TokenProviderTest extends TestCase
     /**
      * @test
      */
-    public function ErrorIfTokenRetrievalFromTwitchFails()
+    public function errorIfTokenRetrievalFromTwitchFails()
     {
         Http::fake([
             'https://id.twitch.tv/oauth2/token' => Http::response(['error' => 'invalid_client'], 400),

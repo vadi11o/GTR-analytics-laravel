@@ -1,12 +1,14 @@
 <?php
 
-use App\Services\TopGamesService;
+namespace Services;
+
 use App\Infrastructure\Clients\ApiClient;
 use App\Infrastructure\Clients\DBClient;
 use App\Providers\TwitchTokenProvider;
-use PHPUnit\Framework\TestCase;
-use Illuminate\Http\Client\ConnectionException;
+use App\Services\TopGamesService;
 use Exception;
+use Illuminate\Http\Client\ConnectionException;
+use PHPUnit\Framework\TestCase;
 
 class TopGamesServiceTest extends TestCase
 {
@@ -34,7 +36,7 @@ class TopGamesServiceTest extends TestCase
      * @throws \PHPUnit\Framework\MockObject\Exception
      * @throws ConnectionException
      */
-    public function itShouldSaveGamesSuccessfullyWhenTokenAndGamesAreValid()
+    public function updatesTopOfTheTops()
     {
         $this->tokenProvider->method('getTokenFromTwitch')->willReturn('fake_token');
         $this->apiClient->method('updateGames')->willReturn([['id' => '123', 'name' => 'Fake Game']]);
@@ -47,7 +49,7 @@ class TopGamesServiceTest extends TestCase
      * @test
      * @throws ConnectionException
      */
-    public function itShouldThrowExceptionWhenTokenRetrievalFails()
+    public function errorIfTokenRetrievalFails()
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Failed to retrieve access token from Twitch');
@@ -61,7 +63,7 @@ class TopGamesServiceTest extends TestCase
      * @throws \PHPUnit\Framework\MockObject\Exception
      * @throws ConnectionException
      */
-    public function itShouldThrowExceptionWhenNoGamesAreFoundInApiResponse()
+    public function errorIfGamesAreNotFound()
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('No se encontraron datos válidos en la respuesta de la API de Twitch.');

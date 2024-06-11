@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Services;
 
 use App\Infrastructure\Clients\DBClient;
 use App\Services\UserRegisterService;
@@ -20,7 +20,7 @@ class UserRegisterServiceTest extends TestCase
     {
         parent::setUp();
         $this->dBClient = Mockery::mock(DBClient::class);
-        $this->service = new UserRegisterService($this->dBClient);
+        $this->service  = new UserRegisterService($this->dBClient);
     }
 
     public function tearDown(): void
@@ -32,7 +32,7 @@ class UserRegisterServiceTest extends TestCase
     /**
      * @test
      */
-    public function returnsConflictWhenUserAllreadyExists()
+    public function conflictWhenUserAllreadyExists()
     {
         $this->dBClient->shouldReceive('getUserAnalyticsByNameFromDB')
             ->with('testuser')
@@ -48,7 +48,7 @@ class UserRegisterServiceTest extends TestCase
     /**
      * @test
      */
-    public function createsNewUserWhenUserDoesNotExist()
+    public function newUserWhenUserDoesNotExist()
     {
         $this->dBClient->shouldReceive('getUserAnalyticsByNameFromDB')
             ->with('testuser')

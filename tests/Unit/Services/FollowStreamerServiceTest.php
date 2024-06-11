@@ -1,16 +1,16 @@
 <?php
 
-namespace Tests\Unit;
+namespace Services;
 
+use App\Infrastructure\Clients\ApiClient;
+use App\Infrastructure\Clients\DBClient;
+use App\Services\FollowStreamerService;
 use Exception;
+use Illuminate\Http\JsonResponse;
+use Mockery;
 use ReflectionClass;
 use ReflectionException;
 use Tests\TestCase;
-use App\Services\FollowStreamerService;
-use App\Infrastructure\Clients\DBClient;
-use App\Infrastructure\Clients\ApiClient;
-use Illuminate\Http\JsonResponse;
-use Mockery;
 
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
@@ -26,13 +26,13 @@ class FollowStreamerServiceTest extends TestCase
         parent::setUp();
         $this->dbClient  = Mockery::mock(DBClient::class);
         $this->apiClient = Mockery::mock(ApiClient::class);
-        $this->service       = new FollowStreamerService($this->dbClient, $this->apiClient);
+        $this->service   = new FollowStreamerService($this->dbClient, $this->apiClient);
     }
 
     /** @test
      * @throws Exception
      */
-    public function executeReturns404WhenUserNotFound()
+    public function handlesErrorWhenUserNotFound()
     {
         $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
@@ -49,7 +49,7 @@ class FollowStreamerServiceTest extends TestCase
     /** @test
      * @throws Exception
      */
-    public function executeReturns409WhenAlreadyFollowing()
+    public function warnsWhenAlreadyFollowingTheStreamer()
     {
         $userData = (object) [
             'followed_streamers' => json_encode([['id' => '123']])
@@ -75,7 +75,7 @@ class FollowStreamerServiceTest extends TestCase
     /** @test
      * @throws Exception
      */
-    public function executeReturns200WhenFollowSuccessful()
+    public function followSuccessful()
     {
         $userData = (object) [
             'followed_streamers' => json_encode([])
@@ -107,11 +107,11 @@ class FollowStreamerServiceTest extends TestCase
         $userId           = 123;
         $streamerId       = 123;
         $exceptionMessage = 'Error del servidor al seguir al streamer';
-        $this->dbClientMock
+        $this->dbClient
             ->shouldReceive('getUserAnalyticsByIdFromDB')
             ->with($userId)
             ->andReturn(['id' => $userId, 'name' => 'Test User']);
-        $this->apiClientMock
+        $this->apiClient
             ->shouldReceive('fetchStreamerDataFromTwitch')
             ->with($streamerId)
             ->andThrow(new Exception($exceptionMessage));
@@ -131,15 +131,15 @@ class FollowStreamerServiceTest extends TestCase
         $userData = (object) [
             'followed_streamers' => 123
         ];
-        $this->dbClientMock->shouldReceive('getUserAnalyticsByIdFromDB')
+        $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
             ->andReturn($userData);
-        $this->apiClientMock->shouldReceive('fetchStreamerDataFromTwitch')
+        $this->apiClient->shouldReceive('fetchStreamerDataFromTwitch')
             ->once()
             ->with('123')
             ->andReturn(['display_name' => 'StreamerName']);
-        $this->dbClientMock->shouldReceive('updateUserAnalyticsInDB')
+        $this->dbClient->shouldReceive('updateUserAnalyticsInDB')
             ->never();
 
         $response = $this->service->execute('456', '123');

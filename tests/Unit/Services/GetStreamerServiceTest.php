@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Services;
 
 use App\Infrastructure\Clients\ApiClient;
 use App\Infrastructure\Clients\DBClient;
@@ -48,7 +48,7 @@ class GetStreamerServiceTest extends TestCase
 
     /** @test
      */
-    public function streamerControllerHandlesMissingIdParameter()
+    public function handlesMissingIdParameterOnRequest()
     {
         $response = $this->getJson('analytics/streamers');
 
@@ -60,7 +60,7 @@ class GetStreamerServiceTest extends TestCase
 
     /** @test
      */
-    public function streamerControllerHandlesInvalidIdParameter()
+    public function handlesInvalidIdParameterOnRequest()
     {
         $response = $this->getJson('analytics/streamers?id=invalid_id');
 
@@ -73,7 +73,7 @@ class GetStreamerServiceTest extends TestCase
     /**@test
      * @throws \Exception
      */
-    public function executeReturnsStreamerFromDBIfFound()
+    public function returnsStreamerFromDBIfFound()
     {
         $userId     = '123';
         $userFromDB = ['id' => $userId, 'name' => 'John Doe'];
@@ -92,7 +92,7 @@ class GetStreamerServiceTest extends TestCase
     /**@test
      * @throws \Exception
      */
-    public function executeCallsGetStreamerServiceWhenNotInDB()
+    public function fetchStreamerFromTwitchWhenIsNotInDB()
     {
         $streamerId   = '83232866';
         $streamerData = [
@@ -138,7 +138,7 @@ class GetStreamerServiceTest extends TestCase
     /** @test
      * @throws \Exception
      */
-    public function getStreamerServiceReturnsStreamerDataWhenFound()
+    public function returnsStreamerDataWhenFound()
     {
         $streamerId   = '83232866';
         $streamerData = [
@@ -175,7 +175,7 @@ class GetStreamerServiceTest extends TestCase
     /** @test
      * @throws \Exception
      */
-    public function executeCallsInsertStreamerToDB()
+    public function insertStreamerToDBIsCalled()
     {
         $this->getStreamerService = new GetStreamerService($this->dbClient, $this->apiClient, $this->tokenProvider);
         $streamerId               = '12345';
@@ -196,7 +196,7 @@ class GetStreamerServiceTest extends TestCase
 
     /** @test
      */
-    public function getUserByIdFromDBReturnsNullIfNotFound()
+    public function ifTheUserIsNotFoundInTheDBReturnsNull()
     {
         $userId   = 'nonexistent';
         $userMock = Mockery::mock('overload:' . User::class);

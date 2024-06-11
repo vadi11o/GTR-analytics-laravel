@@ -2,35 +2,23 @@
 
 namespace App\Infrastructure\Controllers;
 
-use App\Services\UserDataManager;
-use Exception;
+use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
+/**
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
 class UserController extends Controller
 {
-    protected UserDataManager $userDataManager;
+    protected UserService $userService;
 
-    public function __construct(UserDataManager $userDataManager)
+    public function __construct(UserService $userService)
     {
-        $this->userDataManager = $userDataManager;
+        $this->userService = $userService;
     }
 
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(): JsonResponse
     {
-        $userId = $request->query('id');
-        if (!$userId) {
-            return response()->json(['error' => 'El parametro "id" no se proporciono en la URL.'], 400, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-        }
-
-        try {
-            $result = $this->userDataManager->execute($userId);
-            return response()->json($result->getData(), $result->status(), [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-        } catch (Exception) {
-            $response = [
-                'error' => 'No se pueden devolver usuarios en este momento, inténtalo más tarde'
-            ];
-            return response()->json($response, 503, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-        }
+        return $this->userService->execute();
     }
 }

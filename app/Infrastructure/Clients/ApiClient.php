@@ -5,7 +5,7 @@ namespace App\Infrastructure\Clients;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
+use App\Providers\TwitchTokenProvider;
 use Exception;
 
 /**
@@ -14,21 +14,23 @@ use Exception;
 
 class ApiClient
 {
-    private mixed $clientId;
-    private mixed $clientSecret;
+    private TwitchTokenProvider $tokenProvider;
 
-    public function __construct($clientId = null, $clientSecret = null)
+    public function __construct(TwitchTokenProvider $tokenProvider)
     {
-        $this->clientId     = $clientId     ?? env('TWITCH_CLIENT_ID');
-        $this->clientSecret = $clientSecret ?? env('TWITCH_CLIENT_SECRET');
+        $this->tokenProvider = $tokenProvider;
     }
 
-    public function sendCurlPetitionToTwitch($twitchStreamsUrl, $twitchToken): array
+    /**
+     * @throws Exception
+     */
+    public function fetchStreamsFromTwitch(): array
     {
+        $token    = $this->tokenProvider->getTokenFromTwitch();
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $twitchToken,
-            'Client-Id'     => $this->clientId,
-        ])->get($twitchStreamsUrl);
+            'Authorization' => 'Bearer ' . $token,
+            'Client-Id'     => env('TWITCH_CLIENT_ID'),
+        ])->get(env('TWITCH_URL') . '/streams');
 
         return [
             'status' => $response->status(),
@@ -37,69 +39,86 @@ class ApiClient
     }
 
     /**
-     * @throws ConnectionException
-     * @throws \Exception
+     * @throws Exception
      */
-    public function getTokenFromTwitch()
+    public function fetchStreamerDataFromTwitch($streamerId): array
     {
-        $response = Http::asForm()->post('https://id.twitch.tv/oauth2/token', [
-            'client_id'     => $this->clientId,
-            'client_secret' => $this->clientSecret,
-            'grant_type'    => 'client_credentials',
-        ]);
+        $token = $this->tokenProvider->getTokenFromTwitch();
+        $url   = env('TWITCH_URL') . '/users?id=' . $streamerId;
 
-        if ($response->successful() && isset($response->json()['access_token'])) {
-            return $response->json()['access_token'];
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+            'Client-Id'     => env('TWITCH_CLIENT_ID'),
+        ])->get($url);
+
+        if ($response->successful()) {
+            $streamerData = $response->json()['data'][0];
+
+            return [
+                'twitch_id'         => $streamerData['id'],
+                'login'             => $streamerData['login'],
+                'display_name'      => $streamerData['display_name'],
+                'type'              => $streamerData['type'],
+                'broadcaster_type'  => $streamerData['broadcaster_type'],
+                'description'       => $streamerData['description'],
+                'profile_image_url' => $streamerData['profile_image_url'],
+                'offline_image_url' => $streamerData['offline_image_url'],
+                'view_count'        => $streamerData['view_count'],
+                'created_at'        => Carbon::parse($streamerData['created_at'])->toDateTimeString()
+            ];
         }
-
-        Log::warning('Failed to retrieve access token from Twitch', [
-            'status'        => $response->status(),
-            'response_body' => $response->json(),
-        ]);
-
-        throw new Exception('Failed to retrieve access token from Twitch: ' . $response->json()['error'] ?? 'Unknown error', $response->status());
+        return ['error' => 'Failed to fetch data from Twitch', 'status_code' => $response->status()];
     }
 
     /**
      * @throws ConnectionException
      */
-    public function fetchUserDataFromTwitch($token, $userId): array
+    public function updateGames($accessToken)
     {
-        $url = 'https://api.twitch.tv/helix/users?id=' . $userId;
+        $url      = env('TWITCH_URL') . '/games/top?first=3';
+        $response = Http::withHeaders([
+            'Authorization' => "Bearer $accessToken",
+            'Client-Id'     => env('TWITCH_CLIENT_ID'),
+        ])->get($url);
+
+        return $response->json()['data'] ?? [];
+    }
+
+    /**
+     * @throws ConnectionException
+     */
+    public function updateVideos($accessToken, $gameId)
+    {
+        $url      = env('TWITCH_URL') . "/videos?game_id=$gameId&first=40&sort=views";
+        $response = Http::withHeaders([
+            'Authorization' => "Bearer $accessToken",
+            'Client-Id'     => env('TWITCH_CLIENT_ID'),
+        ])->get($url);
+
+        return $response->json()['data'] ?? [];
+    }
+
+    /**
+     * @throws ConnectionException
+     * @throws Exception
+     */
+    public function getStreamsByUserId($userId)
+    {
+        $token = $this->tokenProvider->getTokenFromTwitch();
+        $url   = env('TWITCH_URL') .'/videos';
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $token,
-            'Client-Id'     => $this->clientId,
-        ])->get($url);
+            'Client-Id'     => env('TWITCH_CLIENT_ID'),
+        ])->get($url, [
+            'user_id' => $userId,
+            'first'   => 5,
+        ]);
 
         if ($response->successful()) {
-            $userData = $response->json()['data'][0];
-
-            return [
-                'twitch_id'         => $userData['id'],
-                'login'             => $userData['login'],
-                'display_name'      => $userData['display_name'],
-                'type'              => $userData['type'],
-                'broadcaster_type'  => $userData['broadcaster_type'],
-                'description'       => $userData['description'],
-                'profile_image_url' => $userData['profile_image_url'],
-                'offline_image_url' => $userData['offline_image_url'],
-                'view_count'        => $userData['view_count'],
-                'created_at'        => Carbon::parse($userData['created_at'])->toDateTimeString()
-            ];
+            return $response->json()['data'] ?? [];
         }
 
         return ['error' => 'Failed to fetch data from Twitch', 'status_code' => $response->status()];
-
-    }
-
-    public function getClientId()
-    {
-        return $this->clientId;
-    }
-
-    public function getClientSecret()
-    {
-        return $this->clientSecret;
     }
 }

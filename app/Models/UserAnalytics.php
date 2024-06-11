@@ -5,34 +5,26 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * @method static where(string $string, String $streamerId)
- * @method static create(array $streamerData)
+ * @method static where(string $string, String $userName)
+ * @method static create(array $userData)
  */
-class User extends Model
+class UserAnalytics extends Model
 {
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'users_ta';
-
+    protected $table = 'users_analytics';
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
-        'twitch_id',
-        'login',
-        'display_name',
-        'type',
-        'broadcaster_type',
-        'description',
-        'profile_image_url',
-        'offline_image_url',
-        'view_count',
-        'created_at'
+        'username',
+        'password',
+        'streamers'
     ];
 
     /**
@@ -41,4 +33,5 @@ class User extends Model
      * @var bool
      */
     public $timestamps = false;
+
 }

@@ -22,7 +22,10 @@ jobs:
           php-version: '8.2'
 
       - name: Install dependencies
-        run: composer install
+        run: composer install --ignore-platform-req=ext-http
+
+      - name: Copy .env.example to .env
+        run: cp .env.example .env
 
       - name: Run GRUMPHP
         run: |

@@ -17,17 +17,17 @@ use Mockery;
  */
 class FollowStreamerTest extends TestCase
 {
-    protected DBClient $dbClientMock;
-    protected ApiClient $apiClientMock;
+    protected DBClient $dbClient;
+    protected ApiClient $apiClient;
     protected FollowStreamerService $followService;
     protected FollowStreamerController $followController;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dbClientMock     = Mockery::mock('App\Infrastructure\Clients\DBClient');
-        $this->apiClientMock    = Mockery::mock('App\Infrastructure\Clients\ApiClient');
-        $this->followService    = new FollowStreamerService($this->dbClientMock, $this->apiClientMock);
+        $this->dbClient     = Mockery::mock('App\Infrastructure\Clients\DBClient');
+        $this->apiClient    = Mockery::mock('App\Infrastructure\Clients\ApiClient');
+        $this->followService    = new FollowStreamerService($this->dbClient, $this->apiClient);
         $this->followController = new FollowStreamerController($this->followService);
     }
 
@@ -35,7 +35,7 @@ class FollowStreamerTest extends TestCase
     public function itReturns404WhenUserNotFound()
     {
         $request = FollowRequest::create('/follow', 'POST', ['userId' => '456', 'streamerId' => '123']);
-        $this->dbClientMock->shouldReceive('getUserAnalyticsByIdFromDB')
+        $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
             ->andReturn(null);
@@ -54,15 +54,15 @@ class FollowStreamerTest extends TestCase
             'followed_streamers' => json_encode([['id' => '123']])
         ];
         $request = FollowRequest::create('/follow', 'POST', ['userId' => '456', 'streamerId' => '123']);
-        $this->dbClientMock->shouldReceive('getUserAnalyticsByIdFromDB')
+        $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
             ->andReturn($userData);
-        $this->apiClientMock->shouldReceive('fetchStreamerDataFromTwitch')
+        $this->apiClient->shouldReceive('fetchStreamerDataFromTwitch')
             ->once()
             ->with('123')
             ->andReturn(['display_name' => 'StreamerName']);
-        $this->dbClientMock->shouldReceive('updateUserAnalyticsInDB')
+        $this->dbClient->shouldReceive('updateUserAnalyticsInDB')
             ->never();
 
         $response = $this->followController->__invoke($request);
@@ -79,15 +79,15 @@ class FollowStreamerTest extends TestCase
             'followed_streamers' => json_encode([])
         ];
         $request = FollowRequest::create('/follow', 'POST', ['userId' => '456', 'streamerId' => '123']);
-        $this->dbClientMock->shouldReceive('getUserAnalyticsByIdFromDB')
+        $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
             ->andReturn($userData);
-        $this->apiClientMock->shouldReceive('fetchStreamerDataFromTwitch')
+        $this->apiClient->shouldReceive('fetchStreamerDataFromTwitch')
             ->once()
             ->with('123')
             ->andReturn(['display_name' => 'StreamerName']);
-        $this->dbClientMock->shouldReceive('updateUserAnalyticsInDB')
+        $this->dbClient->shouldReceive('updateUserAnalyticsInDB')
             ->once()
             ->with(Mockery::on(function ($userData) {
                 $decoded = json_decode($userData->followed_streamers, true);

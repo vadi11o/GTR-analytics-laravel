@@ -10,9 +10,9 @@ use Exception;
 
 class TopGamesServiceTest extends TestCase
 {
-    protected TwitchTokenProvider $mockTokenProvider;
-    protected ApiClient $mockApiClient;
-    protected DBClient $mockDbClient;
+    protected TwitchTokenProvider $tokenProvider;
+    protected ApiClient $apiClient;
+    protected DBClient $dbClient;
     protected TopGamesService $service;
 
     /**
@@ -22,11 +22,11 @@ class TopGamesServiceTest extends TestCase
     {
         parent::setUp();
 
-        $this->mockTokenProvider = $this->createMock(TwitchTokenProvider::class);
-        $this->mockApiClient     = $this->createMock(ApiClient::class);
-        $this->mockDbClient      = $this->createMock(DBClient::class);
+        $this->tokenProvider = $this->createMock(TwitchTokenProvider::class);
+        $this->apiClient     = $this->createMock(ApiClient::class);
+        $this->dbClient      = $this->createMock(DBClient::class);
 
-        $this->service = new TopGamesService($this->mockDbClient, $this->mockApiClient, $this->mockTokenProvider);
+        $this->service = new TopGamesService($this->dbClient, $this->apiClient, $this->tokenProvider);
     }
 
     /**
@@ -36,9 +36,9 @@ class TopGamesServiceTest extends TestCase
      */
     public function itShouldSaveGamesSuccessfullyWhenTokenAndGamesAreValid()
     {
-        $this->mockTokenProvider->method('getTokenFromTwitch')->willReturn('fake_token');
-        $this->mockApiClient->method('updateGames')->willReturn([['id' => '123', 'name' => 'Fake Game']]);
-        $this->mockDbClient->expects($this->once())->method('saveGames')->with([['id' => '123', 'name' => 'Fake Game']]);
+        $this->tokenProvider->method('getTokenFromTwitch')->willReturn('fake_token');
+        $this->apiClient->method('updateGames')->willReturn([['id' => '123', 'name' => 'Fake Game']]);
+        $this->dbClient->expects($this->once())->method('saveGames')->with([['id' => '123', 'name' => 'Fake Game']]);
 
         $this->service->execute();
     }
@@ -51,7 +51,7 @@ class TopGamesServiceTest extends TestCase
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Failed to retrieve access token from Twitch');
-        $this->mockTokenProvider->method('getTokenFromTwitch')->will($this->throwException(new Exception('Failed to retrieve access token from Twitch')));
+        $this->tokenProvider->method('getTokenFromTwitch')->will($this->throwException(new Exception('Failed to retrieve access token from Twitch')));
 
         $this->service->execute();
     }
@@ -65,8 +65,8 @@ class TopGamesServiceTest extends TestCase
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('No se encontraron datos válidos en la respuesta de la API de Twitch.');
-        $this->mockTokenProvider->method('getTokenFromTwitch')->willReturn('fake_token');
-        $this->mockApiClient->method('updateGames')->willReturn([]);
+        $this->tokenProvider->method('getTokenFromTwitch')->willReturn('fake_token');
+        $this->apiClient->method('updateGames')->willReturn([]);
 
         $this->service->execute();
     }

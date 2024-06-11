@@ -13,14 +13,14 @@ use Tests\TestCase;
  */
 class UserRegisterServiceTest extends TestCase
 {
-    protected DBClient $dbClientMock;
+    protected DBClient $dBClient;
     protected UserRegisterService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dbClientMock = Mockery::mock(DBClient::class);
-        $this->service = new UserRegisterService($this->dbClientMock);
+        $this->dBClient = Mockery::mock(DBClient::class);
+        $this->service = new UserRegisterService($this->dBClient);
     }
 
     public function tearDown(): void
@@ -34,7 +34,7 @@ class UserRegisterServiceTest extends TestCase
      */
     public function returnsConflictWhenUserAllreadyExists()
     {
-        $this->dbClientMock->shouldReceive('getUserAnalyticsByNameFromDB')
+        $this->dBClient->shouldReceive('getUserAnalyticsByNameFromDB')
             ->with('testuser')
             ->andReturn(true);
 
@@ -50,10 +50,10 @@ class UserRegisterServiceTest extends TestCase
      */
     public function createsNewUserWhenUserDoesNotExist()
     {
-        $this->dbClientMock->shouldReceive('getUserAnalyticsByNameFromDB')
+        $this->dBClient->shouldReceive('getUserAnalyticsByNameFromDB')
             ->with('testuser')
             ->andReturn(false);
-        $this->dbClientMock->shouldReceive('insertUserAnalyticsToDB')
+        $this->dBClient->shouldReceive('insertUserAnalyticsToDB')
             ->with(['username' => 'testuser', 'password' => 'testpassword'])
             ->once();
 

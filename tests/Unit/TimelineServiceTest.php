@@ -10,22 +10,25 @@ use PHPUnit\Framework\TestCase;
  */
 class TimelineServiceTest extends TestCase
 {
-    protected DBClient $dbClientMock;
-    protected APIClient $apiClientMock;
+    protected DBClient $dbClient;
+    protected APIClient $apiClient;
     protected TimelineService $timelineService;
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->dbClientMock  = Mockery::mock(DBClient::class);
-        $this->apiClientMock = Mockery::mock(APIClient::class);
+        $this->dbClient  = Mockery::mock(DBClient::class);
+        $this->apiClient = Mockery::mock(APIClient::class);
 
-        $this->timelineService = new TimelineService($this->dbClientMock, $this->apiClientMock);
+        $this->timelineService = new TimelineService($this->dbClient, $this->apiClient);
     }
 
-    public function testSortStreamsSortsWell()
+    /**
+     * @test
+     */
+    public function sortStreamsSortsWell()
     {
-        $this->apiClientMock->shouldReceive('getStreamsByUserId')
+        $this->apiClient->shouldReceive('getStreamsByUserId')
             ->with('123')
             ->andReturn([
                 ['title' => 'Stream1', 'view_count' => 100, 'created_at' => '2023-01-01T00:00:00Z'],
@@ -56,9 +59,13 @@ class TimelineServiceTest extends TestCase
         $this->assertEquals($expected, $result);
     }
 
-    public function testUserNotFound()
+    /**
+     * @test
+     * @throws \Illuminate\Http\Client\ConnectionException
+     */
+    public function userNotFound()
     {
-        $this->dbClientMock->shouldReceive('getUserAnalyticsByIdFromDB')
+        $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->with(1)
             ->andReturn(false);
 
@@ -68,7 +75,11 @@ class TimelineServiceTest extends TestCase
         $this->timelineService->execute(1);
     }
 
-    public function testExecuteSortsStreamsByStartedAt()
+    /**
+     * @test
+     * @throws \Illuminate\Http\Client\ConnectionException
+     */
+    public function executeSortsStreamsByStartedAt()
     {
         $expected = [
             [
@@ -94,11 +105,11 @@ class TimelineServiceTest extends TestCase
             ]
         ];
 
-        $this->dbClientMock->shouldReceive('getUserAnalyticsByIdFromDB')
+        $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->with(1)
             ->andReturn((object) ['followed_streamers' => json_encode([['id' => '123', 'display_name' => 'Streamer1']])]);
 
-        $this->apiClientMock->shouldReceive('getStreamsByUserId')
+        $this->apiClient->shouldReceive('getStreamsByUserId')
             ->with('123')
             ->andReturn([
                 ['title' => 'Stream1', 'view_count' => 100, 'created_at' => '2023-01-01T10:00:00Z'],

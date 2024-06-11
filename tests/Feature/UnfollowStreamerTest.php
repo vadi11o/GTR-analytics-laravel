@@ -17,17 +17,17 @@ use Mockery;
  */
 class UnfollowStreamerTest extends TestCase
 {
-    protected DBClient $dbClientMock;
-    protected ApiClient $apiClientMock;
+    protected DBClient $dbClient;
+    protected ApiClient $apiClient;
     protected UnfollowStreamerService $unfollowService;
     protected UnfollowStreamerController $unfollowControler;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dbClientMock = Mockery::mock('App\Infrastructure\Clients\DBClient');
-        $this->apiClientMock = Mockery::mock('App\Infrastructure\Clients\ApiClient');
-        $this->unfollowService = new UnfollowStreamerService($this->dbClientMock, $this->apiClientMock);
+        $this->dbClient = Mockery::mock('App\Infrastructure\Clients\DBClient');
+        $this->apiClient = Mockery::mock('App\Infrastructure\Clients\ApiClient');
+        $this->unfollowService = new UnfollowStreamerService($this->dbClient, $this->apiClient);
         $this->unfollowControler = new UnfollowStreamerController($this->unfollowService);
     }
 
@@ -35,7 +35,7 @@ class UnfollowStreamerTest extends TestCase
     public function itReturns404WhenUserNotFound()
     {
         $request = UnfollowRequest::create('/unfollow', 'POST', ['userId' => '456', 'streamerId' => '123']);
-        $this->dbClientMock->shouldReceive('getUserAnalyticsByIdFromDB')
+        $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
             ->andReturn(null);
@@ -54,11 +54,11 @@ class UnfollowStreamerTest extends TestCase
             'followed_streamers' => json_encode([['id' => '789']])
         ];
         $request = UnfollowRequest::create('/unfollow', 'POST', ['userId' => '456', 'streamerId' => '123']);
-        $this->dbClientMock->shouldReceive('getUserAnalyticsByIdFromDB')
+        $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
             ->andReturn($userData);
-        $this->dbClientMock->shouldReceive('updateUserAnalyticsInDB')
+        $this->dbClient->shouldReceive('updateUserAnalyticsInDB')
             ->never();
 
         $response = $this->unfollowControler->__invoke($request);
@@ -75,11 +75,11 @@ class UnfollowStreamerTest extends TestCase
             'followed_streamers' => 'invalid_json'
         ];
         $request = UnfollowRequest::create('/unfollow', 'POST', ['userId' => '456', 'streamerId' => '123']);
-        $this->dbClientMock->shouldReceive('getUserAnalyticsByIdFromDB')
+        $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
             ->andReturn($userData);
-        $this->dbClientMock->shouldReceive('updateUserAnalyticsInDB')
+        $this->dbClient->shouldReceive('updateUserAnalyticsInDB')
             ->never();
 
         $response = $this->unfollowControler->__invoke($request);
@@ -96,11 +96,11 @@ class UnfollowStreamerTest extends TestCase
             'followed_streamers' => json_encode([['id' => '123'], ['id' => '789']])
         ];
         $request = UnfollowRequest::create('/unfollow', 'POST', ['userId' => '456', 'streamerId' => '123']);
-        $this->dbClientMock->shouldReceive('getUserAnalyticsByIdFromDB')
+        $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
             ->andReturn($userData);
-        $this->dbClientMock->shouldReceive('updateUserAnalyticsInDB')
+        $this->dbClient->shouldReceive('updateUserAnalyticsInDB')
             ->once()
             ->with(Mockery::on(function($userData) {
                 $decoded = json_decode($userData->followed_streamers, true);

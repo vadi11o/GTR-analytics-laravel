@@ -14,16 +14,16 @@ use Mockery;
  */
 class UnfollowStreamerServiceTest extends TestCase
 {
-    protected DBClient $dbClientMock;
-    protected ApiClient $apiClientMock;
+    protected DBClient $dBClient;
+    protected ApiClient $apiClient;
     protected UnfollowStreamerService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dbClientMock = Mockery::mock(DBClient::class);
-        $this->apiClientMock = Mockery::mock(ApiClient::class);
-        $this->service = new UnfollowStreamerService($this->dbClientMock, $this->apiClientMock);
+        $this->dBClient = Mockery::mock(DBClient::class);
+        $this->apiClient = Mockery::mock(ApiClient::class);
+        $this->service = new UnfollowStreamerService($this->dBClient, $this->apiClient);
     }
 
     /**
@@ -31,7 +31,7 @@ class UnfollowStreamerServiceTest extends TestCase
      */
     public function executeReturns404WhenUserNotFound()
     {
-        $this->dbClientMock->shouldReceive('getUserAnalyticsByIdFromDB')
+        $this->dBClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
             ->andReturn(null);
@@ -51,7 +51,7 @@ class UnfollowStreamerServiceTest extends TestCase
         $userData = (object) [
             'followed_streamers' => json_encode([['id' => '789']])
         ];
-        $this->dbClientMock->shouldReceive('getUserAnalyticsByIdFromDB')
+        $this->dBClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
             ->andReturn($userData);
@@ -71,7 +71,7 @@ class UnfollowStreamerServiceTest extends TestCase
         $userData = (object) [
             'followed_streamers' => 'invalid_json'
         ];
-        $this->dbClientMock->shouldReceive('getUserAnalyticsByIdFromDB')
+        $this->dBClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
             ->andReturn($userData);
@@ -91,12 +91,12 @@ class UnfollowStreamerServiceTest extends TestCase
         $userData = (object) [
             'followed_streamers' => json_encode([['id' => '123'], ['id' => '789']])
         ];
-        $this->dbClientMock->shouldReceive('getUserAnalyticsByIdFromDB')
+        $this->dBClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
             ->andReturn($userData);
 
-        $this->dbClientMock->shouldReceive('updateUserAnalyticsInDB')
+        $this->dBClient->shouldReceive('updateUserAnalyticsInDB')
             ->once()
             ->with(Mockery::on(function($userData) {
                 $decoded = json_decode($userData->followed_streamers, true);

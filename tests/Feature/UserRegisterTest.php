@@ -12,12 +12,12 @@ use Tests\TestCase;
  */
 class UserRegisterTest extends TestCase
 {
-    protected DBClient $dbClientMock;
+    protected DBClient $dbClient;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dbClientMock = Mockery::mock(DBClient::class);
+        $this->dbClient = Mockery::mock(DBClient::class);
     }
 
     protected function tearDown(): void
@@ -31,7 +31,7 @@ class UserRegisterTest extends TestCase
      */
     public function registerUserSuccess()
     {
-        $dbClientMock = $this->dbClientMock;
+        $dbClientMock = $this->dbClient;
         $dbClientMock->shouldReceive('getUserAnalyticsByNameFromDB')
             ->with('testuser')
             ->andReturn(false);
@@ -56,7 +56,7 @@ class UserRegisterTest extends TestCase
      */
     public function registerUserFailureWhenUserAllreadyExists()
     {
-        $dbClientMock = $this->dbClientMock;
+        $dbClientMock = $this->dbClient;
         $dbClientMock->shouldReceive('getUserAnalyticsByNameFromDB')->with('testuser')->andReturn(true);
         $this->app->instance(DBClient::class, $dbClientMock);
 
@@ -102,7 +102,7 @@ class UserRegisterTest extends TestCase
      */
     public function registerUserFailsDueToDatabaseError()
     {
-        $dbClientMock = $this->dbClientMock;
+        $dbClientMock = $this->dbClient;
         $dbClientMock->shouldReceive('getUserAnalyticsByNameFromDB')->with('testuser')->andThrow(new Exception('Database error'));
         $this->app->instance(DBClient::class, $dbClientMock);
 

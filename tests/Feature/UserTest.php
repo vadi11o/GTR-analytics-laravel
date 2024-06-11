@@ -69,6 +69,43 @@ class UserTest extends TestCase
         $this->assertEquals(['message' => 'Error del servidor al obtener la lista de usuarios'], $response->getData(true));
     }
 
+    /** @test */
+    public function returnsEmptyListWhenNoUsers()
+    {
+        $users = new Collection([]);
+        $this->dbClientMock->shouldReceive('getAllUsersFromDB')
+            ->once()
+            ->andReturn($users);
+
+        $response = $this->userService->execute();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals(200, $response->status());
+        $this->assertEquals([], $response->getData(true));
+    }
+
+    /** @test */
+    public function returnsUserWithNoFollowedsWhenUserFollowsNoStreamers()
+    {
+        $users = new Collection([
+            (object) ['username' => 'usuario1', 'followed_streamers' => json_encode([])],
+        ]);
+        $this->dbClientMock->shouldReceive('getAllUsersFromDB')
+            ->once()
+            ->andReturn($users);
+
+        $response = $this->userService->execute();
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals(200, $response->status());
+        $this->assertEquals([
+            [
+                'username' => 'usuario1',
+                'followedStreamers' => []
+            ]
+        ], $response->getData(true));
+    }
+
     protected function tearDown(): void
     {
         Mockery::close();

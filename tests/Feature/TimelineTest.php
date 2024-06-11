@@ -5,6 +5,7 @@ use App\Infrastructure\Clients\APIClient;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\TestCase;
 use Mockery;
+use Exception;
 
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)

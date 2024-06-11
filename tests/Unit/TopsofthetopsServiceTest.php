@@ -7,6 +7,8 @@ use App\Services\TopGamesService;
 use App\Services\TopVideoService;
 use Illuminate\Http\Client\ConnectionException;
 use PHPUnit\Framework\TestCase;
+use Exception;
+
 
 class TopsofthetopsServiceTest extends TestCase
 {

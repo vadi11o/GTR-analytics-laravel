@@ -2,8 +2,8 @@
 
 namespace Services;
 
-use App\Infrastructure\Clients\ApiClient;
 use App\Infrastructure\Clients\DBClient;
+use App\Managers\TwitchManager;
 use App\Services\UnfollowStreamerService;
 use Illuminate\Http\JsonResponse;
 use Mockery;
@@ -15,14 +15,14 @@ use Tests\TestCase;
 class UnfollowStreamerServiceTest extends TestCase
 {
     protected DBClient $dBClient;
-    protected ApiClient $apiClient;
+    protected TwitchManager $apiClient;
     protected UnfollowStreamerService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->dBClient  = Mockery::mock(DBClient::class);
-        $this->apiClient = Mockery::mock(ApiClient::class);
+        $this->apiClient = Mockery::mock(TwitchManager::class);
         $this->service   = new UnfollowStreamerService($this->dBClient, $this->apiClient);
     }
 

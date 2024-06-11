@@ -2,7 +2,7 @@
 
 namespace Services;
 
-use App\Infrastructure\Clients\ApiClient;
+use App\Managers\TwitchManager;
 use App\Providers\TwitchTokenProvider;
 use App\Services\GetStreamsService;
 use Exception;
@@ -19,7 +19,7 @@ use Tests\TestCase;
  */
 class GetStreamsServiceTest extends TestCase
 {
-    protected ApiClient $apiClient;
+    protected TwitchManager $apiClient;
     private GetStreamsService $service;
 
     /**
@@ -29,7 +29,7 @@ class GetStreamsServiceTest extends TestCase
     {
         parent::setUp();
         $this->tokenProvider = $this->createMock(TwitchTokenProvider::class);
-        $this->apiClient     = $this->getMockBuilder(ApiClient::class)
+        $this->apiClient     = $this->getMockBuilder(TwitchManager::class)
             ->setConstructorArgs([$this->tokenProvider])
             ->onlyMethods(['fetchStreamsFromTwitch'])
             ->getMock();
@@ -125,7 +125,7 @@ class GetStreamsServiceTest extends TestCase
      */
     public function fetchsStreamsFromTwitch()
     {
-        $this->apiClient = new ApiClient($this->tokenProvider);
+        $this->apiClient = new TwitchManager($this->tokenProvider);
         $token           = 'test_token';
         $streamsData     = [
             'data' => [
@@ -155,7 +155,7 @@ class GetStreamsServiceTest extends TestCase
      */
     public function failureWhileFetchingDataFromTwitch()
     {
-        $this->apiClient = new ApiClient($this->tokenProvider);
+        $this->apiClient = new TwitchManager($this->tokenProvider);
         $token           = 'test_token';
         $this->tokenProvider->expects($this->once())
             ->method('getTokenFromTwitch')
@@ -175,7 +175,7 @@ class GetStreamsServiceTest extends TestCase
      */
     public function correctAuthoritationToFetchFromTwitch()
     {
-        $this->apiClient = new ApiClient($this->tokenProvider);
+        $this->apiClient = new TwitchManager($this->tokenProvider);
         $token           = 'test_token';
         $this->tokenProvider->expects($this->once())
             ->method('getTokenFromTwitch')

@@ -2,8 +2,8 @@
 
 namespace Services;
 
-use App\Infrastructure\Clients\APIClient;
 use App\Infrastructure\Clients\DBClient;
+use App\Managers\TwitchManager;
 use App\Services\TimelineService;
 use Exception;
 use Illuminate\Http\Client\ConnectionException;
@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 class TimelineServiceTest extends TestCase
 {
     protected DBClient $dbClient;
-    protected APIClient $apiClient;
+    protected TwitchManager $apiClient;
     protected TimelineService $timelineService;
 
     protected function setUp(): void
@@ -24,7 +24,7 @@ class TimelineServiceTest extends TestCase
         parent::setUp();
 
         $this->dbClient  = Mockery::mock(DBClient::class);
-        $this->apiClient = Mockery::mock(APIClient::class);
+        $this->apiClient = Mockery::mock(TwitchManager::class);
 
         $this->timelineService = new TimelineService($this->dbClient, $this->apiClient);
     }

@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Infrastructure\Clients\ApiClient;
+use App\Managers\TwitchManager;
 use App\Services\GetStreamsService;
-use Tests\TestCase;
 use Exception;
+use Tests\TestCase;
 
 class GetStreamsTest extends TestCase
 {
@@ -26,7 +26,7 @@ class GetStreamsTest extends TestCase
             ['title' => '#ZLAN2024 : 2e jour ! En direct de Montpellier, 198 jugadores s\'affrontent pour 52024€ de cashprize', 'user_name' => 'ZeratoR'],
             ['title' => 'GEN vs TES | DAY 10 | MSI 2024', 'user_name' => 'Riot Games'],
         ];
-        $apiClient = $this->createMock(ApiClient::class);
+        $apiClient = $this->createMock(TwitchManager::class);
         $apiClient->expects($this->once())
             ->method('fetchStreamsFromTwitch')
             ->willReturn([

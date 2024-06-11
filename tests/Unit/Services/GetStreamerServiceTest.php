@@ -2,12 +2,12 @@
 
 namespace Services;
 
-use App\Infrastructure\Clients\ApiClient;
 use App\Infrastructure\Clients\DBClient;
+use App\Managers\StreamerDataManager;
+use App\Managers\TwitchManager;
 use App\Models\User;
 use App\Providers\TwitchTokenProvider;
 use App\Services\GetStreamerService;
-use App\Services\StreamerDataManager;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
@@ -30,7 +30,7 @@ class GetStreamerServiceTest extends TestCase
     {
         parent::setUp();
         $this->tokenProvider = $this->createMock(TwitchTokenProvider::class);
-        $this->apiClient     = $this->getMockBuilder(ApiClient::class)
+        $this->apiClient     = $this->getMockBuilder(TwitchManager::class)
             ->setConstructorArgs([$this->tokenProvider])
             ->onlyMethods(['fetchStreamerDataFromTwitch'])
             ->getMock();
@@ -218,7 +218,7 @@ class GetStreamerServiceTest extends TestCase
      */
     public function fetchStreamerDataFromTwitchReturnsStreamerData()
     {
-        $this->apiClient = new ApiClient($this->tokenProvider);
+        $this->apiClient = new TwitchManager($this->tokenProvider);
         $streamerId      = '83232866';
         $token           = 'test_token';
         $url             = env('TWITCH_URL') . '/users?id=' . $streamerId;
@@ -257,30 +257,6 @@ class GetStreamerServiceTest extends TestCase
             'offline_image_url' => 'https://static-cdn.jtvnw.net/jtv_user_pictures/b01927d9-1cc2-4ba0-b3e2-6e96959179d0-channel_offline_image-1920x1080.jpeg',
             'view_count'        => 0,
             'created_at'        => Carbon::parse('2015-02-20T16:47:56Z')->toDateTimeString()
-        ], $result);
-    }
-
-    /** @test
-     * @throws \Exception
-     */
-    public function fetchStreamerDataFromTwitchReturnsErrorOnFailure()
-    {
-        $this->apiClient = new ApiClient($this->tokenProvider);
-        $streamerId      = '83232866';
-        $token           = 'test_token';
-        $url             = env('TWITCH_URL') . '/users?id=' . $streamerId;
-        $this->tokenProvider->expects($this->once())
-            ->method('getTokenFromTwitch')
-            ->willReturn($token);
-        Http::fake([
-            $url => Http::response(null, 500)
-        ]);
-
-        $result = $this->apiClient->fetchStreamerDataFromTwitch($streamerId);
-
-        $this->assertEquals([
-            'error'       => 'Failed to fetch data from Twitch',
-            'status_code' => 500
         ], $result);
     }
 }

@@ -8,7 +8,8 @@
         "php": "^8.2",
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.0",
-        "laravel/tinker": "^2.9"
+        "laravel/tinker": "^2.9",
+        "ext-http": "*"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.0",
@@ -21,8 +22,7 @@
         "phpro/grumphp": "^2.5",
         "phpunit/phpunit": "^10.5",
         "spatie/laravel-ignition": "^2.4",
-        "friendsofphp/php-cs-fixer": "^3.5",
-        "ext-http": "*"
+        "friendsofphp/php-cs-fixer": "^3.5"
     },
     "autoload": {
         "psr-4": {

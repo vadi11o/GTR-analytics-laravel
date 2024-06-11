@@ -23,7 +23,6 @@ use Illuminate\Foundation\Testing\WithoutMiddleware;
  */
 class TopsofthetopsTest extends TestCase
 {
-    use WithoutMiddleware;
 
     protected DBClient $dbClientMock;
     protected ApiClient $apiClientMock;
@@ -73,10 +72,10 @@ class TopsofthetopsTest extends TestCase
         parent::tearDown();
     }
 
-    /**@test
+    /** @test
      * @throws ConnectionException
      */
-    public function itShouldReturnJsonResponseWithTopGamesAndTopVideosData()
+    public function getsTopOfTheTopsData()
     {
         $mockTopGames = [
             ['game_id' => 1, 'game_name' => 'Test Game']
@@ -133,7 +132,7 @@ class TopsofthetopsTest extends TestCase
     /**
      * @test
      */
-    public function itShouldThrowConnectionExceptionWhenTokenRetrievalFails()
+    public function errorIfTokenRetrievalFails()
     {
         $this->tokenProviderMock->shouldReceive('getTokenFromTwitch')->andThrow(new ConnectionException());
 

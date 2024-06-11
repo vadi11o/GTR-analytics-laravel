@@ -23,7 +23,6 @@ services:
             - sail
         depends_on:
             - mysql
-        command: /bin/sh -c "docker-php-ext-install -j$(nproc) http && php -S 0.0.0.0:8000 -t public"
     mysql:
         image: 'mysql/mysql-server:8.0'
         ports:

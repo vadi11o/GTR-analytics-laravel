@@ -2,6 +2,7 @@
 
 namespace App\Infrastructure\Controllers;
 
+use App\Http\Requests\TopsOfTheTopsRequest;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,7 +25,7 @@ class TopsofthetopsController extends Controller
     /**
      * @throws ConnectionException
      */
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(TopsOfTheTopsRequest $request): JsonResponse
     {
         $since = $request->query('since', 600);
         $this->topsOfTheTopsService->execute($since);

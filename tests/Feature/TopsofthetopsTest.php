@@ -143,4 +143,18 @@ class TopsofthetopsTest extends TestCase
             $this->assertInstanceOf(ConnectionException::class, $e);
         }
     }
+
+    /**
+     * @test
+     */
+    public function errorWhenInvalidParameterFormat()
+    {
+        $response = $this->getJson('analytics/topsofthetops?since="123"');
+
+        $response->assertStatus(400)
+            ->assertJson([
+                'error' => 'El parametro "since" debe ser un entero.',
+            ]);
+    }
+
 }

@@ -23,8 +23,8 @@ class GetUserTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dBClient = Mockery::mock('App\Infrastructure\Clients\DBClient');
-        $this->userService = new UserService($this->dBClient);
+        $this->dBClient       = Mockery::mock('App\Infrastructure\Clients\DBClient');
+        $this->userService    = new UserService($this->dBClient);
         $this->userController = new UserController($this->userService);
     }
 
@@ -45,11 +45,11 @@ class GetUserTest extends TestCase
         $this->assertEquals(200, $response->status());
         $this->assertEquals([
             [
-                'username' => 'usuario1',
+                'username'          => 'usuario1',
                 'followedStreamers' => ['streamer1', 'streamer2']
             ],
             [
-                'username' => 'usuario2',
+                'username'          => 'usuario2',
                 'followedStreamers' => ['streamer2', 'streamer3']
             ]
         ], $response->getData(true));
@@ -100,7 +100,7 @@ class GetUserTest extends TestCase
         $this->assertEquals(200, $response->status());
         $this->assertEquals([
             [
-                'username' => 'usuario1',
+                'username'          => 'usuario1',
                 'followedStreamers' => []
             ]
         ], $response->getData(true));

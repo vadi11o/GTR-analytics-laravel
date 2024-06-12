@@ -29,7 +29,7 @@ class TwitchManager
     public function fetchStreamsFromTwitch(): array
     {
         $token    = $this->tokenProvider->getTokenFromTwitch();
-        $response = $this->apiClient->get('/streams', $token);
+        $response = $this->apiClient->httpFetchStreamsFromTwitch('/streams', $token);
 
         return [
             'status' => $response->status(),
@@ -43,7 +43,7 @@ class TwitchManager
     public function fetchStreamerDataFromTwitch($streamerId): array
     {
         $token    = $this->tokenProvider->getTokenFromTwitch();
-        $response = $this->apiClient->get('/users?id=' . $streamerId, $token);
+        $response = $this->apiClient->httpfetchStreamerDataFromTwitch($token, $streamerId);
 
         if ($response->successful()) {
             $streamerData = $response->json()['data'][0];
@@ -65,22 +65,16 @@ class TwitchManager
         return ['error' => 'Failed to fetch data from Twitch', 'status_code' => $response->status()];
     }
 
-    /**
-     * @throws ConnectionException
-     */
     public function updateGames($accessToken)
     {
-        $response = $this->apiClient->get('/games/top?first=3', $accessToken);
+        $response = $this->apiClient->httpUpdateGames($accessToken);
 
         return $response->json()['data'] ?? [];
     }
 
-    /**
-     * @throws ConnectionException
-     */
     public function updateVideos($accessToken, $gameId)
     {
-        $response = $this->apiClient->get("/videos?game_id=$gameId&first=40&sort=views", $accessToken);
+        $response = $this->apiClient->httpUpdateVideos($accessToken, $gameId);
 
         return $response->json()['data'] ?? [];
     }
@@ -92,7 +86,7 @@ class TwitchManager
     public function getStreamsByUserId($userId)
     {
         $token    = $this->tokenProvider->getTokenFromTwitch();
-        $response = $this->apiClient->get('/videos', $token, [
+        $response = $this->apiClient->httpGetStreamsByUserId($token, [
             'user_id' => $userId,
             'first'   => 5,
         ]);

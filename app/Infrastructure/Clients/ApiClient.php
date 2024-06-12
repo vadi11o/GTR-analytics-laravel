@@ -19,11 +19,55 @@ class ApiClient
     /**
      * @throws ConnectionException
      */
-    public function get($url, $token, $queryParams = [])
+    public function httpFetchStreamsFromTwitch($token)
     {
         return Http::withHeaders([
             'Authorization' => 'Bearer ' . $token,
             'Client-Id'     => $this->clientId,
-        ])->get($this->baseUrl . $url, $queryParams);
+        ])->get($this->baseUrl . '/streams');
+    }
+
+    /**
+     * @throws ConnectionException
+     */
+    public function httpfetchStreamerDataFromTwitch($token, $streamerId)
+    {
+        return Http::withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+            'Client-Id'     => $this->clientId,
+        ])->get($this->baseUrl . '/users?id=' . $streamerId);
+    }
+
+    /**
+     * @throws ConnectionException
+     */
+    public function httpUpdateGames($token)
+    {
+        return Http::withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+            'Client-Id'     => $this->clientId,
+        ])->get($this->baseUrl . '/games/top?first=3');
+    }
+
+    /**
+     * @throws ConnectionException
+     */
+    public function httpUpdateVideos($token, $gameId)
+    {
+        return Http::withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+            'Client-Id'     => $this->clientId,
+        ])->get($this->baseUrl . "/videos?game_id=$gameId&first=40&sort=views");
+    }
+
+    /**
+     * @throws ConnectionException
+     */
+    public function httpGetStreamsByUserId($token, $queryParams = [])
+    {
+        return Http::withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+            'Client-Id'     => $this->clientId,
+        ])->get($this->baseUrl . '/videos', $queryParams);
     }
 }

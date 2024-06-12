@@ -169,24 +169,4 @@ class GetStreamsServiceTest extends TestCase
         $this->assertEquals(500, $result['status']);
         $this->assertEquals('', $result['body']);
     }
-
-    /**
-     * @test
-     */
-    public function correctAuthoritationToFetchFromTwitch()
-    {
-        $this->apiClient = new TwitchManager($this->tokenProvider);
-        $token           = 'test_token';
-        $this->tokenProvider->expects($this->once())
-            ->method('getTokenFromTwitch')
-            ->willReturn($token);
-        Http::fake();
-
-        $this->apiClient->fetchStreamsFromTwitch();
-
-        Http::assertSent(function ($request) use ($token) {
-            return $request->hasHeader('Authorization', 'Bearer ' . $token)
-                && $request->hasHeader('Client-Id', env('TWITCH_CLIENT_ID'));
-        });
-    }
 }

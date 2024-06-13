@@ -24,9 +24,9 @@ class UnfollowStreamerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dbClient = Mockery::mock('App\Infrastructure\Clients\DBClient');
-        $this->apiClient = Mockery::mock('App\Managers\TwitchManager');
-        $this->unfollowService = new UnfollowStreamerService($this->dbClient, $this->apiClient);
+        $this->dbClient          = Mockery::mock('App\Infrastructure\Clients\DBClient');
+        $this->apiClient         = Mockery::mock('App\Managers\TwitchManager');
+        $this->unfollowService   = new UnfollowStreamerService($this->dbClient, $this->apiClient);
         $this->unfollowControler = new UnfollowStreamerController($this->unfollowService);
     }
 
@@ -101,7 +101,7 @@ class UnfollowStreamerTest extends TestCase
             ->andReturn($userData);
         $this->dbClient->shouldReceive('updateUserAnalyticsInDB')
             ->once()
-            ->with(Mockery::on(function($userData) {
+            ->with(Mockery::on(function ($userData) {
                 $decoded = json_decode($userData->followed_streamers, true);
                 return is_array($decoded) && count($decoded) == 1 && $decoded[0]['id'] == '789';
             }));
@@ -111,6 +111,30 @@ class UnfollowStreamerTest extends TestCase
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(200, $response->status());
         $this->assertEquals(['message' => 'Dejaste de seguir a 123'], $response->getData(true));
+    }
+
+    /** @test */
+    public function errorWhenMissingParameters()
+    {
+        $response = $this->deleteJson('analytics/unfollow', [
+            'userId'     => '',
+            'streamerId' => 123,
+        ]);
+
+        $response->assertStatus(400)
+            ->assertJson([
+                'error' => 'El ID del usuario es obligatorio',
+            ]);
+
+        $response = $this->deleteJson('analytics/unfollow', [
+            'userId'     => 123,
+            'streamerId' => '',
+        ]);
+
+        $response->assertStatus(400)
+            ->assertJson([
+                'error' => 'El ID del streamer es obligatorio',
+            ]);
     }
 
     protected function tearDown(): void

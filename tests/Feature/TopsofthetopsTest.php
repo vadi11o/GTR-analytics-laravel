@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Requests\TopsOfTheTopsRequest;
 use App\Infrastructure\Clients\DBClient;
 use App\Infrastructure\Controllers\TopsofthetopsController;
 use App\Managers\TwitchManager;
@@ -118,7 +119,7 @@ class TopsofthetopsTest extends TestCase
         $topOfTheTopMock = Mockery::mock('alias:' . TopOfTheTop::class);
         $topOfTheTopMock->shouldReceive('whereIn')->andReturnSelf();
         $topOfTheTopMock->shouldReceive('get')->andReturn(collect($mockTopOfTheTops));
-        $request = Request::create('analytics/topsofthetops', 'GET', ['since' => 600]);
+        $request = TopsOfTheTopsRequest::create('analytics/topsofthetops', 'GET', ['since' => 600]);
 
         $response = $this->topsController->__invoke($request);
 
@@ -135,7 +136,7 @@ class TopsofthetopsTest extends TestCase
     {
         $this->tokenProvider->shouldReceive('getTokenFromTwitch')->andThrow(new ConnectionException());
 
-        $request = Request::create('analytics/topsofthetops', 'GET', ['since' => 600]);
+        $request = TopsOfTheTopsRequest::create('analytics/topsofthetops', 'GET', ['since' => 600]);
 
         try {
             $this->topsController->__invoke($request);
@@ -143,4 +144,18 @@ class TopsofthetopsTest extends TestCase
             $this->assertInstanceOf(ConnectionException::class, $e);
         }
     }
+
+    /**
+     * @test
+     */
+    public function errorWhenInvalidParameterFormat()
+    {
+        $response = $this->getJson('analytics/topsofthetops?since="123"');
+
+        $response->assertStatus(400)
+            ->assertJson([
+                'error' => 'El parametro "since" debe ser un entero.',
+            ]);
+    }
+
 }

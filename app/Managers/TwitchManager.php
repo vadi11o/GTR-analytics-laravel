@@ -29,7 +29,7 @@ class TwitchManager
     public function fetchStreamsFromTwitch(): array
     {
         $token    = $this->tokenProvider->getTokenFromTwitch();
-        $response = $this->apiClient->httpFetchStreamsFromTwitch('/streams', $token);
+        $response = $this->apiClient->httpFetchStreamsFromTwitch($token);
 
         return [
             'status' => $response->status(),

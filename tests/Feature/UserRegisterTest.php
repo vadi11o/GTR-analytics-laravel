@@ -74,7 +74,7 @@ class UserRegisterTest extends TestCase
     /**
      * @test
      */
-    public function registerUserFailureWhenMissingUsernameOrPassword()
+    public function errorWhenMissingParameters()
     {
         $response = $this->postJson('analytics/users', [
             'username' => '',

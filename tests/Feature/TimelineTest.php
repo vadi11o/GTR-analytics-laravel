@@ -106,4 +106,17 @@ class TimelineTest extends TestCase
         $response->assertStatus(200);
         $response->assertExactJson([]);
     }
+
+    /**
+     * @test
+     */
+    public function errorWhenMissingParameter()
+    {
+        $response = $this->getJson('analytics/timeline');
+
+        $response->assertStatus(400)
+            ->assertJson([
+                'error' => 'The userId parameter is required',
+            ]);
+    }
 }

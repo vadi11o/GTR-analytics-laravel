@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Http\Requests\FollowRequest;
+use App\Infrastructure\Clients\ApiClient;
 use App\Infrastructure\Clients\DBClient;
 use App\Infrastructure\Controllers\FollowStreamerController;
 use App\Managers\TwitchManager;
@@ -33,17 +34,19 @@ class FollowStreamerTest extends TestCase
     /** @test */
     public function itReturns404WhenUserNotFound()
     {
-        $request = FollowRequest::create('/follow', 'POST', ['userId' => '456', 'streamerId' => '123']);
         $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
             ->andReturn(null);
+        $this->app->instance(DBClient::class, $this->dbClient);
 
-        $response = $this->followController->__invoke($request);
+        $response = $this->postJson('analytics/follow', [
+            'userId'     => '456',
+            'streamerId' => '123',
+        ]);
 
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(404, $response->status());
-        $this->assertEquals(['message' => 'Usuario no encontrado'], $response->getData(true));
+        $response->assertStatus(404)
+            ->assertJson(['message' => 'Usuario no encontrado']);
     }
 
     /** @test */
@@ -52,7 +55,6 @@ class FollowStreamerTest extends TestCase
         $userData = (object) [
             'followed_streamers' => json_encode([['id' => '123']])
         ];
-        $request = FollowRequest::create('/follow', 'POST', ['userId' => '456', 'streamerId' => '123']);
         $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
@@ -63,12 +65,16 @@ class FollowStreamerTest extends TestCase
             ->andReturn(['display_name' => 'StreamerName']);
         $this->dbClient->shouldReceive('updateUserAnalyticsInDB')
             ->never();
+        $this->app->instance(DBClient::class, $this->dbClient);
+        $this->app->instance(TwitchManager::class, $this->apiClient);
 
-        $response = $this->followController->__invoke($request);
+        $response = $this->postJson('analytics/follow', [
+            'userId'     => '456',
+            'streamerId' => '123',
+        ]);
 
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(409, $response->status());
-        $this->assertEquals(['message' => 'Ya sigues a este streamer'], $response->getData(true));
+        $response->assertStatus(409)
+            ->assertJson(['message' => 'Ya sigues a este streamer']);
     }
 
     /** @test */
@@ -77,7 +83,6 @@ class FollowStreamerTest extends TestCase
         $userData = (object) [
             'followed_streamers' => json_encode([])
         ];
-        $request = FollowRequest::create('/follow', 'POST', ['userId' => '456', 'streamerId' => '123']);
         $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
@@ -92,12 +97,16 @@ class FollowStreamerTest extends TestCase
                 $decoded = json_decode($userData->followed_streamers, true);
                 return is_array($decoded) && count($decoded) == 1 && $decoded[0]['id'] == '123';
             }));
+        $this->app->instance(DBClient::class, $this->dbClient);
+        $this->app->instance(TwitchManager::class, $this->apiClient);
 
-        $response = $this->followController->__invoke($request);
+        $response = $this->postJson('analytics/follow', [
+            'userId'     => '456',
+            'streamerId' => '123',
+        ]);
 
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(200, $response->status());
-        $this->assertEquals(['message' => 'Ahora sigues a 123'], $response->getData(true));
+        $response->assertStatus(200)
+            ->assertJson(['message' => 'Ahora sigues a 123']);
     }
 
     /** @test */

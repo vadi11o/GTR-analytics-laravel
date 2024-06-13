@@ -38,12 +38,12 @@ class GetUserTest extends TestCase
         $this->dBClient->shouldReceive('getAllUsersFromDB')
             ->once()
             ->andReturn($users);
+        $this->app->instance(DBClient::class, $this->dBClient);
 
-        $response = $this->userController->__invoke();
+        $response = $this->getJson('analytics/users');
 
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(200, $response->status());
-        $this->assertEquals([
+        $response->assertStatus(200);
+        $response->assertJson([
             [
                 'username'          => 'usuario1',
                 'followedStreamers' => ['streamer1', 'streamer2']
@@ -52,7 +52,7 @@ class GetUserTest extends TestCase
                 'username'          => 'usuario2',
                 'followedStreamers' => ['streamer2', 'streamer3']
             ]
-        ], $response->getData(true));
+        ]);
     }
 
     /** @test */
@@ -61,12 +61,12 @@ class GetUserTest extends TestCase
         $this->dBClient->shouldReceive('getAllUsersFromDB')
             ->once()
             ->andThrow(new Exception('Error'));
+        $this->app->instance(DBClient::class, $this->dBClient);
 
-        $response = $this->userController->__invoke();
+        $response = $this->getJson('analytics/users');
 
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(500, $response->status());
-        $this->assertEquals(['message' => 'Error del servidor al obtener la lista de usuarios'], $response->getData(true));
+        $response->assertStatus(500);
+        $response->assertJson(['message' => 'Error del servidor al obtener la lista de usuarios']);
     }
 
     /** @test */
@@ -76,12 +76,12 @@ class GetUserTest extends TestCase
         $this->dBClient->shouldReceive('getAllUsersFromDB')
             ->once()
             ->andReturn($users);
+        $this->app->instance(DBClient::class, $this->dBClient);
 
-        $response = $this->userService->execute();
+        $response = $this->getJson('analytics/users');
 
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(200, $response->status());
-        $this->assertEquals([], $response->getData(true));
+        $response->assertStatus(200);
+        $response->assertJson([]);
     }
 
     /** @test */
@@ -93,17 +93,17 @@ class GetUserTest extends TestCase
         $this->dBClient->shouldReceive('getAllUsersFromDB')
             ->once()
             ->andReturn($users);
+        $this->app->instance(DBClient::class, $this->dBClient);
 
-        $response = $this->userService->execute();
+        $response = $this->getJson('analytics/users');
 
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(200, $response->status());
-        $this->assertEquals([
+        $response->assertStatus(200);
+        $response->assertJson([
             [
                 'username'          => 'usuario1',
                 'followedStreamers' => []
             ]
-        ], $response->getData(true));
+        ]);
     }
 
     protected function tearDown(): void

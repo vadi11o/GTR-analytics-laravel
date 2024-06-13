@@ -33,17 +33,19 @@ class UnfollowStreamerTest extends TestCase
     /** @test */
     public function itReturns404WhenUserNotFound()
     {
-        $request = UnfollowRequest::create('/unfollow', 'POST', ['userId' => '456', 'streamerId' => '123']);
         $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
             ->andReturn(null);
+        $this->app->instance(DBClient::class, $this->dbClient);
 
-        $response = $this->unfollowControler->__invoke($request);
+        $response = $this->deleteJson('analytics/unfollow', [
+            'userId'     => '456',
+            'streamerId' => '123',
+        ]);
 
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(404, $response->status());
-        $this->assertEquals(['message' => 'Usuario no encontrado'], $response->getData(true));
+        $response->assertStatus(404);
+        $response->assertJson(['message' => 'Usuario no encontrado']);
     }
 
     /** @test */
@@ -52,19 +54,21 @@ class UnfollowStreamerTest extends TestCase
         $userData = (object) [
             'followed_streamers' => json_encode([['id' => '789']])
         ];
-        $request = UnfollowRequest::create('/unfollow', 'POST', ['userId' => '456', 'streamerId' => '123']);
         $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
             ->andReturn($userData);
         $this->dbClient->shouldReceive('updateUserAnalyticsInDB')
             ->never();
+        $this->app->instance(DBClient::class, $this->dbClient);
 
-        $response = $this->unfollowControler->__invoke($request);
+        $response = $this->deleteJson('analytics/unfollow', [
+            'userId'     => '456',
+            'streamerId' => '123',
+        ]);
 
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(404, $response->status());
-        $this->assertEquals(['message' => 'No sigues a este streamer'], $response->getData(true));
+        $response->assertStatus(404);
+        $response->assertJson(['message' => 'No sigues a este streamer']);
     }
 
     /** @test */
@@ -73,19 +77,21 @@ class UnfollowStreamerTest extends TestCase
         $userData = (object) [
             'followed_streamers' => 'invalid_json'
         ];
-        $request = UnfollowRequest::create('/unfollow', 'POST', ['userId' => '456', 'streamerId' => '123']);
         $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
             ->andReturn($userData);
         $this->dbClient->shouldReceive('updateUserAnalyticsInDB')
             ->never();
+        $this->app->instance(DBClient::class, $this->dbClient);
 
-        $response = $this->unfollowControler->__invoke($request);
+        $response = $this->deleteJson('analytics/unfollow', [
+            'userId'     => '456',
+            'streamerId' => '123',
+        ]);
 
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(500, $response->status());
-        $this->assertEquals(['message' => 'Error al procesar los streamers seguidos'], $response->getData(true));
+        $response->assertStatus(500);
+        $response->assertJson(['message' => 'Error al procesar los streamers seguidos']);
     }
 
     /** @test */
@@ -94,7 +100,6 @@ class UnfollowStreamerTest extends TestCase
         $userData = (object) [
             'followed_streamers' => json_encode([['id' => '123'], ['id' => '789']])
         ];
-        $request = UnfollowRequest::create('/unfollow', 'POST', ['userId' => '456', 'streamerId' => '123']);
         $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
             ->with('456')
@@ -105,12 +110,15 @@ class UnfollowStreamerTest extends TestCase
                 $decoded = json_decode($userData->followed_streamers, true);
                 return is_array($decoded) && count($decoded) == 1 && $decoded[0]['id'] == '789';
             }));
+        $this->app->instance(DBClient::class, $this->dbClient);
 
-        $response = $this->unfollowControler->__invoke($request);
+        $response = $this->deleteJson('analytics/unfollow', [
+            'userId'     => '456',
+            'streamerId' => '123',
+        ]);
 
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(200, $response->status());
-        $this->assertEquals(['message' => 'Dejaste de seguir a 123'], $response->getData(true));
+        $response->assertStatus(200);
+        $response->assertJson(['message' => 'Dejaste de seguir a 123']);
     }
 
     /** @test */

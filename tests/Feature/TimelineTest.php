@@ -4,7 +4,7 @@ use App\Infrastructure\Clients\DBClient;
 use App\Managers\TwitchManager;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\TestCase;
-
+use Exception;
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
@@ -56,7 +56,7 @@ class TimelineTest extends TestCase
     public function returnsErrorOnServerFailure()
     {
         $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
-            ->andThrow(new Exception());
+            ->andThrow(new Exception('Failed to retrieve data'));
 
         $response = $this->getJson('analytics/timeline?userId=1');
 

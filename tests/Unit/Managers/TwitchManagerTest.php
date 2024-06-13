@@ -11,7 +11,11 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
 use Mockery;
 use Tests\TestCase;
+use Illuminate\Support\Facades\Http;
 
+/**
+ * @SuppressWarnings(PHPMD.StaticAccess)
+ */
 class TwitchManagerTest extends TestCase
 {
     protected function tearDown(): void

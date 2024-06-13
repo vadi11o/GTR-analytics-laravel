@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Response;
 class StreamerDataManagerTest extends TestCase
 {
     protected $dbClientMock;
-    protected $getStreamerServiceMock;
+    protected $getStreamerService;
     protected $streamerDataManager;
 
     protected function setUp(): void
@@ -21,9 +21,9 @@ class StreamerDataManagerTest extends TestCase
         parent::setUp();
 
         $this->dbClientMock           = $this->createMock(DBClient::class);
-        $this->getStreamerServiceMock = $this->createMock(GetStreamerService::class);
+        $this->getStreamerService = $this->createMock(GetStreamerService::class);
 
-        $this->streamerDataManager = new StreamerDataManager($this->getStreamerServiceMock, $this->dbClientMock);
+        $this->streamerDataManager = new StreamerDataManager($this->getStreamerService, $this->dbClientMock);
 
         Response::shouldReceive('json')
             ->andReturnUsing(function ($data, $status = 200) {
@@ -62,7 +62,7 @@ class StreamerDataManagerTest extends TestCase
         $this->dbClientMock->method('getStreamerByIdFromDB')
             ->willReturn(null);
 
-        $this->getStreamerServiceMock->expects($this->once())
+        $this->getStreamerService->expects($this->once())
             ->method('execute')
             ->willReturn(new JsonResponse($fetchedData));
 
@@ -81,7 +81,7 @@ class StreamerDataManagerTest extends TestCase
         $this->dbClientMock->method('getStreamerByIdFromDB')
             ->willReturn(null);
 
-        $this->getStreamerServiceMock->method('execute')
+        $this->getStreamerService->method('execute')
             ->willThrowException(new Exception('No se encontraron datos de usuario para el ID proporcionado.'));
 
         $this->expectException(Exception::class);

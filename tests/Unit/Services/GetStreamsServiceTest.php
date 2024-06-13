@@ -2,6 +2,7 @@
 
 namespace Services;
 
+use App\Infrastructure\Clients\ApiClient;
 use App\Managers\TwitchManager;
 use App\Providers\TwitchTokenProvider;
 use App\Services\GetStreamsService;
@@ -29,8 +30,9 @@ class GetStreamsServiceTest extends TestCase
     {
         parent::setUp();
         $this->tokenProvider = $this->createMock(TwitchTokenProvider::class);
+        $this->api           = $this->createMock(ApiClient::class);
         $this->apiClient     = $this->getMockBuilder(TwitchManager::class)
-            ->setConstructorArgs([$this->tokenProvider])
+            ->setConstructorArgs([$this->tokenProvider, $this->api])
             ->onlyMethods(['fetchStreamsFromTwitch'])
             ->getMock();
         $this->service = new GetStreamsService($this->apiClient);
@@ -125,7 +127,6 @@ class GetStreamsServiceTest extends TestCase
      */
     public function fetchsStreamsFromTwitch()
     {
-        $this->apiClient = new TwitchManager($this->tokenProvider);
         $token           = 'test_token';
         $streamsData     = [
             'data' => [
@@ -155,7 +156,6 @@ class GetStreamsServiceTest extends TestCase
      */
     public function failureWhileFetchingDataFromTwitch()
     {
-        $this->apiClient = new TwitchManager($this->tokenProvider);
         $token           = 'test_token';
         $this->tokenProvider->expects($this->once())
             ->method('getTokenFromTwitch')

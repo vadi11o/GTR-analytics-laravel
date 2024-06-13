@@ -12,18 +12,18 @@ use Illuminate\Support\Facades\Response;
 
 class StreamerDataManagerTest extends TestCase
 {
-    protected $dbClientMock;
-    protected $getStreamerServiceMock;
+    protected $dbClient;
+    protected $getStreamerService;
     protected $streamerDataManager;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->dbClientMock           = $this->createMock(DBClient::class);
-        $this->getStreamerServiceMock = $this->createMock(GetStreamerService::class);
+        $this->dbClient           = $this->createMock(DBClient::class);
+        $this->getStreamerService = $this->createMock(GetStreamerService::class);
 
-        $this->streamerDataManager = new StreamerDataManager($this->getStreamerServiceMock, $this->dbClientMock);
+        $this->streamerDataManager = new StreamerDataManager($this->getStreamerService, $this->dbClient);
 
         Response::shouldReceive('json')
             ->andReturnUsing(function ($data, $status = 200) {
@@ -38,7 +38,7 @@ class StreamerDataManagerTest extends TestCase
     {
         $streamerId       = '123';
         $expectedStreamer = ['id' => $streamerId, 'name' => 'Streamer Name'];
-        $this->dbClientMock->expects($this->once())
+        $this->dbClient->expects($this->once())
             ->method('getStreamerByIdFromDB')
             ->with($this->equalTo($streamerId))
             ->willReturn($expectedStreamer);
@@ -58,11 +58,9 @@ class StreamerDataManagerTest extends TestCase
     {
         $streamerId  = 'unknown_id';
         $fetchedData = ['id' => $streamerId, 'name' => 'New Streamer'];
-
-        $this->dbClientMock->method('getStreamerByIdFromDB')
+        $this->dbClient->method('getStreamerByIdFromDB')
             ->willReturn(null);
-
-        $this->getStreamerServiceMock->expects($this->once())
+        $this->getStreamerService->expects($this->once())
             ->method('execute')
             ->willReturn(new JsonResponse($fetchedData));
 
@@ -78,12 +76,10 @@ class StreamerDataManagerTest extends TestCase
     public function errorIfUserIdDoesNotExist()
     {
         $streamerId = 'unknown_id';
-        $this->dbClientMock->method('getStreamerByIdFromDB')
+        $this->dbClient->method('getStreamerByIdFromDB')
             ->willReturn(null);
-
-        $this->getStreamerServiceMock->method('execute')
+        $this->getStreamerService->method('execute')
             ->willThrowException(new Exception('No se encontraron datos de usuario para el ID proporcionado.'));
-
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('No se encontraron datos de usuario para el ID proporcionado.');
 

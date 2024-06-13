@@ -133,6 +133,30 @@ class FollowStreamerTest extends TestCase
             ]);
     }
 
+    /** @test */
+    public function errorWhenMissingParameters()
+    {
+        $response = $this->postJson('analytics/follow', [
+            'userId'     => '',
+            'streamerId' => 123,
+        ]);
+
+        $response->assertStatus(400)
+            ->assertJson([
+                'error' => 'El ID del usuario es obligatorio',
+            ]);
+
+        $response = $this->postJson('analytics/follow', [
+            'userId'     => 123,
+            'streamerId' => '',
+        ]);
+
+        $response->assertStatus(400)
+            ->assertJson([
+                'error' => 'El ID del streamer es obligatorio',
+            ]);
+    }
+
     protected function tearDown(): void
     {
         Mockery::close();

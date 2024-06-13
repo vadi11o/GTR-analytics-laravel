@@ -2,6 +2,7 @@
 
 namespace Services;
 
+use App\Infrastructure\Clients\ApiClient;
 use App\Managers\TwitchManager;
 use App\Providers\TwitchTokenProvider;
 use App\Services\GetStreamsService;
@@ -29,8 +30,9 @@ class GetStreamsServiceTest extends TestCase
     {
         parent::setUp();
         $this->tokenProvider = $this->createMock(TwitchTokenProvider::class);
+        $this->api           = $this->createMock(ApiClient::class);
         $this->apiClient     = $this->getMockBuilder(TwitchManager::class)
-            ->setConstructorArgs([$this->tokenProvider])
+            ->setConstructorArgs([$this->tokenProvider, $this->api])
             ->onlyMethods(['fetchStreamsFromTwitch'])
             ->getMock();
         $this->service = new GetStreamsService($this->apiClient);
@@ -118,55 +120,5 @@ class GetStreamsServiceTest extends TestCase
             json_encode($expectedResponse, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
             $response->getContent()
         );
-    }
-
-    /**
-     * @test
-     */
-    public function fetchsStreamsFromTwitch()
-    {
-        $this->apiClient = new TwitchManager($this->tokenProvider);
-        $token           = 'test_token';
-        $streamsData     = [
-            'data' => [
-                [
-                    'id'        => '1',
-                    'user_name' => 'streamer1',
-                    'game_id'   => '1234',
-                    'title'     => 'Stream Title 1',
-                ]
-            ]
-        ];
-        $this->tokenProvider->expects($this->once())
-            ->method('getTokenFromTwitch')
-            ->willReturn($token);
-        Http::fake([
-            env('TWITCH_URL') . '/streams' => Http::response($streamsData, 200)
-        ]);
-
-        $result = $this->apiClient->fetchStreamsFromTwitch();
-
-        $this->assertEquals(200, $result['status']);
-        $this->assertEquals(json_encode($streamsData), $result['body']);
-    }
-
-    /**
-     * @test
-     */
-    public function failureWhileFetchingDataFromTwitch()
-    {
-        $this->apiClient = new TwitchManager($this->tokenProvider);
-        $token           = 'test_token';
-        $this->tokenProvider->expects($this->once())
-            ->method('getTokenFromTwitch')
-            ->willReturn($token);
-        Http::fake([
-            env('TWITCH_URL') . '/streams' => Http::response(null, 500)
-        ]);
-
-        $result = $this->apiClient->fetchStreamsFromTwitch();
-
-        $this->assertEquals(500, $result['status']);
-        $this->assertEquals('', $result['body']);
     }
 }

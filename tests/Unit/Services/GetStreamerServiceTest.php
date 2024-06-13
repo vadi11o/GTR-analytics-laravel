@@ -2,6 +2,7 @@
 
 namespace Services;
 
+use App\Infrastructure\Clients\ApiClient;
 use App\Infrastructure\Clients\DBClient;
 use App\Managers\StreamerDataManager;
 use App\Managers\TwitchManager;
@@ -23,15 +24,16 @@ class GetStreamerServiceTest extends TestCase
 {
     use MockeryPHPUnitIntegration;
 
-    /** @Test
+    /**
      * @throws Exception
      */
     protected function setUp(): void
     {
         parent::setUp();
         $this->tokenProvider = $this->createMock(TwitchTokenProvider::class);
+        $this->api = $this->createMock(ApiClient::class);
         $this->apiClient     = $this->getMockBuilder(TwitchManager::class)
-            ->setConstructorArgs([$this->tokenProvider])
+            ->setConstructorArgs([$this->tokenProvider, $this->api])
             ->onlyMethods(['fetchStreamerDataFromTwitch'])
             ->getMock();
         $this->dbClient            = $this->createMock(DBClient::class);

@@ -17,10 +17,10 @@ class TwitchManager
     private TwitchTokenProvider $tokenProvider;
     private ApiClient $apiClient;
 
-    public function __construct(TwitchTokenProvider $tokenProvider)
+    public function __construct(TwitchTokenProvider $tokenProvider, ApiClient $apiClient)
     {
         $this->tokenProvider = $tokenProvider;
-        $this->apiClient     = new ApiClient();
+        $this->apiClient     = $apiClient;
     }
 
     /**

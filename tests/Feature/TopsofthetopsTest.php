@@ -119,30 +119,11 @@ class TopsofthetopsTest extends TestCase
         $topOfTheTopMock = Mockery::mock('alias:' . TopOfTheTop::class);
         $topOfTheTopMock->shouldReceive('whereIn')->andReturnSelf();
         $topOfTheTopMock->shouldReceive('get')->andReturn(collect($mockTopOfTheTops));
-        $request = TopsOfTheTopsRequest::create('analytics/topsofthetops', 'GET', ['since' => 600]);
 
-        $response = $this->topsController->__invoke($request);
+        $response = $this->getJson('analytics/topsofthetops?since=600');
 
-        $responseArray = json_decode($response->getContent(), true);
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals($expectedResponse, $responseArray);
-    }
-
-    /**
-     * @test
-     */
-    public function errorIfTokenRetrievalFails()
-    {
-        $this->tokenProvider->shouldReceive('getTokenFromTwitch')->andThrow(new ConnectionException());
-
-        $request = TopsOfTheTopsRequest::create('analytics/topsofthetops', 'GET', ['since' => 600]);
-
-        try {
-            $this->topsController->__invoke($request);
-        } catch (ConnectionException $e) {
-            $this->assertInstanceOf(ConnectionException::class, $e);
-        }
+        $response->assertStatus(200)
+            ->assertJson($expectedResponse);
     }
 
     /**

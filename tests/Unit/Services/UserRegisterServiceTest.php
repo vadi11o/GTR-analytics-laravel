@@ -32,7 +32,7 @@ class UserRegisterServiceTest extends TestCase
     /**
      * @test
      */
-    public function conflictWhenUserAllreadyExists()
+    public function errorWhenUserAllreadyExists()
     {
         $this->dBClient->shouldReceive('getUserAnalyticsByNameFromDB')
             ->with('testuser')
@@ -48,7 +48,7 @@ class UserRegisterServiceTest extends TestCase
     /**
      * @test
      */
-    public function newUserWhenUserDoesNotExist()
+    public function createsNewUserWhenUserDoesNotExist()
     {
         $this->dBClient->shouldReceive('getUserAnalyticsByNameFromDB')
             ->with('testuser')

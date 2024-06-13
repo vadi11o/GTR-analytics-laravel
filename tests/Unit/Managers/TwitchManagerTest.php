@@ -10,48 +10,58 @@ use Illuminate\Http\Client\Response;
 use Mockery;
 use Tests\TestCase;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
+
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
 class TwitchManagerTest extends TestCase
 {
+    protected $tokenProvider;
+    protected $apiClient;
+    protected $twitchManager;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->tokenProvider = Mockery::mock(TwitchTokenProvider::class);
+        $this->apiClient = Mockery::mock(ApiClient::class);
+        $this->twitchManager = new TwitchManager($this->tokenProvider, $this->apiClient);
+    }
+
     protected function tearDown(): void
     {
         Mockery::close();
     }
 
-    public function testFetchStreamsFromTwitch()
+    /**
+     * @test
+     */
+    public function fetchStreamsFromTwitch()
     {
-        $tokenProviderMock = Mockery::mock(TwitchTokenProvider::class);
-        $apiClientMock     = Mockery::mock(ApiClient::class);
-
-        $tokenProviderMock->shouldReceive('getTokenFromTwitch')
+        $this->tokenProvider->shouldReceive('getTokenFromTwitch')
             ->once()
             ->andReturn('mocked_token');
-
-        $apiClientMock->shouldReceive('httpFetchStreamsFromTwitch')
+        $this->apiClient->shouldReceive('httpFetchStreamsFromTwitch')
             ->with('mocked_token')
             ->once()
             ->andReturn(new Response(new GuzzleResponse(200, [], json_encode(['data' => 'mocked_data']))));
 
-        $twitchManager = new TwitchManager($tokenProviderMock, $apiClientMock);
-
-        $result = $twitchManager->fetchStreamsFromTwitch();
+        $result = $this->twitchManager->fetchStreamsFromTwitch();
 
         $this->assertEquals(200, $result['status']);
         $this->assertEquals(json_encode(['data' => 'mocked_data']), $result['body']);
     }
 
-    public function testFetchStreamerDataFromTwitch()
+    /**
+     * @test
+     */
+    public function fetchStreamerDataFromTwitch()
     {
-        $tokenProviderMock = Mockery::mock(TwitchTokenProvider::class);
-        $apiClientMock     = Mockery::mock(ApiClient::class);
-
-        $tokenProviderMock->shouldReceive('getTokenFromTwitch')
+        $this->tokenProvider->shouldReceive('getTokenFromTwitch')
             ->once()
             ->andReturn('mocked_token');
-
-        $apiClientMock->shouldReceive('httpfetchStreamerDataFromTwitch')
+        $this->apiClient->shouldReceive('httpfetchStreamerDataFromTwitch')
             ->with('mocked_token', 'mocked_streamer_id')
             ->once()
             ->andReturn(new Response(new GuzzleResponse(200, [], json_encode([
@@ -69,9 +79,7 @@ class TwitchManagerTest extends TestCase
                 ]]
             ]))));
 
-        $twitchManager = new TwitchManager($tokenProviderMock, $apiClientMock);
-
-        $result = $twitchManager->fetchStreamerDataFromTwitch('mocked_streamer_id');
+        $result = $this->twitchManager->fetchStreamerDataFromTwitch('mocked_streamer_id');
 
         $this->assertEquals('123', $result['twitch_id']);
         $this->assertEquals('mocked_login', $result['login']);
@@ -83,11 +91,12 @@ class TwitchManagerTest extends TestCase
         $this->assertEquals(Carbon::parse('2020-01-01T00:00:00Z')->toDateTimeString(), $result['created_at']);
     }
 
-    public function testUpdateGames()
+    /**
+     * @test
+     */
+    public function updatesGames()
     {
-        $apiClientMock = Mockery::mock(ApiClient::class);
-
-        $apiClientMock->shouldReceive('httpUpdateGames')
+        $this->apiClient->shouldReceive('httpUpdateGames')
             ->with('mocked_token')
             ->once()
             ->andReturn(new Response(new GuzzleResponse(200, [], json_encode([
@@ -98,9 +107,7 @@ class TwitchManagerTest extends TestCase
                 ]
             ]))));
 
-        $twitchManager = new TwitchManager(Mockery::mock(TwitchTokenProvider::class), $apiClientMock);
-
-        $result = $twitchManager->updateGames('mocked_token');
+        $result = $this->twitchManager->updateGames('mocked_token');
 
         $this->assertCount(3, $result);
         $this->assertEquals('Game 1', $result[0]['name']);
@@ -108,11 +115,12 @@ class TwitchManagerTest extends TestCase
         $this->assertEquals('Game 3', $result[2]['name']);
     }
 
-    public function testUpdateVideos()
+    /**
+     * @test
+     */
+    public function updatesVideos()
     {
-        $apiClientMock = Mockery::mock(ApiClient::class);
-
-        $apiClientMock->shouldReceive('httpUpdateVideos')
+        $this->apiClient->shouldReceive('httpUpdateVideos')
             ->with('mocked_token', 'mocked_game_id')
             ->once()
             ->andReturn(new Response(new GuzzleResponse(200, [], json_encode([
@@ -123,9 +131,7 @@ class TwitchManagerTest extends TestCase
                 ]
             ]))));
 
-        $twitchManager = new TwitchManager(Mockery::mock(TwitchTokenProvider::class), $apiClientMock);
-
-        $result = $twitchManager->updateVideos('mocked_token', 'mocked_game_id');
+        $result = $this->twitchManager->updateVideos('mocked_token', 'mocked_game_id');
 
         $this->assertCount(3, $result);
         $this->assertEquals('Video 1', $result[0]['title']);
@@ -133,16 +139,15 @@ class TwitchManagerTest extends TestCase
         $this->assertEquals('Video 3', $result[2]['title']);
     }
 
-    public function testGetStreamsByUserId()
+    /**
+     * @test
+     */
+    public function getsStreamsByUserId()
     {
-        $tokenProviderMock = Mockery::mock(TwitchTokenProvider::class);
-        $apiClientMock     = Mockery::mock(ApiClient::class);
-
-        $tokenProviderMock->shouldReceive('getTokenFromTwitch')
+        $this->tokenProvider->shouldReceive('getTokenFromTwitch')
             ->once()
             ->andReturn('mocked_token');
-
-        $apiClientMock->shouldReceive('httpGetStreamsByUserId')
+        $this->apiClient->shouldReceive('httpGetStreamsByUserId')
             ->with('mocked_token', ['user_id' => 'mocked_user_id', 'first' => 5])
             ->once()
             ->andReturn(new Response(new GuzzleResponse(200, [], json_encode([
@@ -153,9 +158,7 @@ class TwitchManagerTest extends TestCase
                 ]
             ]))));
 
-        $twitchManager = new TwitchManager($tokenProviderMock, $apiClientMock);
-
-        $result = $twitchManager->getStreamsByUserId('mocked_user_id');
+        $result = $this->twitchManager->getStreamsByUserId('mocked_user_id');
 
         $this->assertCount(3, $result);
         $this->assertEquals('Stream 1', $result[0]['title']);

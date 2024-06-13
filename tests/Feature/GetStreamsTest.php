@@ -12,7 +12,7 @@ class GetStreamsTest extends TestCase
     /** @test
      * @throws Exception|\PHPUnit\Framework\MockObject\Exception
      */
-    public function itShouldReturnStreamsDataSuccessfully()
+    public function returnsStreamsData()
     {
         $apiResponse = [
             'data' => [
@@ -26,14 +26,14 @@ class GetStreamsTest extends TestCase
             ['title' => '#ZLAN2024 : 2e jour ! En direct de Montpellier, 198 jugadores s\'affrontent pour 52024€ de cashprize', 'user_name' => 'ZeratoR'],
             ['title' => 'GEN vs TES | DAY 10 | MSI 2024', 'user_name' => 'Riot Games'],
         ];
-        $apiClient = $this->createMock(TwitchManager::class);
-        $apiClient->expects($this->once())
+        $twitchManager = $this->createMock(TwitchManager::class);
+        $twitchManager->expects($this->once())
             ->method('fetchStreamsFromTwitch')
             ->willReturn([
                 'status' => 200,
                 'body'   => json_encode($apiResponse)
             ]);
-        $streamsService = new GetStreamsService($apiClient);
+        $streamsService = new GetStreamsService($twitchManager);
         $this->app->instance(GetStreamsService::class, $streamsService);
 
         $response = $this->getJson('analytics/streams');

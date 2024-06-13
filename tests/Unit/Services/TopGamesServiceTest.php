@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 class TopGamesServiceTest extends TestCase
 {
     protected TwitchTokenProvider $tokenProvider;
-    protected TwitchManager $apiClient;
+    protected TwitchManager $twitchManager;
     protected DBClient $dbClient;
     protected TopGamesService $service;
 
@@ -25,10 +25,10 @@ class TopGamesServiceTest extends TestCase
         parent::setUp();
 
         $this->tokenProvider = $this->createMock(TwitchTokenProvider::class);
-        $this->apiClient     = $this->createMock(TwitchManager::class);
+        $this->twitchManager     = $this->createMock(TwitchManager::class);
         $this->dbClient      = $this->createMock(DBClient::class);
 
-        $this->service = new TopGamesService($this->dbClient, $this->apiClient, $this->tokenProvider);
+        $this->service = new TopGamesService($this->dbClient, $this->twitchManager, $this->tokenProvider);
     }
 
     /**
@@ -39,7 +39,7 @@ class TopGamesServiceTest extends TestCase
     public function updatesTopOfTheTops()
     {
         $this->tokenProvider->method('getTokenFromTwitch')->willReturn('fake_token');
-        $this->apiClient->method('updateGames')->willReturn([['id' => '123', 'name' => 'Fake Game']]);
+        $this->twitchManager->method('updateGames')->willReturn([['id' => '123', 'name' => 'Fake Game']]);
         $this->dbClient->expects($this->once())->method('saveGames')->with([['id' => '123', 'name' => 'Fake Game']]);
 
         $this->service->execute();
@@ -68,7 +68,7 @@ class TopGamesServiceTest extends TestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('No se encontraron datos válidos en la respuesta de la API de Twitch.');
         $this->tokenProvider->method('getTokenFromTwitch')->willReturn('fake_token');
-        $this->apiClient->method('updateGames')->willReturn([]);
+        $this->twitchManager->method('updateGames')->willReturn([]);
 
         $this->service->execute();
     }

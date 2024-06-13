@@ -24,8 +24,8 @@ class FollowStreamerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dbClient     = Mockery::mock('App\Infrastructure\Clients\DBClient');
-        $this->apiClient    = Mockery::mock('App\Managers\TwitchManager');
+        $this->dbClient         = Mockery::mock('App\Infrastructure\Clients\DBClient');
+        $this->apiClient        = Mockery::mock('App\Managers\TwitchManager');
         $this->followService    = new FollowStreamerService($this->dbClient, $this->apiClient);
         $this->followController = new FollowStreamerController($this->followService);
     }
@@ -98,6 +98,30 @@ class FollowStreamerTest extends TestCase
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(200, $response->status());
         $this->assertEquals(['message' => 'Ahora sigues a 123'], $response->getData(true));
+    }
+
+    /** @test */
+    public function errorWhenMissingParameters()
+    {
+        $response = $this->postJson('analytics/follow', [
+            'userId'     => '',
+            'streamerId' => 123,
+        ]);
+
+        $response->assertStatus(400)
+            ->assertJson([
+                'error' => 'El ID del usuario es obligatorio',
+            ]);
+
+        $response = $this->postJson('analytics/follow', [
+            'userId'     => 123,
+            'streamerId' => '',
+        ]);
+
+        $response->assertStatus(400)
+            ->assertJson([
+                'error' => 'El ID del streamer es obligatorio',
+            ]);
     }
 
     protected function tearDown(): void

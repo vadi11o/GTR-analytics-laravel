@@ -78,4 +78,17 @@ class GetStreamerTest extends TestCase
         $response->assertStatus(200);
         $response->assertJson($this->streamerData);
     }
+
+    /**
+     * @test
+     */
+    public function errorWhenMissingParameter()
+    {
+        $response = $this->getJson('analytics/streamers');
+
+        $response->assertStatus(400)
+            ->assertJson([
+                'error' => 'El parametro "id" es obligatorio.',
+            ]);
+    }
 }

@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 class TopVideoServiceTest extends TestCase
 {
     protected TwitchTokenProvider $tokenProvider;
-    protected TwitchManager $apiClient;
+    protected TwitchManager $twitchManager;
     protected DBClient $dbClient;
     protected TopVideoService $service;
 
@@ -24,10 +24,10 @@ class TopVideoServiceTest extends TestCase
         parent::setUp();
 
         $this->tokenProvider = $this->createMock(TwitchTokenProvider::class);
-        $this->apiClient     = $this->createMock(TwitchManager::class);
+        $this->twitchManager     = $this->createMock(TwitchManager::class);
         $this->dbClient      = $this->createMock(DBClient::class);
 
-        $this->service = new TopVideoService($this->dbClient, $this->apiClient, $this->tokenProvider);
+        $this->service = new TopVideoService($this->dbClient, $this->twitchManager, $this->tokenProvider);
     }
 
     /**
@@ -38,7 +38,7 @@ class TopVideoServiceTest extends TestCase
     public function updatesVideos()
     {
         $this->tokenProvider->method('getTokenFromTwitch')->willReturn('fake_token');
-        $this->apiClient->method('updateVideos')->willReturn([['id' => '456', 'title' => 'Fake Video']]);
+        $this->twitchManager->method('updateVideos')->willReturn([['id' => '456', 'title' => 'Fake Video']]);
         $this->dbClient->expects($this->once())->method('saveVideos')->with([['id' => '456', 'title' => 'Fake Video']], '123');
 
         $this->service->execute('123');
@@ -65,7 +65,7 @@ class TopVideoServiceTest extends TestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('No se encontraron datos válidos en la respuesta de la API de Twitch.');
         $this->tokenProvider->method('getTokenFromTwitch')->willReturn('fake_token');
-        $this->apiClient->method('updateVideos')->willReturn([]);
+        $this->twitchManager->method('updateVideos')->willReturn([]);
 
         $this->service->execute('123');
     }

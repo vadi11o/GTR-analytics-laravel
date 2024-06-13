@@ -17,7 +17,7 @@ use Tests\TestCase;
 class UnfollowStreamerTest extends TestCase
 {
     protected DBClient $dbClient;
-    protected TwitchManager $apiClient;
+    protected TwitchManager $twitchManager;
     protected UnfollowStreamerService $unfollowService;
     protected UnfollowStreamerController $unfollowControler;
 
@@ -25,13 +25,13 @@ class UnfollowStreamerTest extends TestCase
     {
         parent::setUp();
         $this->dbClient          = Mockery::mock('App\Infrastructure\Clients\DBClient');
-        $this->apiClient         = Mockery::mock('App\Managers\TwitchManager');
-        $this->unfollowService   = new UnfollowStreamerService($this->dbClient, $this->apiClient);
+        $this->twitchManager         = Mockery::mock('App\Managers\TwitchManager');
+        $this->unfollowService   = new UnfollowStreamerService($this->dbClient, $this->twitchManager);
         $this->unfollowControler = new UnfollowStreamerController($this->unfollowService);
     }
 
     /** @test */
-    public function itReturns404WhenUserNotFound()
+    public function errorWhenUserNotFound()
     {
         $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
@@ -49,7 +49,7 @@ class UnfollowStreamerTest extends TestCase
     }
 
     /** @test */
-    public function itReturns404WhenNotFollowingStreamer()
+    public function errorWhenNotFollowingStreamer()
     {
         $userData = (object) [
             'followed_streamers' => json_encode([['id' => '789']])
@@ -72,7 +72,7 @@ class UnfollowStreamerTest extends TestCase
     }
 
     /** @test */
-    public function itReturns500WhenFollowedStreamersNotArray()
+    public function errorWhenFollowedStreamersNotArray()
     {
         $userData = (object) [
             'followed_streamers' => 'invalid_json'
@@ -95,7 +95,7 @@ class UnfollowStreamerTest extends TestCase
     }
 
     /** @test */
-    public function itReturns200WhenUnfollowSuccessful()
+    public function unfollowedStreamerSuccessfully()
     {
         $userData = (object) [
             'followed_streamers' => json_encode([['id' => '123'], ['id' => '789']])

@@ -20,7 +20,7 @@ use Tests\TestCase;
  */
 class GetStreamsServiceTest extends TestCase
 {
-    protected TwitchManager $apiClient;
+    protected TwitchManager $twitchManager;
     private GetStreamsService $service;
 
     /**
@@ -30,12 +30,12 @@ class GetStreamsServiceTest extends TestCase
     {
         parent::setUp();
         $this->tokenProvider = $this->createMock(TwitchTokenProvider::class);
-        $this->api           = $this->createMock(ApiClient::class);
-        $this->apiClient     = $this->getMockBuilder(TwitchManager::class)
-            ->setConstructorArgs([$this->tokenProvider, $this->api])
+        $this->apiClient           = $this->createMock(ApiClient::class);
+        $this->twitchManager     = $this->getMockBuilder(TwitchManager::class)
+            ->setConstructorArgs([$this->tokenProvider, $this->apiClient])
             ->onlyMethods(['fetchStreamsFromTwitch'])
             ->getMock();
-        $this->service = new GetStreamsService($this->apiClient);
+        $this->service = new GetStreamsService($this->twitchManager);
     }
 
     protected function tearDown(): void
@@ -48,12 +48,12 @@ class GetStreamsServiceTest extends TestCase
      * @test
      * @throws ConnectionException
      */
-    public function returnsDataInValidFormat()
+    public function returnsDataWithValidFormat()
     {
         $fakeResponse = [
             'body' => json_encode(['data' => [['title' => 'Stream 1', 'user_name' => 'User 1']]])
         ];
-        $this->apiClient
+        $this->twitchManager
             ->method('fetchStreamsFromTwitch')
             ->willReturn($fakeResponse);
 
@@ -70,10 +70,10 @@ class GetStreamsServiceTest extends TestCase
      * @test
      * @throws ConnectionException
      */
-    public function emptyDataWhenThereAreNoStreams()
+    public function returnsEmptyDataWhenThereAreNoStreams()
     {
         $fakeResponse = ['body' => json_encode(['data' => []])];
-        $this->apiClient
+        $this->twitchManager
             ->method('fetchStreamsFromTwitch')
             ->willReturn($fakeResponse);
 
@@ -108,7 +108,7 @@ class GetStreamsServiceTest extends TestCase
      * @test
      * @throws ReflectionException
      */
-    public function emptyDataWhileTreatingFormat()
+    public function returnsEmptyDataWhileTreatingFormat()
     {
         $rawData          = json_encode(['data' => []]);
         $expectedResponse = [];

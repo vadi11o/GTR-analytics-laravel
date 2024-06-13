@@ -25,7 +25,7 @@ class TopsofthetopsTest extends TestCase
 {
 
     protected DBClient $dbClient;
-    protected TwitchManager $apiClient;
+    protected TwitchManager $twitchManager;
     protected TwitchTokenProvider $tokenProvider;
     protected TopsOfTheTopsService $topsService;
     protected TopGamesService $topGamesService;
@@ -37,18 +37,18 @@ class TopsofthetopsTest extends TestCase
         parent::setUp();
 
         $this->dbClient      = Mockery::mock(DBClient::class);
-        $this->apiClient     = Mockery::mock(TwitchManager::class);
+        $this->twitchManager     = Mockery::mock(TwitchManager::class);
         $this->tokenProvider = Mockery::mock(TwitchTokenProvider::class);
 
         $this->topGamesService = new TopGamesService(
             $this->dbClient,
-            $this->apiClient,
+            $this->twitchManager,
             $this->tokenProvider
         );
 
         $this->topVideosService = new TopVideoService(
             $this->dbClient,
-            $this->apiClient,
+            $this->twitchManager,
             $this->tokenProvider
         );
 
@@ -112,7 +112,7 @@ class TopsofthetopsTest extends TestCase
         $this->tokenProvider->shouldReceive('getTokenFromTwitch')->andReturn('valid_token');
         $this->dbClient->shouldReceive('getTopGames')->andReturn(collect($mockTopGames));
         $this->dbClient->shouldReceive('getTopOfTheTopsData')->andReturn(collect($mockTopOfTheTops));
-        $this->apiClient->shouldReceive('updateGames')->andReturn($mockTopGames);
+        $this->twitchManager->shouldReceive('updateGames')->andReturn($mockTopGames);
         $this->dbClient->shouldReceive('saveGames')->andReturnNull();
         $topGameMock = Mockery::mock('alias:' . TopGame::class);
         $topGameMock->shouldReceive('pluck')->andReturn(collect([1]));
@@ -138,5 +138,4 @@ class TopsofthetopsTest extends TestCase
                 'error' => 'El parametro "since" debe ser un entero.',
             ]);
     }
-
 }

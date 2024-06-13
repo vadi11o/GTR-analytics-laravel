@@ -18,7 +18,7 @@ use Tests\TestCase;
 class FollowStreamerTest extends TestCase
 {
     protected DBClient $dbClient;
-    protected TwitchManager $apiClient;
+    protected TwitchManager $twitchManager;
     protected FollowStreamerService $followService;
     protected FollowStreamerController $followController;
 
@@ -26,13 +26,13 @@ class FollowStreamerTest extends TestCase
     {
         parent::setUp();
         $this->dbClient         = Mockery::mock('App\Infrastructure\Clients\DBClient');
-        $this->apiClient        = Mockery::mock('App\Managers\TwitchManager');
-        $this->followService    = new FollowStreamerService($this->dbClient, $this->apiClient);
+        $this->twitchManager        = Mockery::mock('App\Managers\TwitchManager');
+        $this->followService    = new FollowStreamerService($this->dbClient, $this->twitchManager);
         $this->followController = new FollowStreamerController($this->followService);
     }
 
     /** @test */
-    public function itReturns404WhenUserNotFound()
+    public function errorWhenUserNotFound()
     {
         $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->once()
@@ -50,7 +50,7 @@ class FollowStreamerTest extends TestCase
     }
 
     /** @test */
-    public function itReturns409WhenAlreadyFollowing()
+    public function errorWhenAlreadyFollowing()
     {
         $userData = (object) [
             'followed_streamers' => json_encode([['id' => '123']])
@@ -59,14 +59,14 @@ class FollowStreamerTest extends TestCase
             ->once()
             ->with('456')
             ->andReturn($userData);
-        $this->apiClient->shouldReceive('fetchStreamerDataFromTwitch')
+        $this->twitchManager->shouldReceive('fetchStreamerDataFromTwitch')
             ->once()
             ->with('123')
             ->andReturn(['display_name' => 'StreamerName']);
         $this->dbClient->shouldReceive('updateUserAnalyticsInDB')
             ->never();
         $this->app->instance(DBClient::class, $this->dbClient);
-        $this->app->instance(TwitchManager::class, $this->apiClient);
+        $this->app->instance(TwitchManager::class, $this->twitchManager);
 
         $response = $this->postJson('analytics/follow', [
             'userId'     => '456',
@@ -78,7 +78,7 @@ class FollowStreamerTest extends TestCase
     }
 
     /** @test */
-    public function itReturns200WhenFollowSuccessful()
+    public function followNewStreamer()
     {
         $userData = (object) [
             'followed_streamers' => json_encode([])
@@ -87,7 +87,7 @@ class FollowStreamerTest extends TestCase
             ->once()
             ->with('456')
             ->andReturn($userData);
-        $this->apiClient->shouldReceive('fetchStreamerDataFromTwitch')
+        $this->twitchManager->shouldReceive('fetchStreamerDataFromTwitch')
             ->once()
             ->with('123')
             ->andReturn(['display_name' => 'StreamerName']);
@@ -98,7 +98,7 @@ class FollowStreamerTest extends TestCase
                 return is_array($decoded) && count($decoded) == 1 && $decoded[0]['id'] == '123';
             }));
         $this->app->instance(DBClient::class, $this->dbClient);
-        $this->app->instance(TwitchManager::class, $this->apiClient);
+        $this->app->instance(TwitchManager::class, $this->twitchManager);
 
         $response = $this->postJson('analytics/follow', [
             'userId'     => '456',
@@ -132,31 +132,6 @@ class FollowStreamerTest extends TestCase
                 'error' => 'El ID del streamer es obligatorio',
             ]);
     }
-
-    /** @test */
-    public function errorWhenMissingParameters()
-    {
-        $response = $this->postJson('analytics/follow', [
-            'userId'     => '',
-            'streamerId' => 123,
-        ]);
-
-        $response->assertStatus(400)
-            ->assertJson([
-                'error' => 'El ID del usuario es obligatorio',
-            ]);
-
-        $response = $this->postJson('analytics/follow', [
-            'userId'     => 123,
-            'streamerId' => '',
-        ]);
-
-        $response->assertStatus(400)
-            ->assertJson([
-                'error' => 'El ID del streamer es obligatorio',
-            ]);
-    }
-
     protected function tearDown(): void
     {
         Mockery::close();

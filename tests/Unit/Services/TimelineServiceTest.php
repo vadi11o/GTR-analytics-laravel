@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 class TimelineServiceTest extends TestCase
 {
     protected DBClient $dbClient;
-    protected TwitchManager $apiClient;
+    protected TwitchManager $twitchManager;
     protected TimelineService $timelineService;
 
     protected function setUp(): void
@@ -24,9 +24,9 @@ class TimelineServiceTest extends TestCase
         parent::setUp();
 
         $this->dbClient  = Mockery::mock(DBClient::class);
-        $this->apiClient = Mockery::mock(TwitchManager::class);
+        $this->twitchManager = Mockery::mock(TwitchManager::class);
 
-        $this->timelineService = new TimelineService($this->dbClient, $this->apiClient);
+        $this->timelineService = new TimelineService($this->dbClient, $this->twitchManager);
     }
 
     /**
@@ -77,7 +77,7 @@ class TimelineServiceTest extends TestCase
         $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->with(1)
             ->andReturn((object)['followed_streamers' => json_encode([['id' => '123', 'display_name' => 'Streamer1']])]);
-        $this->apiClient->shouldReceive('getStreamsByUserId')
+        $this->twitchManager->shouldReceive('getStreamsByUserId')
             ->with('123')
             ->andReturn([
                 ['title' => 'Stream1', 'view_count' => 100, 'created_at' => '2023-01-01T10:00:00Z'],

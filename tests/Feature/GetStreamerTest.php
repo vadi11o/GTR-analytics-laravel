@@ -30,24 +30,23 @@ class GetStreamerTest extends TestCase
         ];
 
         $this->dbClient = $this->createMock(DBClient::class);
-        $this->apiClient = $this->createMock(TwitchManager::class);
+        $this->twitchManager = $this->createMock(TwitchManager::class);
 
         $this->app->instance(DBClient::class, $this->dbClient);
-        $this->app->instance(TwitchManager::class, $this->apiClient);
+        $this->app->instance(TwitchManager::class, $this->twitchManager);
     }
 
     /** @test
      *
      * @throws Exception
      */
-    public function streamerControllerReturnsSuccessfulResponseWhenStreamerNotInDB()
+    public function returnsStreamerDataFromTwitch()
     {
         $this->dbClient->expects($this->once())
             ->method('getStreamerByIdFromDB')
             ->with('83232866')
             ->willReturn(null);
-
-        $this->apiClient->expects($this->once())
+        $this->twitchManager->expects($this->once())
             ->method('fetchStreamerDataFromTwitch')
             ->with('83232866')
             ->willReturn($this->streamerData);
@@ -63,14 +62,13 @@ class GetStreamerTest extends TestCase
      *
      * @throws Exception
      */
-    public function streamerControllerReturnsSuccessfulResponseWhenStreamerInDB()
+    public function returnsStreamerDataFromDB()
     {
         $this->dbClient->expects($this->once())
             ->method('getStreamerByIdFromDB')
             ->with('83232866')
             ->willReturn($this->streamerData);
-
-        $this->apiClient->expects($this->never())
+        $this->twitchManager->expects($this->never())
             ->method('fetchStreamerDataFromTwitch');
 
         $response = $this->getJson('analytics/streamers?id=83232866');

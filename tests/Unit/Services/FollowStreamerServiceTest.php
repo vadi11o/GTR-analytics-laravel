@@ -18,15 +18,15 @@ use Tests\TestCase;
 class FollowStreamerServiceTest extends TestCase
 {
     protected DBClient $dbClient;
-    protected TwitchManager $apiClient;
+    protected TwitchManager $twitchManager;
     protected FollowStreamerService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->dbClient  = Mockery::mock(DBClient::class);
-        $this->apiClient = Mockery::mock(TwitchManager::class);
-        $this->service   = new FollowStreamerService($this->dbClient, $this->apiClient);
+        $this->twitchManager = Mockery::mock(TwitchManager::class);
+        $this->service   = new FollowStreamerService($this->dbClient, $this->twitchManager);
     }
 
     /** @test
@@ -58,7 +58,7 @@ class FollowStreamerServiceTest extends TestCase
             ->once()
             ->with('456')
             ->andReturn($userData);
-        $this->apiClient->shouldReceive('fetchStreamerDataFromTwitch')
+        $this->twitchManager->shouldReceive('fetchStreamerDataFromTwitch')
             ->once()
             ->with('123')
             ->andReturn(['display_name' => 'StreamerName']);
@@ -84,7 +84,7 @@ class FollowStreamerServiceTest extends TestCase
             ->once()
             ->with(456)
             ->andReturn($userData);
-        $this->apiClient->shouldReceive('fetchStreamerDataFromTwitch')
+        $this->twitchManager->shouldReceive('fetchStreamerDataFromTwitch')
             ->once()
             ->with('123')
             ->andReturn(['display_name' => 'StreamerName']);
@@ -102,7 +102,7 @@ class FollowStreamerServiceTest extends TestCase
     /**
      * @test
      */
-    public function handlesErrorWhenFetchingStreamerDataFails()
+    public function errorWhenFetchingStreamerDataFails()
     {
         $userId           = 123;
         $streamerId       = 123;
@@ -111,7 +111,7 @@ class FollowStreamerServiceTest extends TestCase
             ->shouldReceive('getUserAnalyticsByIdFromDB')
             ->with($userId)
             ->andReturn(['id' => $userId, 'name' => 'Test User']);
-        $this->apiClient
+        $this->twitchManager
             ->shouldReceive('fetchStreamerDataFromTwitch')
             ->with($streamerId)
             ->andThrow(new Exception($exceptionMessage));
@@ -126,7 +126,7 @@ class FollowStreamerServiceTest extends TestCase
     /**
      * @test
      */
-    public function handlesErrorWhenMismatchingTypeInUserData()
+    public function errorWhenMismatchingTypeInUserData()
     {
         $userData = (object) [
             'followed_streamers' => 123
@@ -135,7 +135,7 @@ class FollowStreamerServiceTest extends TestCase
             ->once()
             ->with('456')
             ->andReturn($userData);
-        $this->apiClient->shouldReceive('fetchStreamerDataFromTwitch')
+        $this->twitchManager->shouldReceive('fetchStreamerDataFromTwitch')
             ->once()
             ->with('123')
             ->andReturn(['display_name' => 'StreamerName']);
@@ -152,7 +152,7 @@ class FollowStreamerServiceTest extends TestCase
     /**
      * @test
      */
-    public function detectsWhenUserIsAlreadyFollowingStreamer()
+    public function userIsAlreadyFollowingStreamer()
     {
         $followedStreamers = [
             ['id' => 'streamer1', 'display_name' => 'Streamer 1'],
@@ -169,7 +169,7 @@ class FollowStreamerServiceTest extends TestCase
     /**
      * @test
      */
-    public function detectsWhenUserIsNotAlreadyFollowingStreamer()
+    public function userIsNotAlreadyFollowingStreamer()
     {
         $followedStreamers = [
             ['id' => 'streamer1', 'display_name' => 'Streamer 1'],

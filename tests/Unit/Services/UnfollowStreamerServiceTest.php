@@ -15,15 +15,15 @@ use Tests\TestCase;
 class UnfollowStreamerServiceTest extends TestCase
 {
     protected DBClient $dBClient;
-    protected TwitchManager $apiClient;
+    protected TwitchManager $twitchManager;
     protected UnfollowStreamerService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->dBClient  = Mockery::mock(DBClient::class);
-        $this->apiClient = Mockery::mock(TwitchManager::class);
-        $this->service   = new UnfollowStreamerService($this->dBClient, $this->apiClient);
+        $this->twitchManager = Mockery::mock(TwitchManager::class);
+        $this->service   = new UnfollowStreamerService($this->dBClient, $this->twitchManager);
     }
 
     /**
@@ -95,7 +95,6 @@ class UnfollowStreamerServiceTest extends TestCase
             ->once()
             ->with('456')
             ->andReturn($userData);
-
         $this->dBClient->shouldReceive('updateUserAnalyticsInDB')
             ->once()
             ->with(Mockery::on(function ($userData) {

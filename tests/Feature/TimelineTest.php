@@ -11,15 +11,15 @@ use Exception;
 class TimelineTest extends TestCase
 {
     protected DBClient $dbClient;
-    protected TwitchManager $apiClient;
+    protected TwitchManager $twitchManager;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->dbClient  = Mockery::mock(DBClient::class);
-        $this->apiClient = Mockery::mock(TwitchManager::class);
+        $this->twitchManager = Mockery::mock(TwitchManager::class);
         $this->app->instance(DBClient::class, $this->dbClient);
-        $this->app->instance(TwitchManager::class, $this->apiClient);
+        $this->app->instance(TwitchManager::class, $this->twitchManager);
     }
 
     protected function tearDown(): void
@@ -31,11 +31,11 @@ class TimelineTest extends TestCase
     /**
      * @test
      */
-    public function timelineSuccessWhenUserExists()
+    public function returnsTimelineWhenUserExists()
     {
         $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->andReturn((object) ['followed_streamers' => json_encode([['id' => '123', 'display_name' => 'Streamer1']])]);
-        $this->apiClient->shouldReceive('getStreamsByUserId')
+        $this->twitchManager->shouldReceive('getStreamsByUserId')
             ->andReturn([['title' => 'Stream1', 'view_count' => 100, 'created_at' => '2023-01-01T00:00:00Z']]);
 
         $response = $this->getJson('analytics/timeline?userId=1');
@@ -53,7 +53,7 @@ class TimelineTest extends TestCase
     /**
      * @test
      */
-    public function returnsErrorOnServerFailure()
+    public function errorOnServerFailure()
     {
         $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->andThrow(new Exception('Failed to retrieve data'));
@@ -67,7 +67,7 @@ class TimelineTest extends TestCase
     /**
      * @test
      */
-    public function returnsError404WhenNull()
+    public function errorWhenNull()
     {
         $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->andReturn(null);
@@ -81,7 +81,7 @@ class TimelineTest extends TestCase
     /**
      * @test
      */
-    public function returnsError404WhenUserDoesNotExist()
+    public function errorWhenUserDoesNotExist()
     {
         $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->andThrow(new NotFoundHttpException('El usuario especificado (userId: 1) no existe'));
@@ -95,7 +95,7 @@ class TimelineTest extends TestCase
     /**
      * @test
      */
-    public function returnsSuccessWhenUserExistsButNotFollowingAnyStreamer()
+    public function userExistsButIsNotFollowingAnyStreamers()
     {
         $this->dbClient->shouldReceive('getUserAnalyticsByIdFromDB')
             ->andReturn((object) ['followed_streamers' => json_encode([])]);

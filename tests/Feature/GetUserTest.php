@@ -29,7 +29,7 @@ class GetUserTest extends TestCase
     }
 
     /** @test */
-    public function itReturns200WithListOfUsers()
+    public function returnsListOfUsers()
     {
         $users = new Collection([
             (object) ['username' => 'usuario1', 'followed_streamers' => json_encode([['display_name' => 'streamer1'], ['display_name' => 'streamer2']])],
@@ -56,7 +56,7 @@ class GetUserTest extends TestCase
     }
 
     /** @test */
-    public function itReturns500OnServerError()
+    public function ErrorOnServerFailure()
     {
         $this->dBClient->shouldReceive('getAllUsersFromDB')
             ->once()

@@ -1,10 +1,14 @@
 <?php
 
+namespace Tests\Feature;
+
 use App\Infrastructure\Clients\DBClient;
 use App\Managers\TwitchManager;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\TestCase;
 use Exception;
+use Mockery;
+
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
@@ -16,7 +20,7 @@ class TimelineTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dbClient  = Mockery::mock(DBClient::class);
+        $this->dbClient      = Mockery::mock(DBClient::class);
         $this->twitchManager = Mockery::mock(TwitchManager::class);
         $this->app->instance(DBClient::class, $this->dbClient);
         $this->app->instance(TwitchManager::class, $this->twitchManager);

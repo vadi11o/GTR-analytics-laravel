@@ -1,6 +1,6 @@
 <?php
 
-namespace Managers;
+namespace Tests\Unit\Managers;
 
 use App\Infrastructure\Clients\ApiClient;
 use App\Managers\TwitchManager;

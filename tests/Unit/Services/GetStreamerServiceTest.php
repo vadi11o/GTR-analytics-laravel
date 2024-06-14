@@ -1,6 +1,6 @@
 <?php
 
-namespace Services;
+namespace Tests\Unit\Services;
 
 use App\Infrastructure\Clients\ApiClient;
 use App\Infrastructure\Clients\DBClient;

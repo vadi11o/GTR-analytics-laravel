@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\Services;
 
 use App\Infrastructure\Clients\DBClient;
 use App\Services\UserRegisterService;
@@ -11,8 +11,18 @@ use Tests\TestCase;
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
-class RegisterUserTest extends TestCase
+class UserRegisterServiceTest extends TestCase
 {
+    protected DBClient $dBClient;
+    protected UserRegisterService $service;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->dBClient = Mockery::mock(DBClient::class);
+        $this->service  = new UserRegisterService($this->dBClient);
+    }
+
     public function tearDown(): void
     {
         Mockery::close();
@@ -20,17 +30,15 @@ class RegisterUserTest extends TestCase
     }
 
     /**
-     * @Test
+     * @test
      */
-    public function testExecuteReturnsConflictWhenUserExists()
+    public function errorWhenUserAllreadyExists()
     {
-        $dbClientMock = Mockery::mock(DBClient::class);
-        $dbClientMock->shouldReceive('getUserAnalyticsByNameFromDB')
+        $this->dBClient->shouldReceive('getUserAnalyticsByNameFromDB')
             ->with('testuser')
             ->andReturn(true);
-        $service = new UserRegisterService($dbClientMock);
 
-        $response = $service->execute('testuser', 'testpassword');
+        $response = $this->service->execute('testuser', 'testpassword');
 
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(409, $response->status());
@@ -38,20 +46,18 @@ class RegisterUserTest extends TestCase
     }
 
     /**
-     * @Test
+     * @test
      */
-    public function testExecuteCreatesUserWhenUserDoesNotExist()
+    public function createsNewUserWhenUserDoesNotExist()
     {
-        $dbClientMock = Mockery::mock(DBClient::class);
-        $dbClientMock->shouldReceive('getUserAnalyticsByNameFromDB')
+        $this->dBClient->shouldReceive('getUserAnalyticsByNameFromDB')
             ->with('testuser')
             ->andReturn(false);
-        $dbClientMock->shouldReceive('insertUserAnalyticsToDB')
+        $this->dBClient->shouldReceive('insertUserAnalyticsToDB')
             ->with(['username' => 'testuser', 'password' => 'testpassword'])
             ->once();
-        $service = new UserRegisterService($dbClientMock);
 
-        $response = $service->execute('testuser', 'testpassword');
+        $response = $this->service->execute('testuser', 'testpassword');
 
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(201, $response->status());

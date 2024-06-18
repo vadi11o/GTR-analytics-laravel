@@ -7,6 +7,7 @@ use App\Services\TimelineService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class TimelineController extends Controller
 {
@@ -23,8 +24,11 @@ class TimelineController extends Controller
 
         try {
             $timeline = $this->timelineService->execute($userId);
+
             return response()->json($timeline, 200);
-        } catch (Exception $e) {
+        } catch (NotFoundHttpException) {
+            return response()->json(['error' => 'El usuario especificado (userId: ' . $userId . ') no existe'], 404);
+        } catch (Exception) {
             return response()->json(['error' => 'Server error'], 500);
         }
     }

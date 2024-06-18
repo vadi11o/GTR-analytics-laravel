@@ -2,19 +2,19 @@
 
 namespace Tests\Feature;
 
-use App\Infrastructure\Clients\ApiClient;
+use App\Managers\TwitchManager;
 use App\Services\GetStreamsService;
-use Tests\TestCase;
 use Exception;
+use Tests\TestCase;
 
-class StreamsTest extends TestCase
+class GetStreamsTest extends TestCase
 {
     /** @test
      * @throws Exception|\PHPUnit\Framework\MockObject\Exception
      */
-    public function itShouldReturnStreamsDataSuccessfully()
+    public function returnsStreamsData()
     {
-        $mockApiResponse = [
+        $apiResponse = [
             'data' => [
                 ['title' => 'MSI MAIN EVENT GENG VS TES - #MSI2024', 'user_name' => 'Caedrel'],
                 ['title' => '#ZLAN2024 : 2e jour ! En direct de Montpellier, 198 jugadores s\'affrontent pour 52024€ de cashprize', 'user_name' => 'ZeratoR'],
@@ -26,14 +26,14 @@ class StreamsTest extends TestCase
             ['title' => '#ZLAN2024 : 2e jour ! En direct de Montpellier, 198 jugadores s\'affrontent pour 52024€ de cashprize', 'user_name' => 'ZeratoR'],
             ['title' => 'GEN vs TES | DAY 10 | MSI 2024', 'user_name' => 'Riot Games'],
         ];
-        $apiClient = $this->createMock(ApiClient::class);
-        $apiClient->expects($this->once())
+        $twitchManager = $this->createMock(TwitchManager::class);
+        $twitchManager->expects($this->once())
             ->method('fetchStreamsFromTwitch')
             ->willReturn([
                 'status' => 200,
-                'body'   => json_encode($mockApiResponse)
+                'body'   => json_encode($apiResponse)
             ]);
-        $streamsService = new GetStreamsService($apiClient);
+        $streamsService = new GetStreamsService($twitchManager);
         $this->app->instance(GetStreamsService::class, $streamsService);
 
         $response = $this->getJson('analytics/streams');

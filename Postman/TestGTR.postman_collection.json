@@ -1,0 +1,400 @@
+{
+	"info": {
+		"_postman_id": "d3b424d8-c313-4646-9646-e0b6d336a3b6",
+		"name": "TestGTR",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "32684656"
+	},
+	"item": [
+		{
+			"name": "TimelineLocal",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost/analytics/timeline/?userId=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"analytics",
+						"timeline",
+						""
+					],
+					"query": [
+						{
+							"key": "userId",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "FollowLocal",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Correct response message\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.include(\"Ahora sigues a\");",
+							"});",
+							"",
+							"pm.test(\"Status code is 401 Unauthorized\", function () {",
+							"    if (pm.response.code === 401) {",
+							"        pm.expect(pm.response.code).to.eql(401, \"Expected status code is not 401 Unauthorized.\");",
+							"    }",
+							"});",
+							"",
+							"pm.test(\"Status code is 403 Forbidden\", function () {",
+							"    if (pm.response.code === 403) {",
+							"        pm.expect(pm.response.code).to.eql(403, \"Expected status code is not 403 Forbidden.\");",
+							"    }",
+							"});",
+							"",
+							"pm.test(\"Status code is 404 Not Found for non-existent user or streamer\", function () {",
+							"    if (pm.response.code === 404) {",
+							"        pm.expect(pm.response.code).to.eql(404, \"Expected status code is not 404 Not Found.\");",
+							"    }",
+							"});",
+							"",
+							"pm.test(\"Status code is 409 Conflict\", function () {",
+							"    if (pm.response.code === 409) {",
+							"        pm.expect(pm.response.code).to.eql(409, \"Expected status code is not 409 Conflict.\");",
+							"    }",
+							"});",
+							"",
+							"pm.test(\"Status code is 500 Internal Server Error\", function () {",
+							"    if (pm.response.code === 500) {",
+							"        pm.expect(pm.response.code).to.eql(500, \"Expected status code is not 500 Internal Server Error.\");",
+							"    }",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost/analytics/follow?userId=1&streamerId=123454",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"analytics",
+						"follow"
+					],
+					"query": [
+						{
+							"key": "userId",
+							"value": "1"
+						},
+						{
+							"key": "streamerId",
+							"value": "123454"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UnfollowLocal",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Correct response message includes streamerId\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.include(\"Dejaste de seguir a\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Status code is 403 Forbidden\", function () {",
+							"    if (pm.response.code === 403) {",
+							"        pm.expect(pm.response.code).to.eql(403, \"Expected status code is not 403 Forbidden.\");",
+							"    }",
+							"});",
+							"",
+							"pm.test(\"Status code is 404 Not Found for non-existent user or streamer\", function () {",
+							"    if (pm.response.code === 404) {",
+							"        pm.expect(pm.response.code).to.eql(404, \"Expected status code is not 404 Not Found.\");",
+							"    }",
+							"});",
+							"",
+							"pm.test(\"Status code is 500 Internal Server Error\", function () {",
+							"    if (pm.response.code === 500) {",
+							"        pm.expect(pm.response.code).to.eql(500, \"Expected status code is not 500 Internal Server Error.\");",
+							"    }",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost/analytics/unfollow?userId=1&streamerId=12345",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"analytics",
+						"unfollow"
+					],
+					"query": [
+						{
+							"key": "userId",
+							"value": "1"
+						},
+						{
+							"key": "streamerId",
+							"value": "12345"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UsersLocal",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201 Created\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Response body has correct message\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var sentUsername = pm.environment.get(\"sentUsername\");",
+							"    pm.expect(jsonData.message).to.include(\"Usuario creado correctamente\");",
+							"});",
+							"",
+							"pm.test(\"Response message is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.eql(\"Usuario creado correctamente\");",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost/analytics/users?username=Jowrdrts&password=12346",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"analytics",
+						"users"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "Jowrdrts"
+						},
+						{
+							"key": "password",
+							"value": "12346"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UsersLocal",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response is in valid JSON format\", function () {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response contains users\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"    if (jsonData.length > 0) {",
+							"        pm.expect(jsonData[0]).to.have.property('username');",
+							"        pm.expect(jsonData[0]).to.have.property('followedStreamers').that.is.an('array');",
+							"    }",
+							"});",
+							"",
+							"pm.test(\"Status code is 500 Internal Server Error\", function () {",
+							"    if (pm.response.code === 500) {",
+							"        pm.expect(pm.response.code).to.eql(500, \"Expected status code is not 500 Internal Server Error.\");",
+							"    }",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost/analytics/users"
+			},
+			"response": []
+		},
+		{
+			"name": "TopsofthetopsLocal",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Código de respuesta es 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"La respuesta es un array\", function () {\r",
+							"    pm.expect(pm.response.json()).to.be.an('array');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"La respuesta contiene exactamente tres ítems\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.length).to.equal(3); \r",
+							"});\r",
+							"\r",
+							"\r",
+							"\r",
+							"pm.test(\"Cada objeto tiene las propiedades esperadas con los tipos de datos correctos\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    jsonData.forEach((item) => {\r",
+							"        pm.expect(item).to.have.all.keys('game_id', 'game_name', 'user_name', 'total_videos', 'total_views', 'most_viewed_title', 'most_viewed_views', 'most_viewed_duration', 'most_viewed_created_at', 'ultima_actualizacion');\r",
+							"        pm.expect(item.game_id).to.be.a('string');\r",
+							"        pm.expect(item.game_name).to.be.a('string');\r",
+							"        pm.expect(item.user_name).to.be.a('string');\r",
+							"        pm.expect(item.total_videos).to.be.a('string');\r",
+							"        pm.expect(item.total_views).to.be.a('string');\r",
+							"        pm.expect(item.most_viewed_title).to.be.a('string');\r",
+							"        pm.expect(item.most_viewed_views).to.be.a('string');\r",
+							"        pm.expect(item.most_viewed_duration).to.be.a('string');\r",
+							"        pm.expect(item.most_viewed_created_at).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$/);\r",
+							"        pm.expect(item.ultima_actualizacion).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost/analytics/topsofthetops"
+			},
+			"response": []
+		},
+		{
+			"name": "TopsofthetopsSinceLocal",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Código de respuesta es 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"La respuesta es un array\", function () {\r",
+							"    pm.expect(pm.response.json()).to.be.an('array');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"La respuesta contiene exactamente tres ítems\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.length).to.equal(3); \r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Cada objeto tiene las propiedades esperadas con los tipos de datos correctos\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    jsonData.forEach((item) => {\r",
+							"        pm.expect(item).to.have.all.keys('game_id', 'game_name', 'user_name', 'total_videos', 'total_views', 'most_viewed_title', 'most_viewed_views', 'most_viewed_duration', 'most_viewed_created_at', 'ultima_actualizacion');\r",
+							"        pm.expect(item.game_id).to.be.a('string');\r",
+							"        pm.expect(item.game_name).to.be.a('string');\r",
+							"        pm.expect(item.user_name).to.be.a('string');\r",
+							"        pm.expect(item.total_videos).to.be.a('string');\r",
+							"        pm.expect(item.total_views).to.be.a('string');\r",
+							"        pm.expect(item.most_viewed_title).to.be.a('string');\r",
+							"        pm.expect(item.most_viewed_views).to.be.a('string');\r",
+							"        pm.expect(item.most_viewed_duration).to.be.a('string');\r",
+							"        pm.expect(item.most_viewed_created_at).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$/);\r",
+							"        pm.expect(item.ultima_actualizacion).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"    });\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost/analytics/topsofthetops?since=2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"analytics",
+						"topsofthetops"
+					],
+					"query": [
+						{
+							"key": "since",
+							"value": "2"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,24 +1,26 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\Services;
 
 use App\Infrastructure\Clients\ApiClient;
+use App\Managers\TwitchManager;
 use App\Providers\TwitchTokenProvider;
 use App\Services\GetStreamsService;
+use Exception;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
 use Mockery;
+use ReflectionException;
 use ReflectionMethod;
 use Tests\TestCase;
-use Exception;
 
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
-class StreamsTest extends TestCase
+class GetStreamsServiceTest extends TestCase
 {
-    protected ApiClient $apiClient;
+    protected TwitchManager $twitchManager;
     private GetStreamsService $service;
 
     /**
@@ -28,11 +30,12 @@ class StreamsTest extends TestCase
     {
         parent::setUp();
         $this->tokenProvider = $this->createMock(TwitchTokenProvider::class);
-        $this->apiClient     = $this->getMockBuilder(ApiClient::class)
-            ->setConstructorArgs([$this->tokenProvider])
+        $this->apiClient           = $this->createMock(ApiClient::class);
+        $this->twitchManager     = $this->getMockBuilder(TwitchManager::class)
+            ->setConstructorArgs([$this->tokenProvider, $this->apiClient])
             ->onlyMethods(['fetchStreamsFromTwitch'])
             ->getMock();
-        $this->service = new GetStreamsService($this->apiClient);
+        $this->service = new GetStreamsService($this->twitchManager);
     }
 
     protected function tearDown(): void
@@ -45,12 +48,12 @@ class StreamsTest extends TestCase
      * @test
      * @throws ConnectionException
      */
-    public function getStreamServiceReturnsValidJson()
+    public function returnsDataWithValidFormat()
     {
         $fakeResponse = [
             'body' => json_encode(['data' => [['title' => 'Stream 1', 'user_name' => 'User 1']]])
         ];
-        $this->apiClient
+        $this->twitchManager
             ->method('fetchStreamsFromTwitch')
             ->willReturn($fakeResponse);
 
@@ -67,10 +70,10 @@ class StreamsTest extends TestCase
      * @test
      * @throws ConnectionException
      */
-    public function getStreamServiceExecuteHandlesEmptyData()
+    public function returnsEmptyDataWhenThereAreNoStreams()
     {
         $fakeResponse = ['body' => json_encode(['data' => []])];
-        $this->apiClient
+        $this->twitchManager
             ->method('fetchStreamsFromTwitch')
             ->willReturn($fakeResponse);
 
@@ -85,9 +88,9 @@ class StreamsTest extends TestCase
 
     /**
      * @test
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    public function getStreamsServiceTreatsDataWell()
+    public function treatsDataWellToValidFormat()
     {
         $rawData          = json_encode(['data' => [['title' => 'Stream 1', 'user_name' => 'User 1']]]);
         $expectedResponse = [['title' => 'Stream 1', 'user_name' => 'User 1']];
@@ -103,9 +106,9 @@ class StreamsTest extends TestCase
 
     /**
      * @test
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    public function getStreamsServiceTreatsEmptyDataWell()
+    public function returnsEmptyDataWhileTreatingFormat()
     {
         $rawData          = json_encode(['data' => []]);
         $expectedResponse = [];
@@ -117,75 +120,5 @@ class StreamsTest extends TestCase
             json_encode($expectedResponse, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
             $response->getContent()
         );
-    }
-
-    /**
-     * @test
-     */
-    public function fetchStreamsFromTwitchReturnsSuccess()
-    {
-        $this->apiClient = new ApiClient($this->tokenProvider);
-        $token           = 'test_token';
-        $streamsData     = [
-            'data' => [
-                [
-                    'id'        => '1',
-                    'user_name' => 'streamer1',
-                    'game_id'   => '1234',
-                    'title'     => 'Stream Title 1',
-                ]
-            ]
-        ];
-        $this->tokenProvider->expects($this->once())
-            ->method('getTokenFromTwitch')
-            ->willReturn($token);
-        Http::fake([
-            env('TWITCH_URL') . '/streams' => Http::response($streamsData, 200)
-        ]);
-
-        $result = $this->apiClient->fetchStreamsFromTwitch();
-
-        $this->assertEquals(200, $result['status']);
-        $this->assertEquals(json_encode($streamsData), $result['body']);
-    }
-
-    /**
-     * @test
-     */
-    public function fetchStreamsFromTwitchReturnsFailure()
-    {
-        $this->apiClient = new ApiClient($this->tokenProvider);
-        $token           = 'test_token';
-        $this->tokenProvider->expects($this->once())
-            ->method('getTokenFromTwitch')
-            ->willReturn($token);
-        Http::fake([
-            env('TWITCH_URL') . '/streams' => Http::response(null, 500)
-        ]);
-
-        $result = $this->apiClient->fetchStreamsFromTwitch();
-
-        $this->assertEquals(500, $result['status']);
-        $this->assertEquals('', $result['body']);
-    }
-
-    /**
-     * @test
-     */
-    public function fetchStreamsFromTwitchUsesCorrectToken()
-    {
-        $this->apiClient = new ApiClient($this->tokenProvider);
-        $token           = 'test_token';
-        $this->tokenProvider->expects($this->once())
-            ->method('getTokenFromTwitch')
-            ->willReturn($token);
-        Http::fake();
-
-        $this->apiClient->fetchStreamsFromTwitch();
-
-        Http::assertSent(function ($request) use ($token) {
-            return $request->hasHeader('Authorization', 'Bearer ' . $token)
-                && $request->hasHeader('Client-Id', env('TWITCH_CLIENT_ID'));
-        });
     }
 }

@@ -2,10 +2,10 @@
 
 namespace App\Infrastructure\Controllers;
 
-use App\Services\StreamerDataManager;
+use App\Http\Requests\StreamerRequest;
+use App\Managers\StreamerDataManager;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use App\Http\Requests\StreamerRequest;
 
 class StreamerController extends Controller
 {

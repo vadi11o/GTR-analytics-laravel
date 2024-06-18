@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Services;
+namespace App\Managers;
 
 use App\Infrastructure\Clients\DBClient;
+use App\Services\GetStreamerService;
 use Exception;
 
 class StreamerDataManager

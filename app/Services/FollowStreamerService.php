@@ -3,16 +3,16 @@
 namespace App\Services;
 
 use App\Infrastructure\Clients\DBClient;
-use App\Infrastructure\Clients\ApiClient;
+use App\Managers\TwitchManager;
 use Exception;
 use Illuminate\Http\JsonResponse;
 
 class FollowStreamerService
 {
     protected DBClient $dBClient;
-    protected ApiClient $apiClient;
+    protected TwitchManager $apiClient;
 
-    public function __construct(DBClient $dBClient, ApiClient $apiClient)
+    public function __construct(DBClient $dBClient, TwitchManager $apiClient)
     {
         $this->dBClient  = $dBClient;
         $this->apiClient = $apiClient;
@@ -50,10 +50,10 @@ class FollowStreamerService
     private function handleStreamerDataException(Exception $exception): JsonResponse
     {
         return match ($exception->getCode()) {
-            401     => new JsonResponse(['message' => 'Token de autenticación no proporcionado o inválido'], 401),
-            403     => new JsonResponse(['message' => 'Acceso denegado debido a permisos insuficientes'], 403),
-            404     => new JsonResponse(['message' => 'Streamer especificado no existe en la API'], 404),
-            default => new JsonResponse(['message' => 'Error del servidor al seguir al streamer'], 500),
+            401     => new JsonResponse(['error' => 'Token de autenticación no proporcionado o inválido'], 401),
+            403     => new JsonResponse(['error' => 'Acceso denegado debido a permisos insuficientes'], 403),
+            404     => new JsonResponse(['error' => 'Streamer especificado no existe en la API'], 404),
+            default => new JsonResponse(['error' => 'Error del servidor al seguir al streamer'], 500),
         };
     }
 

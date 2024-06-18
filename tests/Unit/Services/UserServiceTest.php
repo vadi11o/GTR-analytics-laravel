@@ -1,37 +1,40 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\Services;
 
-use Exception;
-use Tests\TestCase;
-use App\Services\UserService;
 use App\Infrastructure\Clients\DBClient;
+use App\Services\UserService;
+use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Mockery;
-use Illuminate\Database\Eloquent\Collection;
+use Tests\TestCase;
 
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
-class UserTest extends TestCase
+class UserServiceTest extends TestCase
 {
-    protected DBClient $dbClientMock;
+    protected DBClient $dbClient;
     protected UserService $userService;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dbClientMock = Mockery::mock(DBClient::class);
-        $this->userService = new UserService($this->dbClientMock);
+        $this->dbClient    = Mockery::mock(DBClient::class);
+        $this->userService = new UserService($this->dbClient);
     }
 
-    public function testExecuteReturns200WithListOfUsers()
+    /**
+     * @test
+     */
+    public function getsUsers()
     {
         $users = new Collection([
             (object) ['username' => 'usuario1', 'followed_streamers' => json_encode([['display_name' => 'streamer1'], ['display_name' => 'streamer2']])],
             (object) ['username' => 'usuario2', 'followed_streamers' => json_encode([['display_name' => 'streamer2'], ['display_name' => 'streamer3']])]
         ]);
-        $this->dbClientMock->shouldReceive('getAllUsersFromDB')
+        $this->dbClient->shouldReceive('getAllUsersFromDB')
             ->once()
             ->andReturn($users);
 
@@ -41,19 +44,22 @@ class UserTest extends TestCase
         $this->assertEquals(200, $response->status());
         $this->assertEquals([
             [
-                'username' => 'usuario1',
+                'username'          => 'usuario1',
                 'followedStreamers' => ['streamer1', 'streamer2']
             ],
             [
-                'username' => 'usuario2',
+                'username'          => 'usuario2',
                 'followedStreamers' => ['streamer2', 'streamer3']
             ]
         ], $response->getData(true));
     }
 
-    public function testExecuteReturns500OnServerError()
+    /**
+     * @test
+     */
+    public function errorWhenServerFails()
     {
-        $this->dbClientMock->shouldReceive('getAllUsersFromDB')
+        $this->dbClient->shouldReceive('getAllUsersFromDB')
             ->once()
             ->andThrow(new Exception('Error'));
 

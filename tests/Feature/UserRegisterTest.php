@@ -10,14 +10,28 @@ use Tests\TestCase;
 /**
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
-class RegisterUserTest extends TestCase
+class UserRegisterTest extends TestCase
 {
-    /**
-     * @Test
-     */
-    public function testRegisterUserSuccess()
+    protected DBClient $dbClient;
+
+    protected function setUp(): void
     {
-        $dbClientMock = Mockery::mock(DBClient::class);
+        parent::setUp();
+        $this->dbClient = Mockery::mock(DBClient::class);
+    }
+
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
+    }
+
+    /**
+     * @test
+     */
+    public function registerUserSuccess()
+    {
+        $dbClientMock = $this->dbClient;
         $dbClientMock->shouldReceive('getUserAnalyticsByNameFromDB')
             ->with('testuser')
             ->andReturn(false);
@@ -38,11 +52,11 @@ class RegisterUserTest extends TestCase
     }
 
     /**
-     * @Test
+     * @test
      */
-    public function testRegisterUserFailureUserExists()
+    public function registerUserFailureWhenUserAllreadyExists()
     {
-        $dbClientMock = Mockery::mock(DBClient::class);
+        $dbClientMock = $this->dbClient;
         $dbClientMock->shouldReceive('getUserAnalyticsByNameFromDB')->with('testuser')->andReturn(true);
         $this->app->instance(DBClient::class, $dbClientMock);
 
@@ -58,9 +72,9 @@ class RegisterUserTest extends TestCase
     }
 
     /**
-     * @Test
+     * @test
      */
-    public function RegisterUserFailureMissingUsernameOrPassword()
+    public function errorWhenMissingParameters()
     {
         $response = $this->postJson('analytics/users', [
             'username' => '',
@@ -69,7 +83,7 @@ class RegisterUserTest extends TestCase
 
         $response->assertStatus(400)
             ->assertJson([
-                'error' => 'Falta el nombre de usuario o la contraseña',
+                'error' => 'El nombre del usuario es obligatorio',
             ]);
 
         $response = $this->postJson('analytics/users', [
@@ -79,16 +93,16 @@ class RegisterUserTest extends TestCase
 
         $response->assertStatus(400)
             ->assertJson([
-                'error' => 'Falta el nombre de usuario o la contraseña',
+                'error' => 'La contraseña es obligatoria',
             ]);
     }
 
     /**
-     * @Test
+     * @test
      */
-    public function testRegisterUserServiceThrowsException()
+    public function registerUserFailsDueToDatabaseError()
     {
-        $dbClientMock = Mockery::mock(DBClient::class);
+        $dbClientMock = $this->dbClient;
         $dbClientMock->shouldReceive('getUserAnalyticsByNameFromDB')->with('testuser')->andThrow(new Exception('Database error'));
         $this->app->instance(DBClient::class, $dbClientMock);
 

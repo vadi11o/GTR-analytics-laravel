@@ -3,16 +3,17 @@
 namespace App\Services;
 
 use App\Infrastructure\Clients\DBClient;
-use App\Infrastructure\Clients\APIClient;
+use App\Managers\TwitchManager;
 use Exception;
 use Illuminate\Http\Client\ConnectionException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class TimelineService
 {
     protected DBClient $dbClient;
-    protected APIClient $apiClient;
+    protected TwitchManager $apiClient;
 
-    public function __construct(DBClient $dbClient, APIClient $apiClient)
+    public function __construct(DBClient $dbClient, TwitchManager $apiClient)
     {
         $this->dbClient  = $dbClient;
         $this->apiClient = $apiClient;
@@ -27,13 +28,16 @@ class TimelineService
         $userAnalytics = $this->dbClient->getUserAnalyticsByIdFromDB($userId);
 
         if (!$userAnalytics) {
-            throw new Exception('User not found');
+            throw new NotFoundHttpException('User not found');
         }
 
         $followedStreamers = json_decode($userAnalytics->followed_streamers, true);
         return $this->sortStreams($followedStreamers);
     }
 
+    /**
+     * @throws ConnectionException
+     */
     public function sortStreams($followedStreamers): array
     {
         $streams = [];

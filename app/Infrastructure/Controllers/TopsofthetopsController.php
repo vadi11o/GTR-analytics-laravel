@@ -2,10 +2,11 @@
 
 namespace App\Infrastructure\Controllers;
 
+use App\Http\Requests\TopsOfTheTopsRequest;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Services\TopsofthetopsService;
+use App\Services\TopsOfTheTopsService;
 use App\Models\TopGame;
 use App\Models\TopOfTheTop;
 
@@ -14,9 +15,9 @@ use App\Models\TopOfTheTop;
  */
 class TopsofthetopsController extends Controller
 {
-    protected TopsofthetopsService $topsOfTheTopsService;
+    protected TopsOfTheTopsService $topsOfTheTopsService;
 
-    public function __construct(TopsofthetopsService $topsOfTheTopsService)
+    public function __construct(TopsOfTheTopsService $topsOfTheTopsService)
     {
         $this->topsOfTheTopsService = $topsOfTheTopsService;
     }
@@ -24,7 +25,7 @@ class TopsofthetopsController extends Controller
     /**
      * @throws ConnectionException
      */
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(TopsOfTheTopsRequest $request): JsonResponse
     {
         $since = $request->query('since', 600);
         $this->topsOfTheTopsService->execute($since);
